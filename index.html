@@ -1,0 +1,2489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1F3A5F">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<title>Custódia Digital — Extração e Verificação de Integridade</title>
+<style>
+  :root{
+    --bg: #EEF1F5;
+    --paper: #FFFFFF;
+    --ink: #1B2430;
+    --muted: #5B6472;
+    --line: #D6DBE2;
+    --navy: #1F3A5F;
+    --navy-dark: #16283F;
+    --accent: #9C6B2E;
+    --ok-bg: #EAF4EE;
+    --ok-ink: #2A6B4B;
+    --warn-bg: #FCEDEC;
+    --warn-ink: #A23B32;
+    --mono: "Courier New", Consolas, monospace;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "Inter", "Segoe UI", Arial, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.45;
+    padding: 28px 16px 80px;
+  }
+
+  .wrap{ max-width: 760px; margin: 0 auto; }
+
+  header.top{
+    text-align:center;
+    margin-bottom: 28px;
+  }
+  .app-header-brand{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .app-header-logo{
+    width: 28px; height:28px;
+    border-radius: 7px;
+  }
+  .app-header-name{
+    font-family: var(--serif);
+    font-weight:700;
+    font-size: 15px;
+    color: var(--navy-dark);
+    letter-spacing: .01em;
+  }
+  header.top h1{
+    font-family: var(--serif);
+    font-size: 26px;
+    margin: 0 0 6px;
+    color: var(--navy-dark);
+    font-weight: 700;
+  }
+  header.top p{
+    margin:0;
+    color: var(--muted);
+    font-size: 14.5px;
+    font-style: italic;
+  }
+
+  .progress{
+    display:flex;
+    gap:4px;
+    margin: 22px 0 30px;
+  }
+  .progress .seg{
+    flex:1;
+    height:4px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow:hidden;
+  }
+  .progress .seg.done{ background: var(--navy); }
+
+  section.card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 22px 8px;
+    margin-bottom: 18px;
+  }
+  section.card h2{
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--navy-dark);
+    margin: 0 0 4px;
+    display:flex;
+    align-items:baseline;
+    gap: 8px;
+  }
+  section.card h2 .num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 24px; height:24px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    font-size: 12.5px;
+    font-family: var(--sans);
+    font-weight:600;
+    flex: none;
+  }
+  section.card .desc{
+    color: var(--muted);
+    font-size: 13.5px;
+    margin: 0 0 18px;
+  }
+
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .field .hint{
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 4px;
+    line-height:1.4;
+  }
+  .field .hint b{ font-style:normal; color:#7A8390; }
+  .field input, .field textarea{
+    width:100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: var(--sans);
+    color: var(--ink);
+    background: #FBFCFD;
+  }
+  .field input.mono, .field textarea.mono{
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .field input[readonly][data-wp]{
+    cursor: pointer;
+    background: #FBFCFD;
+  }
+  .field input:focus, .field textarea:focus{
+    outline: none;
+    border-color: var(--navy);
+    background: #fff;
+  }
+  .field textarea{ min-height: 64px; resize: vertical; }
+
+  .cascade-row{
+    display:flex;
+    gap: 8px;
+  }
+  .cascade-row select{
+    flex: 1;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 13.5px;
+    font-family: var(--sans);
+    color: var(--ink);
+    background: #FBFCFD;
+  }
+  .cascade-row select:focus{ outline:none; border-color: var(--navy); background:#fff; }
+  @media (max-width: 420px){
+    .cascade-row{ flex-direction: column; }
+  }
+
+  .file-attach-row{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-attach{
+    background:#fff;
+    border: 1px solid var(--navy);
+    color: var(--navy);
+    border-radius: 7px;
+    padding: 9px 14px;
+    font-size: 13.5px;
+    cursor:pointer;
+    flex: none;
+  }
+  .btn-attach:hover{ background:#F1F5FA; }
+  .btn-attach:disabled{ opacity:.6; cursor:default; }
+  .file-attach-name{
+    font-size: 12.5px;
+    color: var(--muted);
+    word-break: break-all;
+  }
+
+  .field-label-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 8px;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+  }
+  .field-label-row label{ margin-bottom:0; }
+  .btn-inline-share{
+    background:#fff;
+    border: 1px solid var(--navy);
+    color: var(--navy);
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor:pointer;
+    flex: none;
+    white-space: nowrap;
+  }
+  .btn-inline-share:hover{ background:#F1F5FA; }
+  .btn-inline-share:disabled{ opacity:.6; cursor:default; }
+
+  .ocr-candidates{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 8px;
+    margin: 8px 0 4px;
+  }
+  .ocr-candidate-btn{
+    background:#EAF0F7;
+    border: 1px solid var(--navy);
+    color: var(--navy-dark);
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    cursor:pointer;
+  }
+  .ocr-candidate-btn:hover{ background:#DCE7F2; }
+  .ocr-candidate-label{
+    font-size: 12px;
+    color: var(--muted);
+    width:100%;
+    margin-bottom: -2px;
+  }
+
+  .row2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px){ .row2{ grid-template-columns: 1fr; } }
+
+  .hash-check{
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin: 6px 0 20px;
+  }
+  .hash-check.ok{ background: var(--ok-bg); color: var(--ok-ink); }
+  .hash-check.warn{ background: var(--warn-bg); color: var(--warn-ink); }
+  .hash-check.neutral{ background: #F1F3F6; color: var(--muted); font-weight:500; }
+
+  .anexos-list{ margin-bottom: 10px; }
+  .anexo-row{
+    display:flex; gap:8px; margin-bottom:8px;
+  }
+  .anexo-row input{ flex:1; }
+  .anexo-row button{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:7px;
+    padding: 0 12px;
+    cursor:pointer;
+    color: var(--warn-ink);
+    font-size:13px;
+  }
+  .add-anexo{
+    background:none;
+    border: 1px dashed var(--line);
+    border-radius: 7px;
+    padding: 8px 12px;
+    color: var(--navy);
+    font-size: 13.5px;
+    cursor: pointer;
+    margin-bottom: 18px;
+  }
+  .add-anexo:hover{ background:#F5F7FA; }
+
+  .actions{
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, var(--bg) 60%, transparent);
+    padding: 18px 0 4px;
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+  }
+  .btn-generate{
+    background: var(--navy);
+    color:#fff;
+    border:none;
+    padding: 13px 26px;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow: 0 4px 14px rgba(31,58,95,.28);
+  }
+  .btn-generate:hover{ background: var(--navy-dark); }
+
+  /* ---------- REPORT VIEW ---------- */
+  #reportView{ display:none; }
+  #reportView.active{ display:block; }
+  #formView.hidden{ display:none; }
+
+  .report-toolbar{
+    display:flex; justify-content:space-between; align-items:center;
+    max-width: 760px; margin: 0 auto 16px;
+  }
+  .report-toolbar button{
+    border:1px solid var(--line);
+    background:#fff;
+    padding: 9px 16px;
+    border-radius:8px;
+    font-size:13.5px;
+    cursor:pointer;
+    color: var(--ink);
+  }
+  .report-toolbar .print-btn{
+    background: var(--navy);
+    color:#fff;
+    border:none;
+  }
+
+  .report-paper{
+    background:#fff;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 46px 50px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: var(--serif);
+    color: #14181f;
+  }
+  @media (max-width: 480px){
+    .report-paper{ padding: 24px 16px; }
+  }
+  .report-paper h1{
+    text-align:center;
+    font-size: 21px;
+    margin: 0 0 4px;
+  }
+  .report-paper .subtitle{
+    text-align:center;
+    font-style: italic;
+    font-size: 14px;
+    margin: 0 0 26px;
+    color: #3c4652;
+  }
+  .report-paper h2{
+    font-size: 15.5px;
+    color: var(--navy-dark);
+    border-bottom: 1.5px solid var(--navy-dark);
+    padding-bottom: 4px;
+    margin: 26px 0 10px;
+  }
+  .rtable{ width:100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
+  .rtable tr td{
+    border: 1px solid #B9C2CC;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    vertical-align: top;
+    font-family: var(--sans);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .rtable tr td.lbl{
+    background: #F2F4F7;
+    font-weight:700;
+    width: 34%;
+  }
+  .rtable tr td.mono{
+    font-family: var(--mono);
+    font-size: 11px;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 480px){
+    .rtable tr td{ font-size: 11.5px; padding: 6px 8px; }
+    .rtable tr td.mono{ font-size: 10px; }
+    .rtable tr td.lbl{ width: 40%; }
+  }
+  .report-paper p.body-text{
+    font-size: 13px;
+    margin: 8px 0 4px;
+    font-family: var(--sans);
+    color: #232a33;
+  }
+  .report-paper ul.anexos{
+    font-size: 13px;
+    font-family: var(--sans);
+    margin: 4px 0 4px 0;
+    padding-left: 18px;
+  }
+  .sig-block{
+    margin-top: 46px;
+    font-family: var(--sans);
+    font-size: 13px;
+  }
+  .sig-line{
+    margin-top: 46px;
+    border-top: 1px solid #333;
+    width: 300px;
+    padding-top: 6px;
+  }
+  .badge-match{
+    display:inline-block;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 5px;
+  }
+  .badge-match.ok{ background: var(--ok-bg); color: var(--ok-ink); }
+  .badge-match.warn{ background: var(--warn-bg); color: var(--warn-ink); }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .report-toolbar{ display:none; }
+    .report-paper{ border:none; box-shadow:none; padding: 0; max-width:none; }
+    #formView{ display:none !important; }
+  }
+
+  /* ---------- histórico ---------- */
+  #historyView{ display:none; }
+  #historyView.active{ display:block; }
+  .history-wrap{ max-width: 700px; margin: 0 auto; padding: 0 4px; }
+  .history-title{
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--navy-dark);
+    margin: 4px 0 4px;
+  }
+  .history-sub{
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 20px;
+  }
+  .history-empty{
+    text-align:center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 40px 0;
+  }
+  .history-card{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .history-card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .history-card-num{
+    font-weight:700;
+    font-size: 14px;
+    color: var(--navy-dark);
+  }
+  .history-card-date{
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .history-card-row{
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .history-card-row b{ color:#3c4652; }
+  .history-badge{
+    display:inline-block;
+    font-size: 11px;
+    font-weight:700;
+    padding: 2px 8px;
+    border-radius: 5px;
+    margin-top: 4px;
+  }
+  .history-badge.ok{ background: var(--ok-bg); color: var(--ok-ink); }
+  .history-badge.warn{ background: var(--warn-bg); color: var(--warn-ink); }
+  .history-badge.neutral{ background:#F1F3F6; color: var(--muted); }
+  .history-card-actions{
+    display:flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .history-card-actions button{
+    border: 1px solid var(--line);
+    background:#fff;
+    border-radius: 7px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    cursor:pointer;
+    color: var(--navy);
+  }
+  .history-card-actions button.danger{ color: var(--warn-ink); }
+
+  /* ---------- LOGIN / IDENTIFICAÇÃO ---------- */
+  #loginView{
+    min-height: 100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px 16px;
+  }
+  .login-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 30px 26px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .login-card .logo-badge{
+    width: 68px; height:68px;
+    border-radius: 16px;
+    background: var(--navy);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 14px;
+    overflow: hidden;
+  }
+  .login-card .logo-badge img{ width:100%; height:100%; object-fit:cover; }
+  .login-card .app-brand-name{
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 700;
+    text-align:center;
+    margin: 0 0 2px;
+    color: var(--navy-dark);
+  }
+  .login-card .app-brand-tagline{
+    text-align:center;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+  .login-card h1{
+    font-family: var(--serif);
+    font-size: 17px;
+    text-align:center;
+    margin: 0 0 4px;
+    color: var(--navy-dark);
+  }
+  .login-card .sub{
+    text-align:center;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0 0 22px;
+  }
+  .login-card .field{ margin-bottom:14px; }
+  .login-card select, .login-card input{
+    width:100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 14px;
+    background:#FBFCFD;
+  }
+  .login-card select:focus, .login-card input:focus{ outline:none; border-color:var(--navy); background:#fff; }
+  .btn-primary{
+    width:100%;
+    background: var(--navy);
+    color:#fff;
+    border:none;
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top: 4px;
+  }
+  .btn-primary:hover{ background: var(--navy-dark); }
+  .btn-link{
+    display:block;
+    width:100%;
+    background:none;
+    border:none;
+    color: var(--navy);
+    font-size: 13px;
+    text-align:center;
+    margin-top: 14px;
+    cursor:pointer;
+    text-decoration: underline;
+  }
+  .login-error{
+    background: var(--warn-bg);
+    color: var(--warn-ink);
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    display:none;
+  }
+  .login-error.show{ display:block; }
+  .login-note{
+    font-size: 11px;
+    color: var(--muted);
+    text-align:center;
+    margin-top: 18px;
+    line-height:1.5;
+  }
+  .hidden-view{ display:none !important; }
+
+  .session-bar{
+    max-width: 760px;
+    margin: 0 auto 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+  }
+  .session-bar .who{ color: var(--ink); }
+  .session-bar .who b{ color: var(--navy-dark); }
+  .session-bar .who .mat{ color: var(--muted); font-size:12px; display:block; }
+  .session-bar button{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:7px;
+    padding: 7px 12px;
+    font-size:12.5px;
+    cursor:pointer;
+    color: var(--muted);
+  }
+
+  /* ---------- seletor de data/hora em rodas (bottom sheet) ---------- */
+  .wp-overlay{
+    position: fixed; inset:0;
+    background: rgba(15,20,28,.45);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index: 200;
+  }
+  .wp-overlay.open{ display:flex; }
+  .wp-sheet{
+    background:#fff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 20px 20px 0 0;
+    padding: 26px 20px 10px;
+    animation: wp-slide-up .18s ease-out;
+  }
+  @keyframes wp-slide-up{
+    from{ transform: translateY(24px); opacity:.4; }
+    to{ transform: translateY(0); opacity:1; }
+  }
+  .wp-title{
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--ink);
+    margin: 0 0 22px;
+  }
+  .wp-columns{
+    display:flex;
+    flex-wrap: wrap;
+    justify-content:center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .wp-group{ display:flex; align-items:center; }
+  .wp-colon{ font-size:20px; color:var(--muted); padding: 0 2px; align-self:center; }
+  .wp-col{
+    position:relative;
+    width: 86px;
+    height: 176px;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .wp-col::-webkit-scrollbar{ display:none; }
+  .wp-col-pad{ height: 66px; flex-shrink:0; }
+  .wp-item{
+    height: 44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    scroll-snap-align: center;
+    font-size: 19px;
+    color: #B9C0C9;
+    font-variant-numeric: tabular-nums;
+    transition: color .1s, font-weight .1s;
+  }
+  .wp-item.selected{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .wp-selection-box{
+    position:absolute;
+    left:0; right:0; top:66px;
+    height:44px;
+    border-top: 1.5px solid #C7CDD5;
+    border-bottom: 1.5px solid #C7CDD5;
+    pointer-events:none;
+  }
+  .wp-col-wrap{ position:relative; }
+  .wp-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .wp-actions button{
+    background:none;
+    border:none;
+    color: var(--navy);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 10px 6px;
+    cursor:pointer;
+  }
+  .wp-actions .wp-clear{ color: var(--warn-ink); font-weight:500; }
+
+  /* ---------- barra lateral (sidebar) ---------- */
+  .hamburger-btn{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    width: 38px; height:38px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex: none;
+    margin-right: 10px;
+  }
+  .hamburger-btn span{ display:block; width:18px; height:2px; background:var(--navy-dark); position:relative; }
+  .hamburger-btn span::before, .hamburger-btn span::after{
+    content:''; position:absolute; left:0; width:18px; height:2px; background:var(--navy-dark);
+  }
+  .hamburger-btn span::before{ top:-6px; }
+  .hamburger-btn span::after{ top:6px; }
+
+  .sidebar-overlay{
+    position: fixed; inset:0;
+    background: rgba(15,20,28,.45);
+    display:none;
+    z-index: 300;
+  }
+  .sidebar-overlay.open{ display:block; }
+  .sidebar-panel{
+    position:fixed; top:0; left:0; bottom:0;
+    width: 84%;
+    max-width: 320px;
+    background:#fff;
+    box-shadow: 6px 0 24px rgba(0,0,0,.18);
+    padding: 26px 22px;
+    transform: translateX(-100%);
+    transition: transform .22s ease-out;
+    display:flex;
+    flex-direction:column;
+    overflow-y: auto;
+  }
+  .sidebar-overlay.open .sidebar-panel{ transform: translateX(0); }
+  .sidebar-close{
+    align-self:flex-end;
+    background:none; border:none;
+    font-size: 22px;
+    color: var(--muted);
+    cursor:pointer;
+    margin-bottom: 6px;
+  }
+  .avatar-wrap{
+    display:flex; flex-direction:column; align-items:center;
+    margin-bottom: 18px;
+  }
+  .avatar-circle{
+    width: 92px; height:92px;
+    border-radius:50%;
+    background: #EAF0F7;
+    border: 2px dashed var(--navy);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--navy);
+    font-size: 30px;
+    font-weight:700;
+    overflow:hidden;
+    cursor:pointer;
+    position:relative;
+    margin-bottom: 10px;
+  }
+  .avatar-circle img{ width:100%; height:100%; object-fit:cover; }
+  .avatar-circle .cam-badge{
+    position:absolute; bottom:0; right:0;
+    background: var(--navy);
+    color:#fff;
+    width:26px; height:26px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px;
+    border: 2px solid #fff;
+  }
+  .avatar-wrap h3{
+    font-family: var(--serif);
+    font-size: 17px;
+    margin: 0 0 2px;
+    text-align:center;
+  }
+  .avatar-wrap .cargo-line{ font-size:12.5px; color:var(--navy); font-weight:600; }
+  .avatar-wrap .mat-line{ font-size:12px; color:var(--muted); }
+
+  .sidebar-divider{ border:none; border-top:1px solid var(--line); margin: 16px 0; }
+  .sidebar-btn{
+    display:flex; align-items:center; gap:10px;
+    width:100%;
+    background:none;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 11px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    cursor:pointer;
+    margin-bottom: 10px;
+    text-align:left;
+  }
+  .sidebar-btn:hover{ background:#F5F7FA; }
+  .sidebar-btn.danger{ color: var(--warn-ink); border-color:#F0D3D0; }
+
+  /* ---------- localização ---------- */
+  .loc-row{ display:flex; gap:8px; align-items:flex-start; }
+  .loc-row textarea{ flex:1; }
+  .btn-loc{
+    flex:none;
+    white-space:nowrap;
+    background:#fff;
+    border: 1px solid var(--navy);
+    color: var(--navy);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-size: 13px;
+    cursor:pointer;
+    height: fit-content;
+  }
+  .btn-loc:hover{ background:#F1F5FA; }
+  .btn-loc:disabled{ opacity:.6; cursor:default; }
+  .loc-status{
+    font-size: 12px;
+    margin-top: 4px;
+    color: var(--muted);
+  }
+  .loc-status.err{ color: var(--warn-ink); }
+  .loc-status.ok{ color: var(--ok-ink); }
+
+  .cargo-tag{
+    display:inline-block;
+    font-size: 11.5px;
+    color: var(--navy);
+    background:#EAF0F7;
+    padding: 1px 7px;
+    border-radius: 5px;
+    margin-left: 6px;
+    font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN / IDENTIFICAÇÃO ================= -->
+<div id="loginView">
+  <div class="login-card">
+    <div class="logo-badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital"></div>
+    <h2 class="app-brand-name">Custódia Digital</h2>
+    <p class="app-brand-tagline">Extração e verificação de integridade</p>
+    <h1>Identificação do servidor</h1>
+    <p class="sub">Selecione seu cadastro para preencher o relatório</p>
+
+    <div id="loginErrorBox" class="login-error"></div>
+
+    <div id="loginExisting">
+      <div class="field">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Servidor cadastrado</label>
+        <select id="loginSelect"></select>
+      </div>
+      <div class="field">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">PIN (4 dígitos)</label>
+        <input type="password" id="loginPin" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+      <button class="btn-primary" id="loginBtn">Entrar</button>
+      <button class="btn-link" id="showRegisterBtn">Cadastrar novo servidor</button>
+    </div>
+
+    <div id="loginRegister" class="hidden-view">
+      <div class="field">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Nome completo</label>
+        <input type="text" id="regNome" placeholder="Ex.: João da Silva Santos">
+      </div>
+      <div class="field">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Cargo</label>
+        <select id="regCargo">
+          <option value="" disabled selected>Selecione o cargo</option>
+          <option>Servidor Requisitado</option>
+          <option>Agente Administrativo</option>
+          <option>Investigador de Polícia</option>
+          <option>Escrivão de Polícia</option>
+          <option>Perito</option>
+          <option>Delegado de Polícia</option>
+        </select>
+      </div>
+      <div class="field">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
+        <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
+      </div>
+      <div class="field">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Criar PIN (4 dígitos)</label>
+        <input type="password" id="regPin" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+      <button class="btn-primary" id="registerBtn">Cadastrar e entrar</button>
+      <button class="btn-link" id="backToLoginBtn">Voltar</button>
+    </div>
+
+    <p class="login-note">Esta identificação fica salva apenas neste aparelho e serve para preencher automaticamente o responsável e a assinatura do relatório. Não substitui controles de segurança institucionais.</p>
+  </div>
+</div>
+
+<div class="wrap hidden-view" id="formView">
+  <div class="session-bar" id="sessionBar">
+    <div style="display:flex;align-items:center;">
+      <button class="hamburger-btn" id="openSidebarBtn" aria-label="Abrir menu"><span></span></button>
+      <div class="who">Preenchendo como <b id="sessionNome">—</b><span class="cargo-tag" id="sessionCargo"></span><span class="mat" id="sessionMatricula"></span></div>
+    </div>
+  </div>
+
+  <!-- ===== BARRA LATERAL ===== -->
+  <div class="sidebar-overlay" id="sidebarOverlay">
+    <div class="sidebar-panel">
+      <button class="sidebar-close" id="closeSidebarBtn">✕</button>
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="avatarCircle">
+          <span id="avatarInitial">?</span>
+          <div class="cam-badge">📷</div>
+        </div>
+        <input type="file" accept="image/*" id="avatarInput" style="display:none;">
+        <h3 id="sidebarNome">—</h3>
+        <div class="cargo-line" id="sidebarCargo"></div>
+        <div class="mat-line" id="sidebarMatricula"></div>
+      </div>
+      <hr class="sidebar-divider">
+      <button class="sidebar-btn" id="editProfileBtn">✏️ Editar perfil</button>
+      <button class="sidebar-btn" id="openHistoryBtn">🕘 Histórico de relatórios</button>
+      <button class="sidebar-btn" id="toggleDriveConfigBtn">☁️ Configurar Google Drive</button>
+      <div class="hidden-view" id="driveConfigPanel">
+        <div class="field">
+          <label style="font-size:12.5px;">Client ID (OAuth)</label>
+          <input type="text" id="driveClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
+        </div>
+        <div class="field">
+          <label style="font-size:12.5px;">ID da pasta — Drive da repartição</label>
+          <input type="text" id="driveFolderId" placeholder="Ex.: 1A2b3C4d5E...">
+        </div>
+        <div class="field">
+          <label style="font-size:12.5px;">ID da pasta — Drive do MP</label>
+          <input type="text" id="driveFolderIdMp" placeholder="Ex.: 9Z8y7X6w5V...">
+        </div>
+        <button class="btn-primary" id="saveDriveConfigBtn" style="margin-bottom:10px;">Salvar configuração</button>
+        <div class="loc-status" id="driveConfigStatus"></div>
+        <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-top:2px;">Configuração institucional, salva neste aparelho. Veja o LEIA-ME para o passo a passo de como obter esses valores no Google Cloud Console. A pasta do MP precisa estar compartilhada com a conta Google que fizer o login, com permissão de edição.</p>
+      </div>
+      <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Trocar usuário</button>
+    </div>
+  </div>
+
+  <!-- ===== SELETOR DE DATA/HORA (bottom sheet) ===== -->
+  <div class="wp-overlay" id="wpOverlay">
+    <div class="wp-sheet">
+      <h3 class="wp-title" id="wpTitle">Definir data e hora</h3>
+      <div class="wp-columns" id="wpColumns"></div>
+      <div class="wp-actions">
+        <button class="wp-clear" id="wpClear">Limpar</button>
+        <div>
+          <button id="wpCancel">Cancelar</button>
+          <button id="wpConfirm">Definir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="top">
+    <div class="app-header-brand">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital" class="app-header-logo">
+      <span class="app-header-name">Custódia Digital</span>
+    </div>
+    <h1>Extração e Verificação de Integridade</h1>
+    <p>Conversa de WhatsApp extraída de dispositivo móvel</p>
+  </header>
+
+  <div class="progress" id="progressBar"></div>
+
+  <!-- SECTION 1 -->
+  <section class="card">
+    <h2><span class="num">1</span>Identificação Geral</h2>
+    <div class="field">
+      <label>Nº do relatório</label>
+      <input type="text" id="f_relatorio_num" placeholder="Ex.: REL-EXT-2026-0142">
+      <div class="hint"><b>Como localizar:</b> numeração sequencial de controle interno da unidade (livro de registro ou planilha de controle).</div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Data da coleta</label>
+        <input type="text" id="f_data_coleta" class="mono" placeholder="dd/mm/aaaa" readonly data-wp="date">
+      </div>
+      <div class="field">
+        <label>Horário de início</label>
+        <input type="text" id="f_horario_inicio" class="mono" placeholder="hh:mm" readonly data-wp="time">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Horário de término</label>
+        <input type="text" id="f_horario_fim" class="mono" placeholder="hh:mm" readonly data-wp="time">
+        <div class="hint"><b>Como localizar:</b> horário do relógio do computador/celular oficial usado na coleta.</div>
+      </div>
+      <div class="field"></div>
+    </div>
+    <div class="field">
+      <label>Responsável pela coleta</label>
+      <input type="text" id="f_responsavel" placeholder="Nome e matrícula funcional">
+      <div class="hint"><b>Como localizar:</b> identificação funcional/crachá do servidor que conduziu a extração.</div>
+    </div>
+    <div class="field">
+      <label>Finalidade</label>
+      <textarea id="f_finalidade" placeholder="Ex.: Extração de conversa de WhatsApp para instrução do procedimento nº ..."></textarea>
+      <div class="hint"><b>Como localizar:</b> número do processo/procedimento vinculado, consultável no sistema PJe.</div>
+    </div>
+    <div class="field">
+      <label>Local da coleta</label>
+      <div class="loc-row">
+        <textarea id="f_local_coleta" placeholder="Ex.: Sala de apoio técnico, Cartório Eleitoral da 15ª Zona"></textarea>
+        <button type="button" class="btn-loc" id="detectLocBtn">📍 Usar localização atual</button>
+      </div>
+      <div class="loc-status" id="locStatus"></div>
+      <div class="hint"><b>Como localizar:</b> o botão usa o GPS do aparelho para preencher automaticamente; funciona apenas com o app hospedado em endereço https e permissão de localização concedida. Confira e complete manualmente se necessário.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 2 -->
+  <section class="card">
+    <h2><span class="num">2</span>Identificação do Dispositivo de Origem</h2>
+    <div class="field">
+      <label>Aparelho</label>
+      <input type="text" id="f_aparelho" placeholder="Ex.: Samsung Galaxy A54 5G">
+      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Nome do modelo. iOS: Ajustes > Geral > Sobre > Nome do modelo.</div>
+    </div>
+    <div class="field">
+      <label>Sistema operacional</label>
+      <input type="text" id="f_so_celular" placeholder="Ex.: Android 14, One UI 6.1">
+      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Versão do Android. iOS: Ajustes > Geral > Sobre > Versão do iOS.</div>
+    </div>
+    <div class="field">
+      <div class="field-label-row">
+        <label>IMEI</label>
+        <a href="tel:*%2306%23" class="btn-inline-share">📞 Abrir discador (*#06#)</a>
+      </div>
+      <input type="text" id="f_imei" placeholder="Ex.: 35 926116 148270 5">
+      <div class="file-attach-row" style="margin-top:8px;">
+        <input type="file" id="f_imei_ocr_input" accept="image/*" style="display:none;">
+        <button type="button" class="btn-attach" id="f_imei_ocr_btn">📷 Ler IMEI de uma foto</button>
+      </div>
+      <div class="loc-status" id="f_imei_ocr_status"></div>
+      <div id="f_imei_ocr_candidates"></div>
+      <div class="hint"><b>Como localizar:</b> disque *#06# (botão acima) ou anexe um print da tela com o IMEI — o app tenta ler o número automaticamente por OCR, mas sempre exibe o valor encontrado para você confirmar antes de preencher (requer internet só para essa leitura; a leitura pode errar dígitos, então confira sempre).</div>
+    </div>
+    <div class="field">
+      <label>Número da linha associada</label>
+      <input type="text" id="f_linha" placeholder="Ex.: (83) 9 9876-5432">
+      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Status do SIM. iOS: Ajustes > Telefone > "Meu Número". Se não constar, confirmar com o usuário.</div>
+    </div>
+    <div class="field">
+      <label>Usuário/proprietário informado</label>
+      <input type="text" id="f_proprietario" placeholder="Nome completo">
+      <div class="hint"><b>Como localizar:</b> não é extraído do aparelho — declarar verbalmente pelo detentor, com conferência de documento de identificação.</div>
+    </div>
+    <div class="field">
+      <label>Aplicativo</label>
+      <input type="text" id="f_app" placeholder="Ex.: WhatsApp Messenger, versão 2.26.14.78">
+      <div class="hint"><b>Como localizar:</b> dentro do WhatsApp, em Configurações/Ajuda > Informações do app.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 3 -->
+  <section class="card">
+    <h2><span class="num">3</span>Arquivo Extraído (Original)</h2>
+    <div class="field">
+      <label>Anexar arquivo (opcional)</label>
+      <div class="file-attach-row">
+        <input type="file" id="f_orig_file_input" style="display:none;">
+        <button type="button" class="btn-attach" id="f_orig_file_btn">📎 Selecionar arquivo</button>
+        <span class="file-attach-name" id="f_orig_file_name"></span>
+      </div>
+      <div class="loc-status" id="f_orig_file_status"></div>
+      <div class="hint"><b>Como localizar:</b> selecione o arquivo extraído do celular (ex.: msgstore.db.crypt14). Nome, tamanho, data de modificação e o hash SHA-256 são calculados e preenchidos automaticamente — o conteúdo do arquivo é processado só no aparelho e não é enviado a lugar nenhum.</div>
+    </div>
+    <div class="field">
+      <label>Nome do arquivo</label>
+      <input type="text" class="mono" id="f_orig_nome" placeholder="msgstore.db.crypt14">
+    </div>
+    <div class="field">
+      <label>Caminho no dispositivo</label>
+      <input type="text" class="mono" id="f_orig_caminho" placeholder="/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Databases/...">
+      <div class="hint"><b>Como localizar:</b> gerenciador de arquivos > Armazenamento interno > Android > media > com.whatsapp > WhatsApp > Databases.</div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Tamanho do arquivo</label>
+        <input type="text" id="f_orig_tamanho" placeholder="Ex.: 184.372.916 bytes">
+      </div>
+      <div class="field">
+        <label>Última modificação</label>
+        <input type="text" class="mono" id="f_orig_modificacao" placeholder="dd/mm/aaaa hh:mm:ss" readonly data-wp="datetime-sec">
+      </div>
+    </div>
+    <div class="field">
+      <label>Ferramenta usada para gerar o hash no aparelho</label>
+      <div class="cascade-row">
+        <select id="f_orig_ferramenta_sis"></select>
+        <select id="f_orig_ferramenta_tool"></select>
+      </div>
+      <input type="text" id="f_orig_ferramenta_outro" class="hidden-view" placeholder="Especifique a ferramenta/comando utilizado">
+      <input type="hidden" id="f_orig_ferramenta">
+    </div>
+    <div class="field">
+      <label>Hash SHA-256 do arquivo ORIGINAL</label>
+      <input type="text" class="mono" id="f_hash_original" placeholder="Cole aqui o valor gerado no celular">
+      <div class="hint"><b>Como localizar:</b> resultado exibido no app/terminal logo após executar o comando de hash — capture a tela.</div>
+    </div>
+    <div class="field">
+      <label>Hora exata do cálculo do hash original</label>
+      <input type="text" class="mono" id="f_hora_hash_original" placeholder="dd/mm/aaaa hh:mm:ss" readonly data-wp="datetime-sec">
+    </div>
+  </section>
+
+  <!-- SECTION 4 -->
+  <section class="card">
+    <h2><span class="num">4</span>Procedimento de Cópia</h2>
+    <div class="field">
+      <label>Descrição do procedimento</label>
+      <textarea id="f_proc_descricao">A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.</textarea>
+    </div>
+    <div class="field">
+      <label>Método de transferência</label>
+      <input type="text" id="f_metodo_transf" placeholder="Ex.: Cabo USB — modo MTP (Transferência de arquivos)">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Início da transferência</label>
+        <input type="text" class="mono" id="f_transf_inicio" placeholder="hh:mm:ss" readonly data-wp="time-sec">
+      </div>
+      <div class="field">
+        <label>Término da transferência</label>
+        <input type="text" class="mono" id="f_transf_fim" placeholder="hh:mm:ss" readonly data-wp="time-sec">
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5 -->
+  <section class="card">
+    <h2><span class="num">5</span>Identificação do Computador de Destino</h2>
+    <div class="field">
+      <label>Equipamento</label>
+      <input type="text" id="f_pc_equipamento" placeholder="Ex.: Notebook Dell Latitude 5440, patrimônio nº ...">
+      <div class="hint"><b>Como localizar:</b> etiqueta física do equipamento (modelo e nº de patrimônio).</div>
+    </div>
+    <div class="field">
+      <label>Sistema operacional</label>
+      <input type="text" id="f_pc_so" placeholder="Ex.: Windows 11 Pro, versão 23H2">
+      <div class="hint"><b>Como localizar:</b> Iniciar > Configurações > Sistema > Sobre.</div>
+    </div>
+    <div class="field">
+      <label>Usuário logado no sistema</label>
+      <input type="text" id="f_pc_usuario" placeholder="Ex.: joao.santos (perfil institucional)">
+    </div>
+    <div class="field">
+      <label>Pasta de destino da cópia</label>
+      <input type="text" class="mono" id="f_pc_pasta" placeholder="Ex.: C:\Extracao_WhatsApp\Processo_0000123-45\">
+    </div>
+  </section>
+
+  <!-- SECTION 6 -->
+  <section class="card">
+    <h2><span class="num">6</span>Arquivo Copiado (Cópia no PC)</h2>
+    <div class="field">
+      <label>Anexar arquivo (opcional)</label>
+      <div class="file-attach-row">
+        <input type="file" id="f_cop_file_input" style="display:none;">
+        <button type="button" class="btn-attach" id="f_cop_file_btn">📎 Selecionar arquivo</button>
+        <span class="file-attach-name" id="f_cop_file_name"></span>
+      </div>
+      <div class="loc-status" id="f_cop_file_status"></div>
+      <div class="hint"><b>Como localizar:</b> selecione o arquivo copiado no PC. Nome, tamanho e o hash SHA-256 são calculados e preenchidos automaticamente — o conteúdo do arquivo é processado só no aparelho e não é enviado a lugar nenhum.</div>
+    </div>
+    <div class="field">
+      <label>Nome do arquivo</label>
+      <input type="text" class="mono" id="f_cop_nome" placeholder="msgstore.db.crypt14">
+    </div>
+    <div class="field">
+      <label>Caminho completo no PC</label>
+      <input type="text" class="mono" id="f_cop_caminho" placeholder="C:\Extracao_WhatsApp\Processo_0000123-45\msgstore.db.crypt14">
+      <div class="hint"><b>Como localizar:</b> Shift + botão direito sobre o arquivo > "Copiar como caminho".</div>
+    </div>
+    <div class="field">
+      <label>Tamanho do arquivo copiado</label>
+      <input type="text" id="f_cop_tamanho" placeholder="Ex.: 184.372.916 bytes">
+    </div>
+    <div class="field">
+      <label>Ferramenta usada para gerar o hash no PC</label>
+      <div class="cascade-row">
+        <select id="f_cop_ferramenta_sis"></select>
+        <select id="f_cop_ferramenta_tool"></select>
+      </div>
+      <input type="text" id="f_cop_ferramenta_outro" class="hidden-view" placeholder="Especifique a ferramenta/comando utilizado">
+      <input type="hidden" id="f_cop_ferramenta">
+    </div>
+    <div class="field">
+      <label>Hash SHA-256 do arquivo COPIADO</label>
+      <input type="text" class="mono" id="f_hash_copia" placeholder="Cole aqui o valor gerado no PC">
+    </div>
+    <div class="field">
+      <label>Hora exata do cálculo do hash da cópia</label>
+      <input type="text" class="mono" id="f_hora_hash_copia" placeholder="dd/mm/aaaa hh:mm:ss" readonly data-wp="datetime-sec">
+    </div>
+  </section>
+
+  <!-- SECTION 7 (auto) -->
+  <section class="card">
+    <h2><span class="num">7</span>Verificação de Integridade</h2>
+    <p class="desc">Preenchido automaticamente a partir dos hashes informados nas seções 3 e 6.</p>
+    <div id="hashCompareBox" class="hash-check neutral">Informe os dois hashes acima para comparar automaticamente.</div>
+    <div class="field">
+      <label>Conclusão técnica</label>
+      <textarea id="f_conclusao">A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo móvel, e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.</textarea>
+    </div>
+  </section>
+
+  <!-- SECTION 8 -->
+  <section class="card">
+    <h2><span class="num">8</span>Anexos</h2>
+    <div class="anexos-list" id="anexosList"></div>
+    <button type="button" class="add-anexo" id="addAnexoBtn">+ Adicionar anexo</button>
+  </section>
+
+  <!-- SECTION 9 -->
+  <section class="card">
+    <h2><span class="num">9</span>Cadeia de Custódia</h2>
+    <div class="field">
+      <label>Custódia do dispositivo original</label>
+      <textarea id="f_custodia_dispositivo" placeholder="Ex.: Devolvido ao(à) proprietário(a) em .../.../..., às ..., mediante recibo"></textarea>
+    </div>
+    <div class="field">
+      <div class="field-label-row">
+        <label>Custódia da cópia digital</label>
+        <button type="button" class="btn-inline-share" id="shareRepBtn">☁️ Enviar ao Drive da repartição</button>
+      </div>
+      <textarea id="f_custodia_copia" placeholder="Ex.: Armazenada em pasta institucional de acesso restrito, sob responsabilidade de ..."></textarea>
+      <div class="loc-status" id="shareRepStatus"></div>
+    </div>
+    <div class="field">
+      <div class="field-label-row">
+        <label>Cópia adicional entregue a</label>
+        <button type="button" class="btn-inline-share" id="shareMpBtn">☁️ Enviar ao Drive do MP</button>
+      </div>
+      <textarea id="f_custodia_entrega" placeholder="Ex.: Cartório da 15ª Zona Eleitoral, para juntada ao processo nº ..."></textarea>
+      <div class="loc-status" id="shareMpStatus"></div>
+    </div>
+  </section>
+
+  <!-- SECTION 10 -->
+  <section class="card">
+    <h2><span class="num">10</span>Declaração e Assinatura</h2>
+    <div class="field">
+      <label>Nome de quem assina</label>
+      <input type="text" id="f_assinatura_nome" placeholder="Preenchido automaticamente a partir da Seção 1, se deixado em branco">
+    </div>
+    <div class="field">
+      <label>Matrícula funcional</label>
+      <input type="text" id="f_assinatura_matricula" placeholder="Preenchido automaticamente a partir da Seção 1, se deixado em branco">
+    </div>
+  </section>
+
+  <div class="actions">
+    <button class="btn-generate" id="generateBtn">Gerar relatório (PDF)</button>
+  </div>
+</div>
+
+<!-- ================= REPORT VIEW ================= -->
+<div id="reportView">
+  <div class="report-toolbar">
+    <button id="backBtn">← Voltar para edição</button>
+    <button class="print-btn" id="printBtn">Salvar/Imprimir PDF</button>
+  </div>
+  <div class="report-paper" id="reportPaper"></div>
+</div>
+
+<!-- ================= HISTÓRICO ================= -->
+<div id="historyView">
+  <div class="report-toolbar">
+    <button id="historyBackBtn">← Voltar para o formulário</button>
+  </div>
+  <div class="history-wrap">
+    <h2 class="history-title">Histórico de relatórios</h2>
+    <p class="history-sub">Relatórios gerados por você neste aparelho.</p>
+    <div id="historyList"></div>
+    <p class="history-empty hidden-view" id="historyEmpty">Nenhum relatório gerado ainda.</p>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const MESES_ABREV = ['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'];
+const pad2 = n => String(n).padStart(2,'0');
+
+// ---------- seletor de data/hora em rodas ----------
+const wpOverlay = $('wpOverlay');
+const wpColumns = $('wpColumns');
+let wpTargetInput = null;
+let wpCols = []; // { el, values, selectedIndex, onPick }
+
+function buildWheelColumn(values, initialIndex, displayFn){
+  const wrap = document.createElement('div');
+  wrap.className = 'wp-col-wrap';
+  const col = document.createElement('div');
+  col.className = 'wp-col';
+  const padTop = document.createElement('div'); padTop.className='wp-col-pad';
+  col.appendChild(padTop);
+  values.forEach((val) => {
+    const item = document.createElement('div');
+    item.className = 'wp-item';
+    item.textContent = displayFn ? displayFn(val) : val;
+    col.appendChild(item);
+  });
+  const padBottom = document.createElement('div'); padBottom.className='wp-col-pad';
+  col.appendChild(padBottom);
+  wrap.appendChild(col);
+
+  const state = { el: col, values, selectedIndex: initialIndex };
+
+  function highlight(){
+    const items = col.querySelectorAll('.wp-item');
+    items.forEach((it, i) => it.classList.toggle('selected', i === state.selectedIndex));
+  }
+  function scrollToIndex(idx, smooth){
+    col.scrollTo({ top: idx * 44, behavior: smooth ? 'smooth' : 'auto' });
+  }
+  let scrollTimer = null;
+  col.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      const idx = Math.round(col.scrollTop / 44);
+      state.selectedIndex = Math.max(0, Math.min(values.length - 1, idx));
+      highlight();
+    }, 80);
+  });
+
+  setTimeout(() => { scrollToIndex(initialIndex, false); highlight(); }, 0);
+
+  state.wrap = wrap;
+  state.scrollToIndex = scrollToIndex;
+  return state;
+}
+
+function openWheelPicker(input){
+  wpTargetInput = input;
+  const mode = input.dataset.wp;
+  wpColumns.innerHTML = '';
+  wpCols = [];
+
+  const now = new Date();
+  let initDay = now.getDate(), initMonth = now.getMonth(), initYear = now.getFullYear();
+  let initH = now.getHours(), initMin = now.getMinutes(), initSec = now.getSeconds();
+
+  // tenta reaproveitar valor já preenchido
+  const cur = input.value.trim();
+  if(cur){
+    const dm = cur.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if(dm){ initDay = +dm[1]; initMonth = +dm[2]-1; initYear = +dm[3]; }
+    const tm = cur.match(/(\d{2}):(\d{2})(?::(\d{2}))?/);
+    if(tm){ initH = +tm[1]; initMin = +tm[2]; if(tm[3]) initSec = +tm[3]; }
+  }
+
+  const years = []; for(let y = now.getFullYear()-3; y <= now.getFullYear()+3; y++) years.push(y);
+  const days = Array.from({length:31}, (_,i)=>i+1);
+  const months = Array.from({length:12}, (_,i)=>i);
+  const hours = Array.from({length:24}, (_,i)=>i);
+  const mins = Array.from({length:60}, (_,i)=>i);
+  const secs = Array.from({length:60}, (_,i)=>i);
+
+  const needsDate = mode === 'date' || mode === 'datetime-sec';
+  const needsTime = mode === 'time' || mode === 'time-sec' || mode === 'datetime-sec';
+  const needsSeconds = mode === 'time-sec' || mode === 'datetime-sec';
+
+  if(needsDate){
+    const dGroup = document.createElement('div'); dGroup.className='wp-group';
+    const colDay = buildWheelColumn(days, initDay-1, v => pad2(v));
+    const colMonth = buildWheelColumn(months, initMonth, v => MESES_ABREV[v]);
+    const colYear = buildWheelColumn(years, years.indexOf(initYear) >=0 ? years.indexOf(initYear) : 3, v => String(v));
+    colDay.kind='day'; colMonth.kind='month'; colYear.kind='year';
+    [colDay, colMonth, colYear].forEach(c => { dGroup.appendChild(c.wrap); wpCols.push(c); });
+    wpColumns.appendChild(dGroup);
+  }
+  if(needsDate && needsTime){
+    const brk = document.createElement('div'); brk.style.flexBasis='100%'; brk.style.height='10px';
+    wpColumns.appendChild(brk);
+  }
+  if(needsTime){
+    const tGroup = document.createElement('div'); tGroup.className='wp-group';
+    const colH = buildWheelColumn(hours, initH, pad2);
+    const colM = buildWheelColumn(mins, initMin, pad2);
+    colH.kind='hour'; colM.kind='minute';
+    tGroup.appendChild(colH.wrap); wpCols.push(colH);
+    const colon = document.createElement('div'); colon.className='wp-colon'; colon.textContent=':';
+    tGroup.appendChild(colon);
+    tGroup.appendChild(colM.wrap); wpCols.push(colM);
+    if(needsSeconds){
+      const colS = buildWheelColumn(secs, initSec, pad2);
+      colS.kind='second';
+      const colon2 = document.createElement('div'); colon2.className='wp-colon'; colon2.textContent=':';
+      tGroup.appendChild(colon2);
+      tGroup.appendChild(colS.wrap); wpCols.push(colS);
+    }
+    wpColumns.appendChild(tGroup);
+  }
+
+  wpOverlay.classList.add('open');
+}
+
+function closeWheelPicker(){
+  wpOverlay.classList.remove('open');
+  wpTargetInput = null;
+}
+
+$('wpCancel').addEventListener('click', closeWheelPicker);
+$('wpClear').addEventListener('click', () => {
+  if(wpTargetInput){ wpTargetInput.value = ''; }
+  closeWheelPicker();
+});
+$('wpConfirm').addEventListener('click', () => {
+  if(!wpTargetInput){ closeWheelPicker(); return; }
+  const byKind = {};
+  wpCols.forEach(c => { byKind[c.kind] = c.values[c.selectedIndex]; });
+  const mode = wpTargetInput.dataset.wp;
+  let out = '';
+  if(mode === 'date'){
+    out = `${pad2(byKind.day)}/${pad2(byKind.month+1)}/${byKind.year}`;
+  } else if(mode === 'time'){
+    out = `${pad2(byKind.hour)}:${pad2(byKind.minute)}`;
+  } else if(mode === 'time-sec'){
+    out = `${pad2(byKind.hour)}:${pad2(byKind.minute)}:${pad2(byKind.second)}`;
+  } else if(mode === 'datetime-sec'){
+    out = `${pad2(byKind.day)}/${pad2(byKind.month+1)}/${byKind.year} ${pad2(byKind.hour)}:${pad2(byKind.minute)}:${pad2(byKind.second)}`;
+  }
+  wpTargetInput.value = out;
+  closeWheelPicker();
+});
+wpOverlay.addEventListener('click', (e) => { if(e.target === wpOverlay) closeWheelPicker(); });
+
+document.querySelectorAll('input[data-wp]').forEach(inp => {
+  inp.addEventListener('click', () => openWheelPicker(inp));
+});
+
+// ---------- anexar arquivo e calcular hash automaticamente ----------
+function bufferToHex(buffer){
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function sha256Hex(arrayBuffer){
+  const digest = await crypto.subtle.digest('SHA-256', arrayBuffer);
+  return bufferToHex(digest);
+}
+function formatBytes(n){
+  return n.toLocaleString('pt-BR') + ' bytes';
+}
+function formatDateTimeFromMs(ms){
+  const d = new Date(ms);
+  return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+
+// ---------- Google Drive: configuração institucional ----------
+const DRIVE_CONFIG_KEY = 'extracao_wa_drive_config';
+function loadDriveConfig(){
+  try { return JSON.parse(localStorage.getItem(DRIVE_CONFIG_KEY)) || null; }
+  catch(e){ return null; }
+}
+function saveDriveConfigToStorage(cfg){
+  localStorage.setItem(DRIVE_CONFIG_KEY, JSON.stringify(cfg));
+}
+
+$('toggleDriveConfigBtn').addEventListener('click', () => {
+  const panel = $('driveConfigPanel');
+  panel.classList.toggle('hidden-view');
+  if(!panel.classList.contains('hidden-view')){
+    const cfg = loadDriveConfig();
+    $('driveClientId').value = (cfg && cfg.clientId) || '';
+    $('driveFolderId').value = (cfg && cfg.folderId) || '';
+    $('driveFolderIdMp').value = (cfg && cfg.folderIdMp) || '';
+  }
+});
+$('saveDriveConfigBtn').addEventListener('click', () => {
+  const clientId = $('driveClientId').value.trim();
+  const folderId = $('driveFolderId').value.trim();
+  const folderIdMp = $('driveFolderIdMp').value.trim();
+  const statusEl = $('driveConfigStatus');
+  if(!clientId || (!folderId && !folderIdMp)){
+    statusEl.textContent = 'Preencha o Client ID e ao menos uma das pastas.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  saveDriveConfigToStorage({ clientId, folderId, folderIdMp });
+  gisTokenClient = null; // força recriar com o novo client id
+  statusEl.textContent = '✓ Configuração salva neste aparelho.';
+  statusEl.className = 'loc-status ok';
+  updateInlineShareButtonLabels();
+});
+
+// ---------- Google Drive: autenticação (OAuth) e envio ----------
+let gisTokenClient = null;
+let gisAccessToken = null;
+
+function getDriveAccessToken(clientId){
+  return new Promise((resolve, reject) => {
+    if(!(window.google && google.accounts && google.accounts.oauth2)){
+      reject(new Error('A biblioteca de login do Google não carregou (verifique a conexão com a internet e tente novamente).'));
+      return;
+    }
+    if(!gisTokenClient || gisTokenClient.__clientId !== clientId){
+      gisTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: () => {}
+      });
+      gisTokenClient.__clientId = clientId;
+      gisAccessToken = null;
+    }
+    gisTokenClient.callback = (resp) => {
+      if(resp.error){ reject(new Error(resp.error)); return; }
+      gisAccessToken = resp.access_token;
+      resolve(resp.access_token);
+    };
+    gisTokenClient.requestAccessToken({ prompt: gisAccessToken ? '' : 'consent' });
+  });
+}
+
+async function uploadFileToDrive(file, folderId, clientId, statusEl){
+  statusEl.textContent = 'Autenticando com a conta institucional do Google…';
+  statusEl.className = 'loc-status';
+  const token = await getDriveAccessToken(clientId);
+
+  statusEl.textContent = 'Enviando arquivo para o Google Drive…';
+  const metadata = { name: file.name, parents: [folderId] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', file);
+
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token },
+    body: form
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    throw new Error(`Falha no envio (HTTP ${res.status}): ${errText.slice(0, 200)}`);
+  }
+  return res.json();
+}
+
+async function getDriveFolderName(folderId, clientId){
+  try {
+    const token = await getDriveAccessToken(clientId);
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${folderId}?fields=name`, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data.name || null;
+  } catch(e){ return null; }
+}
+
+function buildCustodySentence(fileName, destinoLabel, folderLabel){
+  const now = new Date();
+  const dataTxt = `${pad2(now.getDate())}/${pad2(now.getMonth()+1)}/${now.getFullYear()}`;
+  const horaTxt = `${pad2(now.getHours())}h${pad2(now.getMinutes())}`;
+  return `Arquivo ${fileName}, salvo no Google Drive ${destinoLabel}, na pasta ${folderLabel}, em ${dataTxt}, às ${horaTxt}.`;
+}
+
+function appendToTextarea(textareaEl, sentence){
+  textareaEl.value = textareaEl.value.trim() ? textareaEl.value.trim() + '\n' + sentence : sentence;
+}
+
+const attachedFiles = { orig: null, cop: null };
+
+function updateInlineShareButtonLabels(){
+  const cfg = loadDriveConfig();
+  $('shareRepBtn').textContent = (cfg && cfg.clientId && cfg.folderId) ? '☁️ Enviar ao Drive da repartição' : '📤 Compartilhar (Drive não configurado)';
+  $('shareMpBtn').textContent = (cfg && cfg.clientId && cfg.folderIdMp) ? '☁️ Enviar ao Drive do MP' : '📤 Compartilhar (Drive não configurado)';
+}
+
+async function handleCustodyShare({ folderKey, destinoLabel, statusEl, textareaEl }){
+  const file = attachedFiles.cop;
+  if(!file){
+    statusEl.textContent = 'Anexe o arquivo copiado na Seção 6 antes de enviar.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const cfg = loadDriveConfig();
+  const folderId = cfg && cfg[folderKey];
+  const btn = folderKey === 'folderId' ? $('shareRepBtn') : $('shareMpBtn');
+  btn.disabled = true;
+  try {
+    if(cfg && cfg.clientId && folderId){
+      const result = await uploadFileToDrive(file, folderId, cfg.clientId, statusEl);
+      const folderName = await getDriveFolderName(folderId, cfg.clientId);
+      const sentence = buildCustodySentence(file.name, destinoLabel, folderName || folderId);
+      appendToTextarea(textareaEl, sentence);
+      statusEl.textContent = '✓ ' + sentence;
+      statusEl.className = 'loc-status ok';
+    } else if(navigator.share && navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({ files: [file], title: file.name });
+      statusEl.textContent = 'Compartilhado via menu do celular — confirme manualmente onde foi salvo.';
+      statusEl.className = 'loc-status ok';
+    } else {
+      statusEl.textContent = `Configure o Google Drive ${destinoLabel} (menu ☰) ou use o app de arquivos para compartilhar manualmente.`;
+      statusEl.className = 'loc-status err';
+    }
+  } catch(err){
+    if(err.name !== 'AbortError'){
+      statusEl.textContent = 'Não foi possível enviar: ' + err.message;
+      statusEl.className = 'loc-status err';
+    }
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+$('shareRepBtn').addEventListener('click', () => handleCustodyShare({
+  folderKey: 'folderId', destinoLabel: 'da repartição', statusEl: $('shareRepStatus'), textareaEl: $('f_custodia_copia')
+}));
+$('shareMpBtn').addEventListener('click', () => handleCustodyShare({
+  folderKey: 'folderIdMp', destinoLabel: 'do MP', statusEl: $('shareMpStatus'), textareaEl: $('f_custodia_entrega')
+}));
+
+function setupFileAttach({ btnId, inputId, nameId, statusId, hashFieldId, nomeFieldId, tamanhoFieldId, modificacaoFieldId, horaHashFieldId, attachKey }){
+  const btn = $(btnId), input = $(inputId), nameEl = $(nameId), statusEl = $(statusId);
+
+  btn.addEventListener('click', () => input.click());
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    if(attachKey) attachedFiles[attachKey] = file;
+    nameEl.textContent = file.name;
+
+    if(!(window.crypto && window.crypto.subtle)){
+      statusEl.textContent = 'Este navegador/contexto não permite calcular o hash automaticamente (recurso requer o app aberto em https). Preencha o hash manualmente.';
+      statusEl.className = 'loc-status err';
+      if(nomeFieldId) $(nomeFieldId).value = file.name;
+      if(tamanhoFieldId) $(tamanhoFieldId).value = formatBytes(file.size);
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = 'Calculando hash SHA-256 do arquivo…';
+    statusEl.className = 'loc-status';
+    try {
+      const buf = await file.arrayBuffer();
+      const hex = await sha256Hex(buf);
+
+      if(nomeFieldId) $(nomeFieldId).value = file.name;
+      if(tamanhoFieldId) $(tamanhoFieldId).value = formatBytes(file.size);
+      if(modificacaoFieldId && file.lastModified) $(modificacaoFieldId).value = formatDateTimeFromMs(file.lastModified);
+      $(hashFieldId).value = hex;
+      if(horaHashFieldId) $(horaHashFieldId).value = formatDateTimeFromMs(Date.now());
+      updateHashCompare();
+
+      statusEl.textContent = '✓ Hash calculado a partir do arquivo anexado.';
+      statusEl.className = 'loc-status ok';
+    } catch(err){
+      statusEl.textContent = 'Não foi possível calcular o hash automaticamente: ' + err.message + '. Preencha manualmente.';
+      statusEl.className = 'loc-status err';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+setupFileAttach({
+  btnId: 'f_orig_file_btn', inputId: 'f_orig_file_input', nameId: 'f_orig_file_name', statusId: 'f_orig_file_status',
+  hashFieldId: 'f_hash_original', nomeFieldId: 'f_orig_nome', tamanhoFieldId: 'f_orig_tamanho',
+  modificacaoFieldId: 'f_orig_modificacao', horaHashFieldId: 'f_hora_hash_original', attachKey: 'orig'
+});
+setupFileAttach({
+  btnId: 'f_cop_file_btn', inputId: 'f_cop_file_input', nameId: 'f_cop_file_name', statusId: 'f_cop_file_status',
+  hashFieldId: 'f_hash_copia', nomeFieldId: 'f_cop_nome', tamanhoFieldId: 'f_cop_tamanho',
+  horaHashFieldId: 'f_hora_hash_copia', attachKey: 'cop'
+});
+updateInlineShareButtonLabels();
+
+
+// ---------- seletores em cascata (ferramenta de hash) ----------
+const FERRAMENTA_APARELHO = {
+  'Android': [
+    'Termux — comando sha256sum',
+    'MiXplorer — função Hash integrada',
+    'Cx File Explorer — função Hash integrada',
+    'HashDroid',
+    'Outro (especificar)'
+  ],
+  'iOS': [
+    'iMazing — verificação de hash',
+    'Outro (especificar)'
+  ]
+};
+const FERRAMENTA_PC = {
+  'Windows': [
+    'PowerShell — Get-FileHash -Algorithm SHA256',
+    'Prompt de Comando — certutil -hashfile (...) SHA256',
+    '7-Zip — cálculo de CRC/SHA',
+    'Outro (especificar)'
+  ],
+  'macOS': [
+    'Terminal — shasum -a 256',
+    'Outro (especificar)'
+  ],
+  'Linux': [
+    'Terminal — sha256sum',
+    'Outro (especificar)'
+  ]
+};
+
+function setupCascade(sisId, toolId, outroId, hiddenId, optionsMap){
+  const sisSel = $(sisId), toolSel = $(toolId), outroInp = $(outroId), hidden = $(hiddenId);
+
+  Object.keys(optionsMap).forEach(sis => {
+    const opt = document.createElement('option');
+    opt.value = sis; opt.textContent = sis;
+    sisSel.appendChild(opt);
+  });
+
+  function updateHidden(){
+    const tool = toolSel.value;
+    if(tool === 'Outro (especificar)'){
+      outroInp.classList.remove('hidden-view');
+      hidden.value = outroInp.value.trim();
+    } else {
+      outroInp.classList.add('hidden-view');
+      hidden.value = tool || '';
+    }
+  }
+  function populateTool(){
+    const sis = sisSel.value;
+    toolSel.innerHTML = '';
+    (optionsMap[sis] || []).forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      toolSel.appendChild(opt);
+    });
+    updateHidden();
+  }
+
+  sisSel.addEventListener('change', populateTool);
+  toolSel.addEventListener('change', updateHidden);
+  outroInp.addEventListener('input', () => { hidden.value = outroInp.value.trim(); });
+
+  populateTool();
+}
+
+setupCascade('f_orig_ferramenta_sis', 'f_orig_ferramenta_tool', 'f_orig_ferramenta_outro', 'f_orig_ferramenta', FERRAMENTA_APARELHO);
+setupCascade('f_cop_ferramenta_sis', 'f_cop_ferramenta_tool', 'f_cop_ferramenta_outro', 'f_cop_ferramenta', FERRAMENTA_PC);
+
+// ---------- OCR: ler IMEI de uma foto ----------
+function extractImeiCandidates(text){
+  // exige que o número não esteja colado a letras (evita capturar o "1" de "IMEI1")
+  // e não atravesse quebras de linha nem barras (ex.: "... / 01" do dígito verificador)
+  const matches = text.match(/(?<![A-Za-z0-9])\d[\d \-]{11,22}\d(?![A-Za-z0-9])/g) || [];
+  const candidates = [];
+  const seen = new Set();
+  matches.forEach(raw => {
+    const digits = raw.replace(/\D/g, '');
+    if(digits.length >= 14 && digits.length <= 16 && !seen.has(digits)){
+      seen.add(digits);
+      candidates.push(digits);
+    }
+  });
+  return candidates;
+}
+
+const imeiOcrBtn = $('f_imei_ocr_btn');
+const imeiOcrInput = $('f_imei_ocr_input');
+const imeiOcrStatus = $('f_imei_ocr_status');
+const imeiOcrCandidatesBox = $('f_imei_ocr_candidates');
+
+imeiOcrBtn.addEventListener('click', () => imeiOcrInput.click());
+imeiOcrInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  imeiOcrCandidatesBox.innerHTML = '';
+  if(!(window.Tesseract)){
+    imeiOcrStatus.textContent = 'Não foi possível carregar o leitor de texto (verifique a conexão com a internet e tente novamente).';
+    imeiOcrStatus.className = 'loc-status err';
+    return;
+  }
+
+  imeiOcrBtn.disabled = true;
+  imeiOcrStatus.textContent = 'Lendo texto da imagem… isso pode levar alguns segundos.';
+  imeiOcrStatus.className = 'loc-status';
+
+  try {
+    const { data } = await Tesseract.recognize(file, 'eng');
+    const text = data.text || '';
+    const candidates = extractImeiCandidates(text);
+
+    if(candidates.length === 0){
+      imeiOcrStatus.textContent = 'Não foi possível identificar um número de IMEI nessa imagem. Tente um print mais nítido, ou preencha manualmente.';
+      imeiOcrStatus.className = 'loc-status err';
+    } else {
+      imeiOcrStatus.textContent = candidates.length === 1
+        ? '✓ Número encontrado — confira e toque para preencher:'
+        : `✓ ${candidates.length} números encontrados — confira e toque no correto:`;
+      imeiOcrStatus.className = 'loc-status ok';
+
+      const label = document.createElement('div');
+      label.className = 'ocr-candidate-label';
+      label.textContent = 'Sempre confira dígito a dígito antes de usar:';
+      imeiOcrCandidatesBox.appendChild(label);
+
+      const row = document.createElement('div');
+      row.className = 'ocr-candidates';
+      candidates.forEach(digits => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ocr-candidate-btn';
+        btn.textContent = digits;
+        btn.addEventListener('click', () => {
+          $('f_imei').value = digits;
+          imeiOcrStatus.textContent = '✓ Campo IMEI preenchido com ' + digits + '. Confira novamente antes de gerar o relatório.';
+          imeiOcrStatus.className = 'loc-status ok';
+        });
+        row.appendChild(btn);
+      });
+      imeiOcrCandidatesBox.appendChild(row);
+    }
+  } catch(err){
+    imeiOcrStatus.textContent = 'Erro ao ler a imagem: ' + err.message;
+    imeiOcrStatus.className = 'loc-status err';
+  } finally {
+    imeiOcrBtn.disabled = false;
+  }
+});
+
+// ---------- geolocalização do local da coleta ----------
+
+$('detectLocBtn').addEventListener('click', () => {
+  const statusEl = $('locStatus');
+  if(!navigator.geolocation){
+    statusEl.textContent = 'Geolocalização não é suportada neste navegador.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const btn = $('detectLocBtn');
+  btn.disabled = true;
+  btn.textContent = 'Obtendo localização…';
+  statusEl.textContent = '';
+  statusEl.className = 'loc-status';
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude, accuracy } = pos.coords;
+    const coordsText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)} (precisão ≈ ${Math.round(accuracy)} m)`;
+    let address = '';
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+      if(res.ok){
+        const data = await res.json();
+        address = data.display_name || '';
+      }
+    } catch(e){ /* sem internet ou serviço indisponível — segue só com coordenadas */ }
+
+    $('f_local_coleta').value = address ? `${address}\nCoordenadas: ${coordsText}` : `Coordenadas: ${coordsText}`;
+    statusEl.textContent = address ? 'Endereço obtido por geolocalização — confira antes de gerar o relatório.' : 'Apenas coordenadas obtidas (endereço não pôde ser determinado) — complete manualmente se necessário.';
+    statusEl.className = 'loc-status ok';
+    btn.disabled = false;
+    btn.textContent = '📍 Usar localização atual';
+  }, (err) => {
+    statusEl.textContent = 'Não foi possível obter a localização: ' + err.message;
+    statusEl.className = 'loc-status err';
+    btn.disabled = false;
+    btn.textContent = '📍 Usar localização atual';
+  }, { enableHighAccuracy: true, timeout: 12000 });
+});
+
+// ---------- PWA: registrar service worker ----------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
+
+// ---------- Identificação do servidor (login local) ----------
+const STORAGE_KEY = 'extracao_wa_servidores';
+const SESSION_KEY = 'extracao_wa_sessao';
+let currentUser = null;
+let currentUserIndex = null;
+let editingIndex = null; // null = cadastro novo; número = editando perfil existente
+
+function loadServidores(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveServidores(list){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+function populateLoginSelect(){
+  const list = loadServidores();
+  const sel = $('loginSelect');
+  sel.innerHTML = '';
+  if(list.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'Nenhum servidor cadastrado';
+    opt.disabled = true; opt.selected = true;
+    sel.appendChild(opt);
+    return;
+  }
+  list.forEach((s, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = `${s.nome} (mat. ${s.matricula})`;
+    sel.appendChild(opt);
+  });
+}
+function showLoginError(msg){
+  const box = $('loginErrorBox');
+  box.textContent = msg;
+  box.classList.add('show');
+}
+function clearLoginError(){ $('loginErrorBox').classList.remove('show'); }
+
+function showRegisterPanel({ editMode }){
+  clearLoginError();
+  $('loginExisting').classList.add('hidden-view');
+  $('loginRegister').classList.remove('hidden-view');
+  $('registerBtn').textContent = editMode ? 'Salvar alterações' : 'Cadastrar e entrar';
+  $('backToLoginBtn').textContent = editMode ? 'Cancelar' : 'Voltar';
+  const pinLabel = document.querySelector('label[for="regPin"]');
+  if(editMode){
+    $('regPin').placeholder = 'Deixe em branco para manter';
+  } else {
+    $('regPin').placeholder = '••••';
+  }
+}
+
+$('showRegisterBtn').addEventListener('click', () => {
+  editingIndex = null;
+  $('regNome').value = ''; $('regCargo').value=''; $('regMatricula').value=''; $('regPin').value='';
+  showRegisterPanel({ editMode:false });
+});
+$('backToLoginBtn').addEventListener('click', () => {
+  clearLoginError();
+  $('loginRegister').classList.add('hidden-view');
+  if(editingIndex !== null){
+    editingIndex = null;
+    $('loginView').classList.add('hidden-view');
+    $('formView').classList.remove('hidden-view');
+  } else {
+    $('loginExisting').classList.remove('hidden-view');
+    populateLoginSelect();
+  }
+});
+
+$('registerBtn').addEventListener('click', () => {
+  clearLoginError();
+  const nome = $('regNome').value.trim();
+  const cargo = $('regCargo').value;
+  const matricula = $('regMatricula').value.trim();
+  const pin = $('regPin').value.trim();
+  const list = loadServidores();
+
+  if(editingIndex !== null){
+    if(!nome || !cargo || !matricula){
+      showLoginError('Preencha nome, cargo e matrícula.');
+      return;
+    }
+    if(pin && !/^\d{4}$/.test(pin)){
+      showLoginError('O novo PIN deve ter 4 dígitos, ou deixe em branco para manter o atual.');
+      return;
+    }
+    const existing = list[editingIndex];
+    const updated = { ...existing, nome, cargo, matricula, pin: pin || existing.pin };
+    list[editingIndex] = updated;
+    saveServidores(list);
+    currentUser = updated;
+    currentUserIndex = editingIndex;
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+    editingIndex = null;
+    $('loginView').classList.add('hidden-view');
+    $('formView').classList.remove('hidden-view');
+    refreshUserUI();
+    return;
+  }
+
+  if(!nome || !cargo || !matricula || !/^\d{4}$/.test(pin)){
+    showLoginError('Preencha nome, cargo, matrícula e um PIN de 4 dígitos.');
+    return;
+  }
+  list.push({ nome, cargo, matricula, pin, photo: null });
+  saveServidores(list);
+  loginAs(list.length - 1);
+});
+
+$('loginBtn').addEventListener('click', () => {
+  clearLoginError();
+  const list = loadServidores();
+  const idx = $('loginSelect').value;
+  const pin = $('loginPin').value.trim();
+  if(idx === '' || idx === undefined || !list[idx]){
+    showLoginError('Selecione um servidor cadastrado.');
+    return;
+  }
+  const servidor = list[idx];
+  if(servidor.pin !== pin){
+    showLoginError('PIN incorreto.');
+    return;
+  }
+  loginAs(+idx);
+});
+
+function loginAs(index){
+  const list = loadServidores();
+  currentUserIndex = index;
+  currentUser = list[index];
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+  sessionStorage.setItem(SESSION_KEY + '_idx', String(index));
+  enterApp();
+}
+
+function initials(nome){
+  const parts = (nome||'').trim().split(/\s+/);
+  if(parts.length === 0 || !parts[0]) return '?';
+  return parts.length > 1 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : parts[0][0].toUpperCase();
+}
+
+function refreshUserUI(){
+  if(!currentUser) return;
+  $('sessionNome').textContent = currentUser.nome;
+  $('sessionCargo').textContent = currentUser.cargo || '';
+  $('sessionMatricula').textContent = 'Matrícula ' + currentUser.matricula;
+
+  $('sidebarNome').textContent = currentUser.nome;
+  $('sidebarCargo').textContent = currentUser.cargo || '';
+  $('sidebarMatricula').textContent = 'Matrícula ' + currentUser.matricula;
+
+  const avatarCircle = $('avatarCircle');
+  const avatarInitial = $('avatarInitial');
+  const existingImg = avatarCircle.querySelector('img');
+  if(currentUser.photo){
+    if(existingImg){ existingImg.src = currentUser.photo; }
+    else {
+      const img = document.createElement('img');
+      img.src = currentUser.photo;
+      avatarCircle.insertBefore(img, avatarCircle.firstChild);
+      avatarInitial.style.display = 'none';
+    }
+  } else {
+    if(existingImg) existingImg.remove();
+    avatarInitial.style.display = '';
+    avatarInitial.textContent = initials(currentUser.nome);
+  }
+
+  $('f_assinatura_nome').placeholder = currentUser.nome + ' (preenchido automaticamente)';
+  $('f_assinatura_matricula').placeholder = currentUser.matricula + ' (preenchido automaticamente)';
+}
+
+function enterApp(){
+  $('loginView').classList.add('hidden-view');
+  $('formView').classList.remove('hidden-view');
+  refreshUserUI();
+  // autopreenche Responsável pela coleta se estiver vazio
+  const respField = $('f_responsavel');
+  if(!respField.value.trim()){
+    const cargoTxt = currentUser.cargo ? `, ${currentUser.cargo}` : '';
+    respField.value = `${currentUser.nome}${cargoTxt}, matrícula funcional nº ${currentUser.matricula}`;
+  }
+}
+
+function doLogout(){
+  currentUser = null;
+  currentUserIndex = null;
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY + '_idx');
+  $('sidebarOverlay').classList.remove('open');
+  $('formView').classList.add('hidden-view');
+  $('reportView').classList.remove('active');
+  $('loginView').classList.remove('hidden-view');
+  $('loginRegister').classList.add('hidden-view');
+  $('loginExisting').classList.remove('hidden-view');
+  $('loginPin').value = '';
+  populateLoginSelect();
+}
+$('sidebarLogoutBtn').addEventListener('click', doLogout);
+
+// ---------- barra lateral ----------
+$('openSidebarBtn').addEventListener('click', () => { refreshUserUI(); $('sidebarOverlay').classList.add('open'); });
+$('closeSidebarBtn').addEventListener('click', () => $('sidebarOverlay').classList.remove('open'));
+$('sidebarOverlay').addEventListener('click', (e) => { if(e.target.id === 'sidebarOverlay') $('sidebarOverlay').classList.remove('open'); });
+
+$('avatarCircle').addEventListener('click', () => $('avatarInput').click());
+$('avatarInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    currentUser.photo = dataUrl;
+    if(currentUserIndex !== null){
+      const list = loadServidores();
+      list[currentUserIndex].photo = dataUrl;
+      saveServidores(list);
+    }
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+    refreshUserUI();
+  };
+  reader.readAsDataURL(file);
+});
+
+$('editProfileBtn').addEventListener('click', () => {
+  $('sidebarOverlay').classList.remove('open');
+  editingIndex = currentUserIndex;
+  $('regNome').value = currentUser.nome;
+  $('regCargo').value = currentUser.cargo || '';
+  $('regMatricula').value = currentUser.matricula;
+  $('regPin').value = '';
+  $('formView').classList.add('hidden-view');
+  $('loginView').classList.remove('hidden-view');
+  showRegisterPanel({ editMode:true });
+});
+
+// restaura sessão ativa, se houver
+(function initSession(){
+  populateLoginSelect();
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(SESSION_KEY));
+    const idx = sessionStorage.getItem(SESSION_KEY + '_idx');
+    if(saved && saved.nome){
+      currentUser = saved;
+      currentUserIndex = idx !== null ? +idx : null;
+      enterApp();
+    }
+  } catch(e){}
+})();
+
+
+// ---------- progress bar ----------
+const progressBar = $('progressBar');
+for(let i=0;i<10;i++){
+  const seg = document.createElement('div');
+  seg.className='seg';
+  progressBar.appendChild(seg);
+}
+
+// ---------- anexos ----------
+const defaultAnexos = [
+  "Captura de tela do comando executado no aparelho, com hash, nome do arquivo e horário do sistema visíveis.",
+  "Captura de tela do comando executado no PC, com hash, caminho do arquivo e horário do sistema visíveis.",
+  "Cópia do arquivo extraído, armazenada em mídia apartada, sob controle de custódia."
+];
+const anexosList = $('anexosList');
+
+function renderAnexos(){
+  anexosList.innerHTML = '';
+  defaultAnexos.forEach((val, idx) => {
+    const row = document.createElement('div');
+    row.className = 'anexo-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = val;
+    input.dataset.idx = idx;
+    input.addEventListener('input', e => defaultAnexos[idx] = e.target.value);
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.textContent = 'Remover';
+    rm.addEventListener('click', () => { defaultAnexos.splice(idx,1); renderAnexos(); });
+    row.appendChild(input);
+    row.appendChild(rm);
+    anexosList.appendChild(row);
+  });
+}
+renderAnexos();
+$('addAnexoBtn').addEventListener('click', () => { defaultAnexos.push(''); renderAnexos(); });
+
+// ---------- hash live compare ----------
+function normHash(v){ return (v||'').trim().toLowerCase().replace(/\s+/g,''); }
+function updateHashCompare(){
+  const a = normHash($('f_hash_original').value);
+  const b = normHash($('f_hash_copia').value);
+  const box = $('hashCompareBox');
+  if(!a || !b){
+    box.className = 'hash-check neutral';
+    box.textContent = 'Informe os dois hashes acima para comparar automaticamente.';
+    return;
+  }
+  if(a === b){
+    box.className = 'hash-check ok';
+    box.textContent = '✓ HASHES IDÊNTICOS — integridade confirmada.';
+  } else {
+    box.className = 'hash-check warn';
+    box.textContent = '⚠ HASHES DIVERGENTES — a integridade da cópia NÃO pode ser confirmada. Revise os valores antes de gerar o relatório.';
+  }
+}
+['f_hash_original','f_hash_copia'].forEach(id => $(id).addEventListener('input', updateHashCompare));
+
+function esc(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function row(label, value, mono){
+  const v = esc(value).replace(/\n/g, '<br>');
+  return `<tr><td class="lbl">${esc(label)}</td><td class="${mono?'mono':''}">${v || '—'}</td></tr>`;
+}
+
+// ---------- build report ----------
+function buildReport(){
+  const v = id => $(id).value;
+
+  const hashA = normHash(v('f_hash_original'));
+  const hashB = normHash(v('f_hash_copia'));
+  let matchHtml;
+  if(!hashA || !hashB){
+    matchHtml = `<span class="badge-match warn">NÃO VERIFICADO</span>`;
+  } else if(hashA === hashB){
+    matchHtml = `<span class="badge-match ok">HASHES IDÊNTICOS</span>`;
+  } else {
+    matchHtml = `<span class="badge-match warn">HASHES DIVERGENTES</span>`;
+  }
+
+  const nomeAssinatura = v('f_assinatura_nome') || (currentUser && currentUser.nome) || v('f_responsavel').split(',')[0] || '';
+  let matriculaAssinatura = v('f_assinatura_matricula') || (currentUser && currentUser.matricula) || '';
+  if(!matriculaAssinatura){
+    const m = v('f_responsavel').match(/matr[ií]cula[^\d]*([\d.\-\/]+)/i);
+    matriculaAssinatura = m ? m[1] : '';
+  }
+  const cargoAssinatura = (currentUser && currentUser.cargo) || '';
+
+  const now = new Date();
+  const emissaoTexto = `${pad2(now.getDate())}/${pad2(now.getMonth()+1)}/${now.getFullYear()} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+
+  window.__lastReportMeta = {
+    relatorioNum: v('f_relatorio_num'),
+    responsavel: nomeAssinatura,
+    cargo: cargoAssinatura,
+    emissao: emissaoTexto,
+    hashStatus: (!hashA || !hashB) ? 'neutral' : (hashA === hashB ? 'ok' : 'warn')
+  };
+
+  const anexosHtml = defaultAnexos.filter(a => a.trim()).map(a => `<li>${esc(a)}</li>`).join('');
+
+  const dataColeta = v('f_data_coleta');
+  const horarioRange = [v('f_horario_inicio'), v('f_horario_fim')].filter(Boolean).join(' às ');
+
+  const html = `
+    <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E VERIFICAÇÃO DE INTEGRIDADE</h1>
+    <p class="subtitle">Arquivo de conversa do WhatsApp extraído de dispositivo móvel</p>
+
+    <h2>1. Identificação Geral</h2>
+    <table class="rtable">
+      ${row('Nº do relatório', v('f_relatorio_num'))}
+      ${row('Data e hora da coleta', [dataColeta, horarioRange].filter(Boolean).join(' — '))}
+      ${row('Responsável pela coleta', v('f_responsavel'))}
+      ${row('Finalidade', v('f_finalidade'))}
+      ${row('Local da coleta', v('f_local_coleta'))}
+    </table>
+
+    <h2>2. Identificação do Dispositivo de Origem</h2>
+    <table class="rtable">
+      ${row('Aparelho', v('f_aparelho'))}
+      ${row('Sistema operacional', v('f_so_celular'))}
+      ${row('IMEI', v('f_imei'))}
+      ${row('Número da linha associada', v('f_linha'))}
+      ${row('Usuário/proprietário informado', v('f_proprietario'))}
+      ${row('Aplicativo', v('f_app'))}
+    </table>
+
+    <h2>3. Arquivo Extraído (Original)</h2>
+    <table class="rtable">
+      ${row('Nome do arquivo', v('f_orig_nome'), true)}
+      ${row('Caminho no dispositivo', v('f_orig_caminho'), true)}
+      ${row('Tamanho do arquivo', v('f_orig_tamanho'))}
+      ${row('Data/hora da última modificação', v('f_orig_modificacao'))}
+      ${row('Ferramenta usada para gerar o hash', v('f_orig_ferramenta'))}
+      ${row('Hash SHA-256 (ORIGINAL)', v('f_hash_original'), true)}
+      ${row('Hora exata do cálculo do hash', v('f_hora_hash_original'))}
+    </table>
+
+    <h2>4. Procedimento de Cópia</h2>
+    <p class="body-text">${esc(v('f_proc_descricao'))}</p>
+    <table class="rtable">
+      ${row('Método de transferência', v('f_metodo_transf'))}
+      ${row('Início da transferência', v('f_transf_inicio'))}
+      ${row('Término da transferência', v('f_transf_fim'))}
+    </table>
+
+    <h2>5. Identificação do Computador de Destino</h2>
+    <table class="rtable">
+      ${row('Equipamento', v('f_pc_equipamento'))}
+      ${row('Sistema operacional', v('f_pc_so'))}
+      ${row('Usuário logado no sistema', v('f_pc_usuario'))}
+      ${row('Pasta de destino da cópia', v('f_pc_pasta'), true)}
+    </table>
+
+    <h2>6. Arquivo Copiado (Cópia no PC)</h2>
+    <table class="rtable">
+      ${row('Nome do arquivo', v('f_cop_nome'), true)}
+      ${row('Caminho completo no PC', v('f_cop_caminho'), true)}
+      ${row('Tamanho do arquivo copiado', v('f_cop_tamanho'))}
+      ${row('Ferramenta usada para gerar o hash', v('f_cop_ferramenta'))}
+      ${row('Hash SHA-256 (CÓPIA)', v('f_hash_copia'), true)}
+      ${row('Hora exata do cálculo do hash', v('f_hora_hash_copia'))}
+    </table>
+
+    <h2>7. Verificação de Integridade</h2>
+    <table class="rtable">
+      ${row('Hash do arquivo original (aparelho)', v('f_hash_original'), true)}
+      ${row('Hash do arquivo copiado (PC)', v('f_hash_copia'), true)}
+      <tr><td class="lbl">Resultado da comparação</td><td>${matchHtml}</td></tr>
+    </table>
+    <p class="body-text">${esc(v('f_conclusao'))}</p>
+
+    <h2>8. Anexos</h2>
+    <ul class="anexos">${anexosHtml || '<li>—</li>'}</ul>
+
+    <h2>9. Cadeia de Custódia</h2>
+    <table class="rtable">
+      ${row('Custódia do dispositivo original', v('f_custodia_dispositivo'))}
+      ${row('Custódia da cópia digital', v('f_custodia_copia'))}
+      ${row('Cópia adicional entregue a', v('f_custodia_entrega'))}
+    </table>
+
+    <h2>10. Declaração e Assinatura</h2>
+    <p class="body-text">Declaro, sob as penas da lei, que o procedimento técnico acima descrito foi executado por mim, de forma fiel ao relatado, e que os valores de hash consignados correspondem exatamente aos resultados obtidos nos respectivos comandos, sem qualquer alteração, edição ou manipulação do conteúdo do arquivo original ou de sua cópia.</p>
+    <div class="sig-block">
+      <div class="sig-line">
+        ${esc(nomeAssinatura) || '(nome não informado)'}<br>
+        ${cargoAssinatura ? esc(cargoAssinatura) + '<br>' : ''}
+        ${matriculaAssinatura ? 'Matrícula funcional nº ' + esc(matriculaAssinatura) : ''}<br>
+        Data e hora da emissão: ${emissaoTexto}
+      </div>
+    </div>
+  `;
+  $('reportPaper').innerHTML = html;
+}
+
+// ---------- histórico de relatórios ----------
+const HISTORY_KEY = 'extracao_wa_historico';
+let cameFromHistory = false;
+
+function loadHistory(){
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveHistoryList(list){
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+}
+function saveReportToHistory(){
+  if(!currentUser) return;
+  const meta = window.__lastReportMeta || {};
+  const record = {
+    id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+    matricula: currentUser.matricula,
+    relatorioNum: meta.relatorioNum || '',
+    responsavel: meta.responsavel || '',
+    cargo: meta.cargo || '',
+    emissao: meta.emissao || '',
+    hashStatus: meta.hashStatus || 'neutral',
+    html: $('reportPaper').innerHTML
+  };
+  const list = loadHistory();
+  list.unshift(record);
+  saveHistoryList(list.slice(0, 200)); // limite de segurança para não crescer sem controle
+}
+
+function renderHistoryList(){
+  const container = $('historyList');
+  const emptyMsg = $('historyEmpty');
+  container.innerHTML = '';
+  const all = loadHistory();
+  const mine = currentUser ? all.filter(r => r.matricula === currentUser.matricula) : [];
+
+  if(mine.length === 0){
+    emptyMsg.classList.remove('hidden-view');
+    return;
+  }
+  emptyMsg.classList.add('hidden-view');
+
+  mine.forEach(record => {
+    const badgeClass = record.hashStatus === 'ok' ? 'ok' : (record.hashStatus === 'warn' ? 'warn' : 'neutral');
+    const badgeText = record.hashStatus === 'ok' ? 'HASHES IDÊNTICOS' : (record.hashStatus === 'warn' ? 'VERIFICAR HASHES' : 'NÃO VERIFICADO');
+
+    const card = document.createElement('div');
+    card.className = 'history-card';
+    card.innerHTML = `
+      <div class="history-card-top">
+        <div class="history-card-num">${esc(record.relatorioNum || 'Sem número')}</div>
+        <div class="history-card-date">${esc(record.emissao || '')}</div>
+      </div>
+      <div class="history-card-row"><b>Responsável:</b> ${esc(record.responsavel || '—')}${record.cargo ? ' — ' + esc(record.cargo) : ''}</div>
+      <span class="history-badge ${badgeClass}">${badgeText}</span>
+      <div class="history-card-actions">
+        <button data-action="open">Abrir</button>
+        <button data-action="delete" class="danger">Excluir</button>
+      </div>
+    `;
+    card.querySelector('[data-action="open"]').addEventListener('click', () => openHistoryRecord(record.id));
+    card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteHistoryRecord(record.id));
+    container.appendChild(card);
+  });
+}
+
+function openHistoryRecord(id){
+  const record = loadHistory().find(r => r.id === id);
+  if(!record) return;
+  $('reportPaper').innerHTML = record.html;
+  cameFromHistory = true;
+  $('historyView').classList.remove('active');
+  $('reportView').classList.add('active');
+  window.scrollTo(0, 0);
+}
+function deleteHistoryRecord(id){
+  if(!confirm('Excluir este relatório do histórico? Essa ação não pode ser desfeita.')) return;
+  saveHistoryList(loadHistory().filter(r => r.id !== id));
+  renderHistoryList();
+}
+
+$('openHistoryBtn').addEventListener('click', () => {
+  $('sidebarOverlay').classList.remove('open');
+  renderHistoryList();
+  $('formView').classList.add('hidden');
+  $('reportView').classList.remove('active');
+  $('historyView').classList.add('active');
+  window.scrollTo(0, 0);
+});
+$('historyBackBtn').addEventListener('click', () => {
+  $('historyView').classList.remove('active');
+  $('formView').classList.remove('hidden');
+  window.scrollTo(0, 0);
+});
+
+// ---------- view switching ----------
+$('generateBtn').addEventListener('click', () => {
+  buildReport();
+  saveReportToHistory();
+  $('formView').classList.add('hidden');
+  $('reportView').classList.add('active');
+  window.scrollTo(0,0);
+});
+$('backBtn').addEventListener('click', () => {
+  $('reportView').classList.remove('active');
+  if(cameFromHistory){
+    cameFromHistory = false;
+    $('historyView').classList.add('active');
+  } else {
+    $('formView').classList.remove('hidden');
+  }
+  window.scrollTo(0,0);
+});
+$('printBtn').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>
