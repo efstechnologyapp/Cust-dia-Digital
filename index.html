@@ -162,7 +162,7 @@
     line-height:1.4;
   }
   .field .hint b{ font-style:normal; color:#7A8390; }
-  .field input, .field textarea{
+  .field input, .field textarea, .field select{
     width:100%;
     padding: 9px 11px;
     border: 1px solid var(--line);
@@ -466,6 +466,50 @@
   /* ---------- histórico ---------- */
   #historyView{ display:none; }
   #historyView.active{ display:block; }
+  #connectionsView{ display:none; }
+  #connectionsView.active{ display:block; }
+  .reparticao-card{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+  }
+  .reparticao-card-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .reparticao-card-nome{
+    font-weight:700;
+    font-size: 14.5px;
+    color: var(--navy-dark);
+  }
+  .reparticao-card-icons{
+    display:flex;
+    gap: 4px;
+    flex: none;
+  }
+  .reparticao-card-icons button{
+    border: 1px solid var(--line);
+    background:#fff;
+    border-radius: 7px;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .reparticao-card-icons button:hover{ background:#F5F7FA; }
+  .reparticao-card-detail{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    word-break: break-all;
+    margin-bottom: 2px;
+  }
   .history-wrap{ max-width: 700px; margin: 0 auto; padding: 0 4px; }
   .history-title{
     font-family: var(--serif);
@@ -802,6 +846,12 @@
     overflow-y: auto;
   }
   .sidebar-overlay.open .sidebar-panel{ transform: translateX(0); }
+  .edit-rep-panel{
+    left:auto; right:0;
+    box-shadow: -6px 0 24px rgba(0,0,0,.18);
+    transform: translateX(100%);
+  }
+  #editRepOverlay.open .edit-rep-panel{ transform: translateX(0); }
   .sidebar-close{
     align-self:flex-end;
     background:none; border:none;
@@ -964,12 +1014,40 @@
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
         <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
       </div>
-      <div class="field">
+      <div class="field" id="regEmailField">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">E-mail</label>
+        <input type="email" id="regEmail" placeholder="Ex.: joao.santos@exemplo.com">
+      </div>
+      <div class="field" id="regTelefoneField">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Telefone (WhatsApp)</label>
+        <input type="tel" id="regTelefone" placeholder="Ex.: (83) 99876-5432">
+      </div>
+
+      <div class="field hidden-view" id="regCodeField">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Código recebido por e-mail</label>
+        <input type="text" id="regCode" inputmode="numeric" maxlength="6" placeholder="000000">
+        <button type="button" class="btn-link" id="resendCodeBtn" style="margin-top:6px;font-size:12px;">Reenviar código</button>
+      </div>
+
+      <div class="field hidden-view" id="regPinField">
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Criar PIN (4 dígitos)</label>
         <input type="password" id="regPin" inputmode="numeric" maxlength="4" placeholder="••••">
       </div>
-      <button class="btn-primary" id="registerBtn">Cadastrar e entrar</button>
+
+      <div class="loc-status" id="regVerifyStatus"></div>
+      <button class="btn-primary" id="registerBtn">Enviar código de verificação</button>
       <button class="btn-link" id="backToLoginBtn">Voltar</button>
+    </div>
+
+    <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;margin-top:14px;color:var(--muted);">⚙️ Configurar verificação de e-mail</button>
+    <div class="hidden-view" id="emailConfigPanel" style="margin-top:10px;">
+      <div class="field">
+        <label style="font-size:12px;">URL do Google Apps Script (verificação de e-mail)</label>
+        <input type="text" id="emailVerifyUrlInput" placeholder="https://script.google.com/macros/s/XXXX/exec">
+      </div>
+      <button class="btn-primary" id="saveEmailConfigBtn" style="margin-bottom:6px;">Salvar</button>
+      <div class="loc-status" id="emailConfigStatus"></div>
+      <p style="font-size:11px;color:var(--muted);line-height:1.5;">Veja o LEIA-ME para o passo a passo de publicar o script no Google Apps Script e obter essa URL. Configuração institucional, salva neste aparelho.</p>
     </div>
 
     <p class="login-note">Esta identificação fica salva apenas neste aparelho e serve para preencher automaticamente o responsável e a assinatura do relatório. Não substitui controles de segurança institucionais.</p>
@@ -1001,29 +1079,89 @@
     <button class="sidebar-btn" id="editProfileBtn">✏️ Editar perfil</button>
     <button class="sidebar-btn" id="openHistoryBtn">🕘 Histórico de relatórios</button>
 
+    <div class="field" style="margin-top:12px;">
+      <label style="font-size:12.5px;">Selecione a repartição de destino:</label>
+      <select id="repSelect"></select>
+    </div>
+
     <div class="drive-status-card" id="driveStatusCard">
       <div class="drive-status-row">
         <span id="driveStatusIcon">🔴</span>
         <span id="driveStatusText">Desconectado do Google Drive</span>
       </div>
-      <button class="sidebar-btn" id="driveConnectBtn" style="margin-top:8px;margin-bottom:0;">Conectar ao Google Drive</button>
+      <button class="sidebar-btn" id="driveConnectBtn" style="margin-top:8px;margin-bottom:0;">Conectar</button>
     </div>
 
-    <button class="sidebar-btn" id="toggleDriveConfigBtn" style="margin-top:10px;">⚙️ Configuração avançada do Drive</button>
-    <div class="hidden-view" id="driveConfigPanel">
-      <div class="field">
-        <label style="font-size:12.5px;">Client ID (OAuth)</label>
-        <input type="text" id="driveClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
-      </div>
-      <div class="field">
-        <label style="font-size:12.5px;">ID da pasta — Drive da repartição</label>
-        <input type="text" id="driveFolderId" placeholder="Ex.: 1A2b3C4d5E...">
-      </div>
-      <button class="btn-primary" id="saveDriveConfigBtn" style="margin-bottom:10px;">Salvar configuração</button>
-      <div class="loc-status" id="driveConfigStatus"></div>
-      <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-top:2px;">Esses valores já vêm pré-configurados para toda a repartição. Só altere aqui se for necessário trocar de projeto do Google Cloud ou de pasta de destino.</p>
-    </div>
+    <button class="sidebar-btn" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gerenciar Repartições</button>
     <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Trocar usuário</button>
+  </div>
+</div>
+
+<!-- ===== CONEXÕES (gerenciar repartições) ===== -->
+<div id="connectionsView">
+  <div class="report-toolbar">
+    <button id="connectionsBackBtn">← Voltar</button>
+  </div>
+  <div class="history-wrap">
+    <h2 class="history-title">Conexões — Repartições</h2>
+    <p class="history-sub">Cada repartição tem seu próprio Client ID (Google Cloud) e pasta de destino no Drive.</p>
+
+    <div class="field-label-row" style="margin-top:4px;">
+      <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Cadastrar nova repartição</h3>
+      <button type="button" class="btn-inline-share" id="toggleNewRepBtn" aria-label="Adicionar repartição" title="Adicionar repartição">+</button>
+    </div>
+
+    <div class="hidden-view" id="newReparticaoForm" style="margin-top:12px;">
+      <div class="field">
+        <label>Nome da repartição</label>
+        <input type="text" id="repNome" placeholder="Ex.: 14ª Delegacia de Polícia">
+      </div>
+      <div class="field">
+        <label>E-mail do Cloud/Drive da repartição</label>
+        <input type="email" id="repEmail" placeholder="Ex.: repartição@gmail.com">
+      </div>
+      <div class="field">
+        <label>Client ID (OAuth)</label>
+        <input type="text" id="repClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
+      </div>
+      <div class="field">
+        <label>ID da pasta compartilhada no Drive</label>
+        <input type="text" id="repFolderId" placeholder="Ex.: 1A2b3C4d5E...">
+      </div>
+      <button class="btn-primary" id="saveReparticaoBtn" style="margin-bottom:8px;">Salvar repartição</button>
+      <div class="loc-status" id="reparticaoFormStatus"></div>
+    </div>
+
+    <hr class="sidebar-divider">
+    <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:4px 0 12px;">Repartições cadastradas</h3>
+    <div id="reparticoesList"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: editar repartição ===== -->
+<div class="sidebar-overlay" id="editRepOverlay">
+  <div class="sidebar-panel edit-rep-panel">
+    <button class="sidebar-close" id="closeEditRepBtn">✕</button>
+    <h3 style="font-family:var(--serif);font-size:17px;color:var(--navy-dark);margin:0 0 16px;">Editar repartição</h3>
+    <div class="field">
+      <label>Nome da repartição</label>
+      <input type="text" id="repEditNome" placeholder="Ex.: 14ª Delegacia de Polícia">
+    </div>
+    <div class="field">
+      <label>E-mail do Cloud/Drive da repartição</label>
+      <input type="email" id="repEditEmail" placeholder="Ex.: repartição@gmail.com">
+    </div>
+    <div class="field">
+      <label>Client ID (OAuth)</label>
+      <input type="text" id="repEditClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
+    </div>
+    <div class="field">
+      <label>ID da pasta compartilhada no Drive</label>
+      <input type="text" id="repEditFolderId" placeholder="Ex.: 1A2b3C4d5E...">
+    </div>
+    <button class="btn-primary" id="saveReparticaoEditBtn" style="margin-bottom:8px;">Salvar alterações</button>
+    <button class="btn-link" id="cancelEditRepBtn" style="width:100%;margin-bottom:8px;">Cancelar</button>
+    <div class="loc-status" id="reparticaoEditFormStatus"></div>
   </div>
 </div>
 
@@ -1382,6 +1520,7 @@ function showView(name){
   $('loginView').classList.add('hidden-view');
   $('reportView').classList.remove('active');
   $('historyView').classList.remove('active');
+  $('connectionsView').classList.remove('active');
   $('sessionBar').classList.add('hidden-view');
 
   if(name === 'home'){
@@ -1394,6 +1533,8 @@ function showView(name){
     $('reportView').classList.add('active');
   } else if(name === 'history'){
     $('historyView').classList.add('active');
+  } else if(name === 'connections'){
+    $('connectionsView').classList.add('active');
   } else if(name === 'login'){
     $('loginView').classList.remove('hidden-view');
   }
@@ -1567,53 +1708,186 @@ function formatDateTimeFromMs(ms){
   return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 }
 
-// ---------- Google Drive: configuração institucional ----------
-const DRIVE_CONFIG_KEY = 'extracao_wa_drive_config';
+// ---------- Repartições (Cloud + pasta Drive) ----------
+const REPARTICOES_KEY = 'extracao_wa_reparticoes';
+const SELECTED_REP_KEY = 'extracao_wa_reparticao_selecionada';
 const DRIVE_CONNECTED_KEY = 'extracao_wa_drive_connected';
 
-// Configuração padrão da repartição — já vem pronta para todo novo usuário.
-// Pode ser sobrescrita em "Configuração avançada do Drive", se necessário.
-const DEFAULT_DRIVE_CONFIG = {
-  clientId: '753601479431-93a4q48vo5j62n3i4cucdlutj57m9p7b.apps.googleusercontent.com',
-  folderId: '1FQ8whGRlyB0vzjBwVEzPq66ps-ewuddt'
-};
-
-function loadDriveConfig(){
+function loadReparticoes(){
   try {
-    const stored = JSON.parse(localStorage.getItem(DRIVE_CONFIG_KEY));
-    if(stored && stored.clientId) return stored;
+    const stored = JSON.parse(localStorage.getItem(REPARTICOES_KEY));
+    if(Array.isArray(stored) && stored.length) return stored;
   } catch(e){}
-  return { ...DEFAULT_DRIVE_CONFIG };
+  // primeira repartição, já pronta a partir da configuração anterior
+  const seeded = [{
+    id: 'rep-default',
+    nome: 'Servidor EFS Technology',
+    clientId: '753601479431-93a4q48vo5j62n3i4cucdlutj57m9p7b.apps.googleusercontent.com',
+    folderId: '1FQ8whGRlyB0vzjBwVEzPq66ps-ewuddt'
+  }];
+  saveReparticoesList(seeded);
+  return seeded;
 }
-function saveDriveConfigToStorage(cfg){
-  localStorage.setItem(DRIVE_CONFIG_KEY, JSON.stringify(cfg));
+function saveReparticoesList(list){
+  localStorage.setItem(REPARTICOES_KEY, JSON.stringify(list));
+}
+function getSelectedReparticaoId(){ return localStorage.getItem(SELECTED_REP_KEY) || ''; }
+function setSelectedReparticaoId(id){ localStorage.setItem(SELECTED_REP_KEY, id); }
+function getSelectedReparticao(){
+  const id = getSelectedReparticaoId();
+  return loadReparticoes().find(r => r.id === id) || null;
 }
 
-$('toggleDriveConfigBtn').addEventListener('click', () => {
-  const panel = $('driveConfigPanel');
-  panel.classList.toggle('hidden-view');
-  if(!panel.classList.contains('hidden-view')){
-    const cfg = loadDriveConfig();
-    $('driveClientId').value = cfg.clientId || '';
-    $('driveFolderId').value = cfg.folderId || '';
+function renderRepSelectDropdown(){
+  const list = loadReparticoes();
+  const sel = $('repSelect');
+  const currentId = getSelectedReparticaoId();
+  sel.innerHTML = '';
+  if(list.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'Nenhuma repartição cadastrada';
+    opt.disabled = true; opt.selected = true;
+    sel.appendChild(opt);
+    return;
   }
+  list.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = r.nome;
+    if(r.id === currentId) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  if(!list.some(r => r.id === currentId)){
+    setSelectedReparticaoId(list[0].id);
+    sel.value = list[0].id;
+  }
+}
+$('repSelect').addEventListener('change', () => {
+  setSelectedReparticaoId($('repSelect').value);
+  gisTokenClient = null;
+  setDriveConnectedFlag(false);
+  updateDriveStatusUI(false);
 });
-$('saveDriveConfigBtn').addEventListener('click', () => {
-  const clientId = $('driveClientId').value.trim();
-  const folderId = $('driveFolderId').value.trim();
-  const statusEl = $('driveConfigStatus');
-  if(!clientId || !folderId){
-    statusEl.textContent = 'Preencha o Client ID e o ID da pasta.';
+
+// ---------- página de gerenciamento de repartições ----------
+let editingReparticaoId = null;
+
+function renderReparticoesManageList(){
+  const container = $('reparticoesList');
+  container.innerHTML = '';
+  loadReparticoes().forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'reparticao-card';
+    card.innerHTML = `
+      <div class="reparticao-card-top">
+        <div class="reparticao-card-nome">${esc(r.nome)}</div>
+        <div class="reparticao-card-icons">
+          <button data-action="edit" title="Editar" aria-label="Editar">✏️</button>
+          <button data-action="delete" title="Excluir" aria-label="Excluir">🗑️</button>
+        </div>
+      </div>
+    `;
+    card.querySelector('[data-action="edit"]').addEventListener('click', () => startEditReparticao(r.id));
+    card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteReparticao(r.id));
+    container.appendChild(card);
+  });
+}
+
+function resetNewReparticaoForm(){
+  $('repNome').value = '';
+  $('repEmail').value = '';
+  $('repClientId').value = '';
+  $('repFolderId').value = '';
+  $('reparticaoFormStatus').textContent = '';
+}
+
+$('toggleNewRepBtn').addEventListener('click', () => {
+  const form = $('newReparticaoForm');
+  const opening = form.classList.contains('hidden-view');
+  if(opening) resetNewReparticaoForm();
+  form.classList.toggle('hidden-view');
+});
+
+function startEditReparticao(id){
+  const rep = loadReparticoes().find(r => r.id === id);
+  if(!rep) return;
+  editingReparticaoId = id;
+  $('repEditNome').value = rep.nome;
+  $('repEditEmail').value = rep.email || '';
+  $('repEditClientId').value = rep.clientId;
+  $('repEditFolderId').value = rep.folderId;
+  $('reparticaoEditFormStatus').textContent = '';
+  $('editRepOverlay').classList.add('open');
+}
+function closeEditReparticaoModal(){
+  editingReparticaoId = null;
+  $('editRepOverlay').classList.remove('open');
+}
+function deleteReparticao(id){
+  if(!confirm('Excluir esta repartição? Isso não afeta arquivos já enviados ao Drive.')) return;
+  const list = loadReparticoes().filter(r => r.id !== id);
+  saveReparticoesList(list);
+  if(getSelectedReparticaoId() === id) setSelectedReparticaoId(list[0] ? list[0].id : '');
+  renderReparticoesManageList();
+  renderRepSelectDropdown();
+}
+
+$('saveReparticaoBtn').addEventListener('click', () => {
+  const nome = $('repNome').value.trim();
+  const email = $('repEmail').value.trim();
+  const clientId = $('repClientId').value.trim();
+  const folderId = $('repFolderId').value.trim();
+  const statusEl = $('reparticaoFormStatus');
+  if(!nome || !email || !clientId || !folderId){
+    statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
     statusEl.className = 'loc-status err';
     return;
   }
-  saveDriveConfigToStorage({ clientId, folderId });
-  gisTokenClient = null; // força recriar com o novo client id
-  setDriveConnectedFlag(false);
-  updateDriveStatusUI(false);
-  statusEl.textContent = '✓ Configuração salva neste aparelho.';
-  statusEl.className = 'loc-status ok';
+  const list = loadReparticoes();
+  list.push({ id: 'rep-' + Date.now(), nome, email, clientId, folderId });
+  saveReparticoesList(list);
+  resetNewReparticaoForm();
+  $('newReparticaoForm').classList.add('hidden-view');
+  renderReparticoesManageList();
+  renderRepSelectDropdown();
 });
+
+$('saveReparticaoEditBtn').addEventListener('click', () => {
+  const nome = $('repEditNome').value.trim();
+  const email = $('repEditEmail').value.trim();
+  const clientId = $('repEditClientId').value.trim();
+  const folderId = $('repEditFolderId').value.trim();
+  const statusEl = $('reparticaoEditFormStatus');
+  if(!nome || !email || !clientId || !folderId){
+    statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const list = loadReparticoes();
+  const idx = list.findIndex(r => r.id === editingReparticaoId);
+  if(idx >= 0){
+    list[idx] = { ...list[idx], nome, email, clientId, folderId };
+    saveReparticoesList(list);
+    gisTokenClient = null;
+    setDriveConnectedFlag(false);
+    updateDriveStatusUI(false);
+  }
+  renderReparticoesManageList();
+  renderRepSelectDropdown();
+  closeEditReparticaoModal();
+});
+$('closeEditRepBtn').addEventListener('click', closeEditReparticaoModal);
+$('cancelEditRepBtn').addEventListener('click', closeEditReparticaoModal);
+$('editRepOverlay').addEventListener('click', (e) => { if(e.target.id === 'editRepOverlay') closeEditReparticaoModal(); });
+
+$('openConnectionsBtn').addEventListener('click', () => {
+  $('sidebarOverlay').classList.remove('open');
+  $('newReparticaoForm').classList.add('hidden-view');
+  resetNewReparticaoForm();
+  renderReparticoesManageList();
+  showView('connections');
+});
+$('connectionsBackBtn').addEventListener('click', () => { showView('home'); });
 
 // ---------- Google Drive: autenticação (OAuth), conectar/desconectar e envio ----------
 let gisTokenClient = null;
@@ -1627,7 +1901,7 @@ function setDriveConnectedFlag(val){
 function updateDriveStatusUI(connected){
   $('driveStatusIcon').textContent = connected ? '🟢' : '🔴';
   $('driveStatusText').textContent = connected ? 'Conectado ao Google Drive' : 'Desconectado do Google Drive';
-  $('driveConnectBtn').textContent = connected ? 'Desconectar' : 'Conectar ao Google Drive';
+  $('driveConnectBtn').textContent = connected ? 'Desconectar' : 'Conectar';
   $('driveConnectBtn').className = connected ? 'sidebar-btn danger' : 'sidebar-btn';
 }
 
@@ -1657,9 +1931,9 @@ function getDriveAccessToken(clientId, opts){
 }
 
 $('driveConnectBtn').addEventListener('click', async () => {
-  const cfg = loadDriveConfig();
-  if(!cfg.clientId){
-    alert('Nenhum Client ID configurado. Abra "Configuração avançada do Drive" para definir um.');
+  const rep = getSelectedReparticao();
+  if(!rep){
+    alert('Selecione (ou cadastre) uma repartição primeiro, em "🔗 Gerenciar Repartições".');
     return;
   }
   const btn = $('driveConnectBtn');
@@ -1676,7 +1950,7 @@ $('driveConnectBtn').addEventListener('click', async () => {
   btn.disabled = true;
   $('driveStatusText').textContent = 'Conectando…';
   try {
-    await getDriveAccessToken(cfg.clientId);
+    await getDriveAccessToken(rep.clientId);
     setDriveConnectedFlag(true);
     updateDriveStatusUI(true);
   } catch(err){
@@ -1690,13 +1964,13 @@ $('driveConnectBtn').addEventListener('click', async () => {
 // tenta reconectar em silêncio (sem popup) quando a sessão do Google ainda estiver ativa
 async function trySilentDriveReconnect(){
   if(!isDriveConnectedFlag()){ updateDriveStatusUI(false); return; }
-  const cfg = loadDriveConfig();
-  if(!cfg.clientId || !(window.google && google.accounts && google.accounts.oauth2)){
+  const rep = getSelectedReparticao();
+  if(!rep || !(window.google && google.accounts && google.accounts.oauth2)){
     updateDriveStatusUI(false);
     return;
   }
   try {
-    await getDriveAccessToken(cfg.clientId, { silent: true });
+    await getDriveAccessToken(rep.clientId, { silent: true });
     updateDriveStatusUI(true);
   } catch(e){
     // não conseguiu renovar sozinho — usuário precisa tocar em "Conectar" de novo
@@ -1764,14 +2038,14 @@ async function handleCustodyShare(){
     statusEl.className = 'loc-status err';
     return;
   }
-  const cfg = loadDriveConfig();
+  const rep = getSelectedReparticao();
   const btn = $('shareRepBtn');
   btn.disabled = true;
   try {
-    if(cfg && cfg.clientId && cfg.folderId){
-      const result = await uploadFileToDrive(file, cfg.folderId, cfg.clientId, statusEl);
-      const folderName = await getDriveFolderName(cfg.folderId, cfg.clientId);
-      const sentence = buildCustodySentence(file.name, 'da repartição', folderName || cfg.folderId);
+    if(rep && rep.clientId && rep.folderId){
+      const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
+      const folderName = await getDriveFolderName(rep.folderId, rep.clientId);
+      const sentence = buildCustodySentence(file.name, `da ${rep.nome}`, folderName || rep.folderId);
       appendToTextarea(textareaEl, sentence);
       statusEl.textContent = '✓ ' + sentence;
       statusEl.className = 'loc-status ok';
@@ -1780,7 +2054,7 @@ async function handleCustodyShare(){
       statusEl.textContent = 'Compartilhado via menu do celular — confirme manualmente onde foi salvo.';
       statusEl.className = 'loc-status ok';
     } else {
-      statusEl.textContent = 'Configure o Google Drive (menu ☰) ou use o app de arquivos para compartilhar manualmente.';
+      statusEl.textContent = 'Selecione uma repartição conectada (menu ☰) ou use o app de arquivos para compartilhar manualmente.';
       statusEl.className = 'loc-status err';
     }
   } catch(err){
@@ -2055,6 +2329,56 @@ const SESSION_KEY = 'extracao_wa_sessao';
 let currentUser = null;
 let currentUserIndex = null;
 let editingIndex = null; // null = cadastro novo; número = editando perfil existente
+let regStage = 'info'; // 'info' | 'code' | 'pin' | 'edit'
+let pendingRegEmail = '';
+
+// ---------- verificação de e-mail (Google Apps Script) ----------
+const EMAIL_VERIFY_URL_KEY = 'extracao_wa_email_verify_url';
+const DEFAULT_EMAIL_VERIFY_URL = 'https://script.google.com/macros/s/AKfycbyFIamYib5OaR8RnMMpN5khItxeLOAV74N0S86k3YZkYzAZ6FUUfw_CpB3utNPFQFnG8Q/exec';
+
+function getEmailVerifyUrl(){ return localStorage.getItem(EMAIL_VERIFY_URL_KEY) || DEFAULT_EMAIL_VERIFY_URL; }
+function setEmailVerifyUrl(url){ localStorage.setItem(EMAIL_VERIFY_URL_KEY, url); }
+
+$('toggleEmailConfigBtn').addEventListener('click', () => {
+  const panel = $('emailConfigPanel');
+  panel.classList.toggle('hidden-view');
+  if(!panel.classList.contains('hidden-view')){
+    $('emailVerifyUrlInput').value = getEmailVerifyUrl();
+  }
+});
+$('saveEmailConfigBtn').addEventListener('click', () => {
+  const url = $('emailVerifyUrlInput').value.trim();
+  const statusEl = $('emailConfigStatus');
+  if(!url){
+    statusEl.textContent = 'Cole a URL do Apps Script.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  setEmailVerifyUrl(url);
+  statusEl.textContent = '✓ Configuração salva neste aparelho.';
+  statusEl.className = 'loc-status ok';
+});
+
+async function callVerifyEndpoint(action, email, code){
+  const url = getEmailVerifyUrl();
+  if(!url) throw new Error('Verificação por e-mail ainda não configurada neste aparelho (veja "⚙️ Configurar verificação de e-mail").');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, email, code })
+  });
+  let data;
+  try { data = await res.json(); }
+  catch(e){ throw new Error('Resposta inesperada do servidor de verificação.'); }
+  if(!data.ok) throw new Error(data.error || 'Falha na verificação.');
+  return data;
+}
+
+function validateEmailFormat(email){ return /^\S+@\S+\.\S+$/.test(email); }
+function validateTelefoneFormat(tel){
+  const digits = tel.replace(/\D/g, '');
+  return digits.length === 10 || digits.length === 11;
+}
 
 function loadServidores(){
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -2092,19 +2416,27 @@ function showRegisterPanel({ editMode }){
   clearLoginError();
   $('loginExisting').classList.add('hidden-view');
   $('loginRegister').classList.remove('hidden-view');
-  $('registerBtn').textContent = editMode ? 'Salvar alterações' : 'Cadastrar e entrar';
+  $('regVerifyStatus').textContent = '';
+  $('regCodeField').classList.add('hidden-view');
   $('backToLoginBtn').textContent = editMode ? 'Cancelar' : 'Voltar';
-  const pinLabel = document.querySelector('label[for="regPin"]');
   if(editMode){
+    regStage = 'edit';
+    $('regPinField').classList.remove('hidden-view');
+    $('registerBtn').textContent = 'Salvar alterações';
     $('regPin').placeholder = 'Deixe em branco para manter';
   } else {
+    regStage = 'info';
+    pendingRegEmail = '';
+    $('regPinField').classList.add('hidden-view');
+    $('registerBtn').textContent = 'Enviar código de verificação';
     $('regPin').placeholder = '••••';
   }
 }
 
 $('showRegisterBtn').addEventListener('click', () => {
   editingIndex = null;
-  $('regNome').value = ''; $('regCargo').value=''; $('regMatricula').value=''; $('regPin').value='';
+  $('regNome').value = ''; $('regCargo').value=''; $('regMatricula').value='';
+  $('regEmail').value = ''; $('regTelefone').value = ''; $('regCode').value = ''; $('regPin').value='';
   showRegisterPanel({ editMode:false });
 });
 $('backToLoginBtn').addEventListener('click', () => {
@@ -2119,25 +2451,117 @@ $('backToLoginBtn').addEventListener('click', () => {
   }
 });
 
+async function handleSendCode(){
+  const nome = $('regNome').value.trim();
+  const cargo = $('regCargo').value;
+  const matricula = $('regMatricula').value.trim();
+  const email = $('regEmail').value.trim();
+  const telefone = $('regTelefone').value.trim();
+
+  if(!nome || !cargo || !matricula){
+    showLoginError('Preencha nome, cargo e matrícula.');
+    return;
+  }
+  if(!validateEmailFormat(email)){
+    showLoginError('Informe um e-mail válido.');
+    return;
+  }
+  if(!validateTelefoneFormat(telefone)){
+    showLoginError('Informe um telefone (WhatsApp) válido, com DDD.');
+    return;
+  }
+
+  const btn = $('registerBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Enviando código…';
+  try {
+    await callVerifyEndpoint('send', email);
+    pendingRegEmail = email;
+    regStage = 'code';
+    $('regCodeField').classList.remove('hidden-view');
+    $('regCode').value = '';
+    btn.textContent = 'Verificar código';
+    $('regVerifyStatus').textContent = `Código enviado para ${email}. Confira sua caixa de entrada (e a pasta de spam).`;
+    $('regVerifyStatus').className = 'loc-status ok';
+  } catch(err){
+    showLoginError('Não foi possível enviar o código: ' + err.message);
+    btn.textContent = original;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleVerifyCode(){
+  const code = $('regCode').value.trim();
+  if(!/^\d{4,8}$/.test(code)){
+    showLoginError('Informe o código recebido por e-mail.');
+    return;
+  }
+  const btn = $('registerBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+  try {
+    await callVerifyEndpoint('verify', pendingRegEmail, code);
+    regStage = 'pin';
+    $('regCodeField').classList.add('hidden-view');
+    $('regPinField').classList.remove('hidden-view');
+    btn.textContent = 'Concluir cadastro';
+    $('regVerifyStatus').textContent = '✓ E-mail verificado com sucesso. Crie seu PIN para concluir o cadastro.';
+    $('regVerifyStatus').className = 'loc-status ok';
+  } catch(err){
+    showLoginError(err.message);
+    btn.textContent = original;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+$('resendCodeBtn').addEventListener('click', async () => {
+  if(!pendingRegEmail) return;
+  const statusEl = $('regVerifyStatus');
+  statusEl.textContent = 'Reenviando código…';
+  statusEl.className = 'loc-status';
+  try {
+    await callVerifyEndpoint('send', pendingRegEmail);
+    statusEl.textContent = `Novo código enviado para ${pendingRegEmail}.`;
+    statusEl.className = 'loc-status ok';
+  } catch(err){
+    statusEl.textContent = 'Não foi possível reenviar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+});
+
 $('registerBtn').addEventListener('click', () => {
   clearLoginError();
   const nome = $('regNome').value.trim();
   const cargo = $('regCargo').value;
   const matricula = $('regMatricula').value.trim();
+  const email = $('regEmail').value.trim();
+  const telefone = $('regTelefone').value.trim();
   const pin = $('regPin').value.trim();
-  const list = loadServidores();
 
   if(editingIndex !== null){
     if(!nome || !cargo || !matricula){
       showLoginError('Preencha nome, cargo e matrícula.');
       return;
     }
+    if(email && !validateEmailFormat(email)){
+      showLoginError('Informe um e-mail válido, ou deixe em branco.');
+      return;
+    }
+    if(telefone && !validateTelefoneFormat(telefone)){
+      showLoginError('Informe um telefone (WhatsApp) válido, com DDD, ou deixe em branco.');
+      return;
+    }
     if(pin && !/^\d{4}$/.test(pin)){
       showLoginError('O novo PIN deve ter 4 dígitos, ou deixe em branco para manter o atual.');
       return;
     }
+    const list = loadServidores();
     const existing = list[editingIndex];
-    const updated = { ...existing, nome, cargo, matricula, pin: pin || existing.pin };
+    const updated = { ...existing, nome, cargo, matricula, email, telefone, pin: pin || existing.pin };
     list[editingIndex] = updated;
     saveServidores(list);
     currentUser = updated;
@@ -2149,14 +2573,22 @@ $('registerBtn').addEventListener('click', () => {
     return;
   }
 
-  if(!nome || !cargo || !matricula || !/^\d{4}$/.test(pin)){
-    showLoginError('Preencha nome, cargo, matrícula e um PIN de 4 dígitos.');
-    return;
+  if(regStage === 'info'){
+    handleSendCode();
+  } else if(regStage === 'code'){
+    handleVerifyCode();
+  } else if(regStage === 'pin'){
+    if(!/^\d{4}$/.test(pin)){
+      showLoginError('Crie um PIN de 4 dígitos.');
+      return;
+    }
+    const list = loadServidores();
+    list.push({ nome, cargo, matricula, email: pendingRegEmail, telefone, pin, photo: null });
+    saveServidores(list);
+    loginAs(list.length - 1);
   }
-  list.push({ nome, cargo, matricula, pin, photo: null });
-  saveServidores(list);
-  loginAs(list.length - 1);
 });
+
 
 $('loginBtn').addEventListener('click', () => {
   clearLoginError();
@@ -2224,6 +2656,7 @@ function refreshUserUI(){
 function enterApp(){
   showView('home');
   refreshUserUI();
+  renderRepSelectDropdown();
   // autopreenche Responsável pela coleta se estiver vazio
   const respField = $('f_responsavel');
   if(!respField.value.trim()){
@@ -2247,7 +2680,7 @@ function doLogout(){
 $('sidebarLogoutBtn').addEventListener('click', doLogout);
 
 // ---------- barra lateral ----------
-$('openSidebarBtn').addEventListener('click', () => { refreshUserUI(); trySilentDriveReconnect(); $('sidebarOverlay').classList.add('open'); });
+$('openSidebarBtn').addEventListener('click', () => { refreshUserUI(); renderRepSelectDropdown(); trySilentDriveReconnect(); $('sidebarOverlay').classList.add('open'); });
 $('closeSidebarBtn').addEventListener('click', () => $('sidebarOverlay').classList.remove('open'));
 $('sidebarOverlay').addEventListener('click', (e) => { if(e.target.id === 'sidebarOverlay') $('sidebarOverlay').classList.remove('open'); });
 
@@ -2276,6 +2709,8 @@ $('editProfileBtn').addEventListener('click', () => {
   $('regNome').value = currentUser.nome;
   $('regCargo').value = currentUser.cargo || '';
   $('regMatricula').value = currentUser.matricula;
+  $('regEmail').value = currentUser.email || '';
+  $('regTelefone').value = currentUser.telefone || '';
   $('regPin').value = '';
   showView('login');
   showRegisterPanel({ editMode:true });
@@ -2648,13 +3083,13 @@ async function concludeTask(){
 
   saveReportToHistory();
 
-  const cfg = loadDriveConfig();
-  if(cfg && cfg.clientId && cfg.folderId){
+  const rep = getSelectedReparticao();
+  if(rep && rep.clientId && rep.folderId){
     try {
       btn.textContent = 'Gerando arquivo…';
       const file = await generateReportFile();
       btn.textContent = 'Enviando ao Drive…';
-      await uploadFileToDrive(file, cfg.folderId, cfg.clientId, { textContent: '' });
+      await uploadFileToDrive(file, rep.folderId, rep.clientId, { textContent: '' });
     } catch(err){
       alert('O relatório foi salvo no histórico, mas não foi possível enviar ao Google Drive: ' + err.message);
     }

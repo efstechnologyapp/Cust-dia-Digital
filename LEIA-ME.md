@@ -103,97 +103,195 @@ OCR (leitura de texto em imagem) que roda no navegador.
   resolução. Se não encontrar nada, tente um print mais legível ou
   preencha manualmente.
 
-## Envio automático para o Google Drive da repartição
+## Verificação de e-mail no cadastro de novo servidor
 
-O app pode enviar o arquivo anexado (o original extraído do celular, ou a
-cópia no PC) direto para uma pasta fixa do Google Drive institucional,
-sem precisar passar pelo menu de compartilhar do celular. Isso exige uma
-configuração única, feita por alguém com acesso ao Google Cloud da
-repartição (normalmente o TI).
+Ao cadastrar um novo servidor, o app agora exige e-mail e telefone
+(WhatsApp), e **só libera a criação do PIN depois de confirmar um
+código enviado por e-mail** — assim, ninguém consegue criar um perfil
+usando um e-mail que não é seu.
 
-### Passo a passo para configurar (feito uma vez, pelo TI)
+### Por que isso precisa de uma peça extra (Google Apps Script)
 
-1. Acesse [console.cloud.google.com](https://console.cloud.google.com/) com
-   a conta institucional (Google Workspace do TRE-PB, se houver).
-2. Crie um projeto novo (ou use um existente).
-3. No menu, vá em **"APIs e serviços" → "Biblioteca"**, procure por
-   **"Google Drive API"** e clique em **Ativar**.
-4. Vá em **"APIs e serviços" → "Tela de consentimento OAuth"**:
-   - Tipo de usuário: escolha **"Interno"** (só aparece essa opção se a
-     conta pertencer a um Google Workspace institucional — isso restringe
-     o uso a contas @tre-pb.jus.br, sem precisar de revisão do Google).
-   - Preencha nome do app, e-mail de suporte e salve.
-5. Vá em **"APIs e serviços" → "Credenciais" → "Criar credenciais" →
-   "ID do cliente OAuth"**:
-   - Tipo de aplicativo: **"Aplicativo da Web"**.
-   - Em **"Origens JavaScript autorizadas"**, adicione o endereço
-     `https://...` onde este app está hospedado (o mesmo do GitHub Pages
-     ou do servidor interno).
-   - Clique em **Criar**. Copie o **Client ID** gerado (algo como
-     `123456789-abc123.apps.googleusercontent.com`).
-6. No Google Drive, crie (ou escolha) a pasta institucional de destino,
-   abra ela e copie o **ID da pasta**: é o trecho final da URL, depois de
-   `/folders/` — por exemplo, em
-   `https://drive.google.com/drive/folders/1A2b3C4d5E6f`, o ID é
-   `1A2b3C4d5E6f`.
-7. Compartilhe essa pasta com as contas dos servidores que vão usar o
-   app (ou deixe acessível a todo o domínio institucional), com permissão
-   de "Editor", para que o envio de arquivos funcione.
+O app roda inteiramente no navegador, sem servidor próprio — e enviar
+e-mails de verdade exige, obrigatoriamente, algum tipo de servidor (por
+segurança da própria internet, nenhum site consegue disparar e-mails
+sozinho a partir do navegador de quem o visita). A solução mais simples
+e gratuita é usar o **Google Apps Script**: um pequeno programa que
+roda nos servidores do Google, vinculado a uma conta Google
+institucional, capaz de enviar e-mails de verdade em nome dessa conta.
 
-### Como usar, depois de configurado
+### Passo a passo para publicar (feito uma vez, pelo TI)
 
-1. No app, abra o menu ☰ → **"Configurar Google Drive"**.
-2. Cole o **Client ID**, o **ID da pasta da repartição** e/ou o **ID da
-   pasta do MP** obtidos acima → **Salvar configuração**. Pode preencher
-   só uma das pastas, se só precisar de um destino.
-3. Anexe o arquivo copiado na **Seção 6** (é esse arquivo que os botões
-   da Seção 9 enviam).
-4. Na **Seção 9 — Cadeia de Custódia**, use os botões ao lado dos
-   títulos:
-   - **"☁️ Enviar ao Drive da repartição"**, ao lado de "Custódia da
-     cópia digital";
-   - **"☁️ Enviar ao Drive do MP"**, ao lado de "Cópia adicional
-     entregue a".
-5. Ao concluir o envio, o app preenche automaticamente o campo de texto
-   correspondente com uma frase de registro, no formato:
-   *"Arquivo msgstore.db.crypt14, salvo no Google Drive do MP, na pasta
-   Evidências_2026, em 02/09/2026, às 14h30."*
+1. Acesse [script.google.com](https://script.google.com) com a conta
+   Google institucional (a mesma que deve aparecer como remetente dos
+   e-mails de verificação).
+2. **Novo projeto** → apague o conteúdo padrão → cole todo o conteúdo
+   do arquivo `Codigo_Apps_Script_Verificacao_Email.gs` (incluído neste
+   pacote).
+3. Salve o projeto (ex.: nome "Verificação Custódia Digital").
+4. **Implantar** → **Nova implantação** → ícone de engrenagem → tipo
+   **"App da Web"**.
+   - **Executar como:** Eu (sua conta)
+   - **Quem pode acessar:** Qualquer pessoa
+5. Clique em **Implantar**. O Google vai pedir para autorizar
+   permissões (enviar e-mail em seu nome) — aceite.
+6. Copie a URL gerada (termina em `/exec`).
+7. No app, na tela de login, toque em **"⚙️ Configurar verificação de
+   e-mail"**, cole essa URL e toque em **Salvar**.
+
+### Como funciona, depois de configurado
+
+1. Ao cadastrar um novo servidor, depois de preencher nome, cargo,
+   matrícula, e-mail e telefone, o botão vira **"Enviar código de
+   verificação"**.
+2. Um código de 6 dígitos chega no e-mail informado (confira também a
+   pasta de spam).
+3. Digite o código → **"Verificar código"**.
+4. Só depois disso aparece o campo para criar o PIN e concluir o
+   cadastro.
+5. Há um link **"Reenviar código"**, caso não chegue.
+
+### Limitações importantes, para saber de antemão
+
+- **Editar um perfil já existente não exige nova verificação** — o
+  e-mail/telefone podem ser alterados livremente na edição, sem pedir
+  código de novo. Isso foi uma escolha para não travar o uso diário;
+  se quiser exigir verificação também na edição, é possível ajustar
+  depois.
+- **O telefone (WhatsApp) não é verificado de verdade** — só o formato
+  é validado (DDD + número). Enviar um código por WhatsApp de verdade
+  exigiria aprovação da Meta como empresa (API oficial do WhatsApp
+  Business) ou um serviço pago de terceiros (Twilio, por exemplo) —
+  isso está fora do escopo deste app.
+- **Essa configuração (a URL do Apps Script) precisa ser feita em cada
+  aparelho** que for usado para *cadastrar novos servidores* — ela fica
+  salva no navegador local, como as demais configurações institucionais
+  deste app. Se um aparelho não tiver essa URL configurada, o cadastro
+  de novo servidor fica bloqueado com uma mensagem explicando isso (ele
+  não deixa criar conta sem verificação).
+- O limite de reenvio (60 segundos entre códigos) é uma proteção básica
+  contra abuso, mas não é um sistema de segurança robusto — é adequado
+  para uso interno institucional, não para um sistema público de larga
+  escala.
+
+## Novo fluxo: Home → Formulário → Concluir Tarefa
+
+O app agora tem uma tela inicial ("Home") separada do formulário:
+
+1. Ao entrar/logar, você cai na Home — só a logo, o título do app e o
+   botão **"▶️ Iniciar Formulário"**.
+2. Tocar nesse botão abre o formulário completo (Seções 1 a 10).
+3. Ao gerar o relatório (PDF), o botão que antes dizia "Voltar para
+   edição" agora é **"✅ Concluir Tarefa"**. Ao tocar nele:
+   - O relatório preenchido é salvo no **histórico** do servidor;
+   - O relatório é convertido em arquivo (PDF, ou HTML como alternativa
+     se a geração de PDF não estiver disponível) e enviado
+     automaticamente para a pasta do **Google Drive já conectada**
+     (é necessário estar conectado — veja a seção sobre o Drive mais
+     abaixo);
+   - O formulário é limpo e o app volta para a Home, pronto para uma
+     nova tarefa.
+4. Reabrir um relatório pelo **Histórico** mostra o botão
+   **"← Voltar ao histórico"** em vez de "Concluir Tarefa" — reabrir um
+   relatório já concluído não deve reenviá-lo ao Drive nem duplicá-lo
+   no histórico.
+
+## Múltiplas repartições — conexões com o Google Drive
+
+O app agora suporta **mais de uma repartição de destino**, cada uma com
+seu próprio Client ID (Google Cloud) e pasta compartilhada no Drive.
+
+### Cadastrando uma repartição
+
+1. Menu ☰ → **"🔗 Gerenciar Repartições"**.
+2. Toque no **"+"** ao lado de "Cadastrar nova repartição" para abrir o
+   formulário (ele fica escondido por padrão, para não poluir a tela).
+3. Preencha: **Nome da repartição** (ex.: "14ª Delegacia de Polícia"),
+   **E-mail do Cloud/Drive da repartição** (obrigatório — o e-mail da
+   conta Google associada àquele Cloud/Drive institucional), **Client
+   ID** e **ID da pasta compartilhada** — os dois últimos são obtidos
+   do Google Cloud Console e do Google Drive, como já explicado nas
+   seções anteriores deste documento.
+4. Toque em **"Salvar repartição"**. O formulário se fecha sozinho, e
+   ela passa a aparecer na lista (só pelo nome) e também no seletor da
+   barra lateral.
+5. Repita para quantas repartições forem necessárias. Cada uma pode ter
+   um Client ID diferente (ou o mesmo, se compartilharem o projeto do
+   Google Cloud) e uma pasta de destino diferente.
+6. Na lista, cada repartição mostra só o nome, com dois ícones ao lado:
+   ✏️ abre um painel para editar (nome, e-mail, Client ID e pasta), e
+   🗑️ exclui direto (com confirmação).
+
+### Escolhendo para onde enviar
+
+No menu ☰, o campo **"Selecione a repartição de destino:"** mostra só
+os nomes cadastrados (nunca o Client ID ou o ID da pasta). Ao trocar de
+repartição nesse seletor, a conexão anterior é encerrada automaticamente
+— é necessário tocar em **"Conectar"** de novo, agora para a nova
+repartição escolhida.
+
+### Como o envio usa isso
+
+Os botões **"☁️ Enviar ao Drive da repartição"** (Seção 9) e o envio
+automático do relatório ao concluir uma tarefa sempre usam a
+**repartição atualmente selecionada** na barra lateral — nem o Client
+ID nem o ID da pasta aparecem em nenhum lugar do formulário, só o nome
+escolhido.
+
+## Envio para o Google Drive: como conectar e usar
+
+1. Cadastre (ou use a já pré-cadastrada) uma repartição — veja
+   "Múltiplas repartições" acima.
+2. No menu ☰, escolha-a no seletor **"Selecione a repartição de
+   destino:"**.
+3. Toque em **"Conectar"** — na primeira vez, o Google vai pedir para
+   escolher a conta e autorizar o acesso.
+4. Pronto: o cartão muda para **"🟢 Conectado ao Google Drive"**, e o
+   botão vira **"Desconectar"**.
+5. Anexe o arquivo copiado na **Seção 6**, vá até a **Seção 9** e toque
+   em **"☁️ Enviar ao Drive da repartição"**, ao lado de "Custódia da
+   cópia digital".
+6. Ao concluir o envio, o app preenche automaticamente o campo de texto
+   com uma frase de registro, no formato:
+   *"Arquivo msgstore.db.crypt14, salvo no Google Drive da 14ª
+   Delegacia de Polícia, na pasta Evidências_2026, em 02/09/2026, às
+   14h30."*
    Isso já entra no relatório final gerado — não precisa digitar nada
    manualmente.
-6. No primeiro uso, o Google vai pedir para o servidor fazer login e
-   autorizar o acesso à pasta (usando a conta institucional). Nos usos
-   seguintes, isso costuma ficar mais rápido, mas o Google pode pedir
-   confirmação de novo periodicamente — é o comportamento normal do
-   OAuth do Google, não é um defeito do app.
-7. A pasta do MP precisa estar compartilhada (com permissão de edição)
-   com a conta Google que o servidor usar para fazer login — geralmente
-   isso é combinado previamente entre as duas instituições.
+
+### Sobre a conexão "permanente"
+
+O app tenta reconectar sozinho, em silêncio, toda vez que a barra
+lateral é aberta — aproveitando a sessão do Google já salva no
+navegador daquele aparelho, para a repartição atualmente selecionada.
+Na prática, isso significa que a maioria dos servidores só precisa
+conectar uma vez por aparelho (por repartição escolhida). Mas não é uma
+garantia 100% permanente: se o navegador "esquecer" a sessão (dados
+limpos, muito tempo sem uso, troca de conta), o cartão volta a mostrar
+"Desconectado" e a pessoa simplesmente toca em "Conectar" de novo — é
+rápido, mas pode acontecer de vez em quando. Isso é uma limitação do
+próprio sistema de login do Google para aplicativos sem servidor
+próprio, não um defeito do app. Trocar de repartição no seletor também
+encerra a conexão atual, exigindo reconectar para a nova escolhida.
 
 ### O que isso NÃO faz
 
-- Não faz upload automático "no fundo" sem o servidor perceber — sempre
-  exige login/autorização do Google na primeira vez de cada sessão.
 - Não dá ao app acesso a todo o Google Drive da conta — o escopo usado
   (`drive.file`) só permite acesso aos arquivos que o próprio app criar,
   não a outros arquivos/pastas da conta.
-- Não funcina sem internet (ao contrário do cálculo do hash, que é
+- Não funciona sem internet (ao contrário do cálculo do hash, que é
   local) — enviar para o Drive depende de conexão, já que é uma chamada
   para os servidores do Google.
-- Enquanto uma das pastas não estiver configurada, o respectivo botão
-  fica com o rótulo **"📤 Compartilhar (Drive não configurado)"**, que
-  tenta usar o menu de compartilhamento nativo do Android (inclui
-  "Salvar no Drive" manualmente, se o app do Drive estiver instalado) —
-  funciona sem nenhuma configuração prévia.
-- Os dois botões agem sobre o arquivo anexado na **Seção 6** (a cópia no
-  PC) — anexe-o antes de usar os botões da Seção 9.
+- Enquanto nenhuma repartição estiver conectada, o botão de envio
+  recorre ao menu de compartilhamento nativo do Android, permitindo
+  salvar manualmente no app do Drive.
 
 ### Cuidado institucional
 
 Enviar o arquivo original de extração (com conteúdo de conversas) para o
 Drive cria uma nova cópia da evidência fora do celular/PC já registrados
 no relatório. Trate essa cópia com o mesmo cuidado de cadeia de custódia
-descrito na Seção 9 do relatório — vale registrar ali que uma cópia
-adicional foi enviada ao Drive institucional, se for o caso.
+descrito na Seção 9 do relatório.
 
 ## Cálculo automático de hash a partir do arquivo anexado
 
