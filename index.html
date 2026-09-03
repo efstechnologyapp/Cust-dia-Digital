@@ -503,6 +503,37 @@
     line-height:1;
   }
   .reparticao-card-icons button:hover{ background:#F5F7FA; }
+
+  .rep-users-section-title{
+    font-size: 12px;
+    font-weight:700;
+    color: var(--muted);
+    margin: 14px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .rep-user-card{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+  }
+  .rep-user-card .rep-user-nome{ font-weight:700; color: var(--ink); }
+  .rep-user-card .rep-user-detail{ color: var(--muted); margin-top: 2px; }
+  .rep-user-card .rep-user-habilitado-em{ color: var(--ok-ink); margin-top: 2px; font-size:11.5px; }
+  .rep-user-card button{
+    margin-top: 8px;
+    border: 1px solid var(--navy);
+    color: var(--navy);
+    background:#fff;
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor:pointer;
+  }
+  .rep-users-empty{ font-size:12px; color: var(--muted); font-style:italic; margin-bottom:8px; }
   .reparticao-card-detail{
     font-family: var(--mono);
     font-size: 11px;
@@ -1014,6 +1045,10 @@
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
         <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
       </div>
+      <div class="field">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Repartição</label>
+        <select id="regReparticao"></select>
+      </div>
       <div class="field" id="regEmailField">
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">E-mail</label>
         <input type="email" id="regEmail" placeholder="Ex.: joao.santos@exemplo.com">
@@ -1162,6 +1197,19 @@
     <button class="btn-primary" id="saveReparticaoEditBtn" style="margin-bottom:8px;">Salvar alterações</button>
     <button class="btn-link" id="cancelEditRepBtn" style="width:100%;margin-bottom:8px;">Cancelar</button>
     <div class="loc-status" id="reparticaoEditFormStatus"></div>
+
+    <hr class="sidebar-divider">
+    <div class="field-label-row">
+      <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0;">Usuários da repartição</h4>
+      <button type="button" class="btn-inline-share" id="refreshRepUsersBtn" title="Atualizar lista">🔄</button>
+    </div>
+    <div class="loc-status" id="repUsersStatus"></div>
+
+    <div class="rep-users-section-title">🕒 Pendentes de habilitação</div>
+    <div id="repUsersPendentes"></div>
+
+    <div class="rep-users-section-title">✅ Habilitados</div>
+    <div id="repUsersHabilitados"></div>
   </div>
 </div>
 
@@ -1818,11 +1866,75 @@ function startEditReparticao(id){
   $('repEditFolderId').value = rep.folderId;
   $('reparticaoEditFormStatus').textContent = '';
   $('editRepOverlay').classList.add('open');
+  renderRepUsersLists(id);
 }
 function closeEditReparticaoModal(){
   editingReparticaoId = null;
   $('editRepOverlay').classList.remove('open');
 }
+
+// ---------- usuários cadastrados por repartição (central via Apps Script) ----------
+function repUserCardHtml(u, showEnableBtn){
+  return `
+    <div class="rep-user-card">
+      <div class="rep-user-nome">${esc(u.nome)} (${esc(u.email)})</div>
+      <div class="rep-user-detail">${esc(u.cargo)} — matrícula ${esc(u.matricula)}</div>
+      ${u.habilitadoEm ? `<div class="rep-user-habilitado-em">Habilitado em: ${esc(u.habilitadoEm)}</div>` : ''}
+      ${showEnableBtn ? `<button data-row="${u.rowIndex}">✓ Marcar como habilitado</button>` : ''}
+    </div>
+  `;
+}
+
+async function renderRepUsersLists(reparticaoId){
+  const statusEl = $('repUsersStatus');
+  const pendentesEl = $('repUsersPendentes');
+  const habilitadosEl = $('repUsersHabilitados');
+  statusEl.textContent = 'Carregando lista de usuários…';
+  statusEl.className = 'loc-status';
+  pendentesEl.innerHTML = '';
+  habilitadosEl.innerHTML = '';
+
+  try {
+    const data = await callAppsScript({ action: 'list_users', reparticaoId });
+    statusEl.textContent = '';
+
+    if(data.pendentes.length === 0){
+      pendentesEl.innerHTML = '<div class="rep-users-empty">Nenhum usuário pendente.</div>';
+    } else {
+      pendentesEl.innerHTML = data.pendentes.map(u => repUserCardHtml(u, true)).join('');
+      pendentesEl.querySelectorAll('button[data-row]').forEach(btn => {
+        btn.addEventListener('click', () => enableRepUser(btn.dataset.row, reparticaoId));
+      });
+    }
+
+    if(data.habilitados.length === 0){
+      habilitadosEl.innerHTML = '<div class="rep-users-empty">Nenhum usuário habilitado ainda.</div>';
+    } else {
+      habilitadosEl.innerHTML = data.habilitados.map(u => repUserCardHtml(u, false)).join('');
+    }
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
+async function enableRepUser(rowIndex, reparticaoId){
+  const statusEl = $('repUsersStatus');
+  statusEl.textContent = 'Habilitando…';
+  statusEl.className = 'loc-status';
+  try {
+    await callAppsScript({ action: 'enable_user', rowIndex });
+    renderRepUsersLists(reparticaoId);
+  } catch(err){
+    statusEl.textContent = 'Não foi possível habilitar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
+$('refreshRepUsersBtn').addEventListener('click', () => {
+  if(editingReparticaoId) renderRepUsersLists(editingReparticaoId);
+});
+
 function deleteReparticao(id){
   if(!confirm('Excluir esta repartição? Isso não afeta arquivos já enviados ao Drive.')) return;
   const list = loadReparticoes().filter(r => r.id !== id);
@@ -2334,6 +2446,7 @@ let currentUserIndex = null;
 let editingIndex = null; // null = cadastro novo; número = editando perfil existente
 let regStage = 'info'; // 'info' | 'code' | 'pin' | 'edit'
 let pendingRegEmail = '';
+let pendingRegReparticaoId = '';
 
 // ---------- verificação de e-mail (Google Apps Script) ----------
 const EMAIL_VERIFY_URL_KEY = 'extracao_wa_email_verify_url';
@@ -2362,19 +2475,23 @@ $('saveEmailConfigBtn').addEventListener('click', () => {
   statusEl.className = 'loc-status ok';
 });
 
-async function callVerifyEndpoint(action, email, code){
+async function callAppsScript(payload){
   const url = getEmailVerifyUrl();
-  if(!url) throw new Error('Verificação por e-mail ainda não configurada neste aparelho (veja "⚙️ Configurar verificação de e-mail").');
+  if(!url) throw new Error('Integração com o Google Apps Script ainda não configurada neste aparelho (veja "⚙️ Configurar verificação de e-mail").');
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, email, code })
+    body: JSON.stringify(payload)
   });
   let data;
   try { data = await res.json(); }
-  catch(e){ throw new Error('Resposta inesperada do servidor de verificação.'); }
-  if(!data.ok) throw new Error(data.error || 'Falha na verificação.');
+  catch(e){ throw new Error('Resposta inesperada do servidor.'); }
+  if(!data.ok) throw new Error(data.error || 'Falha na operação.');
   return data;
+}
+
+async function callVerifyEndpoint(action, email, code){
+  return callAppsScript({ action, email, code });
 }
 
 function validateEmailFormat(email){ return /^\S+@\S+\.\S+$/.test(email); }
@@ -2390,6 +2507,24 @@ function loadServidores(){
 function saveServidores(list){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
+
+// Usuários cadastrados antes desta atualização não tinham repartição
+// vinculada. Aqui, associamos automaticamente esses cadastros já
+// existentes (só localmente, neste aparelho) à repartição padrão, para
+// não quebrar nada. Isso roda só uma vez — assim que o campo já
+// estiver preenchido, não mexe mais.
+(function migrateServidoresReparticao(){
+  const list = loadServidores();
+  let changed = false;
+  list.forEach(s => {
+    if(!s.reparticaoId){
+      s.reparticaoId = 'rep-default';
+      changed = true;
+    }
+  });
+  if(changed) saveServidores(list);
+})();
+
 function populateLoginSelect(){
   const list = loadServidores();
   const sel = $('loginSelect');
@@ -2415,13 +2550,43 @@ function showLoginError(msg){
 }
 function clearLoginError(){ $('loginErrorBox').classList.remove('show'); }
 
-function showRegisterPanel({ editMode }){
+function populateRegReparticaoSelect(selectedId){
+  const list = loadReparticoes();
+  const sel = $('regReparticao');
+  sel.innerHTML = '';
+  if(list.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'Nenhuma repartição cadastrada';
+    opt.disabled = true; opt.selected = true;
+    sel.appendChild(opt);
+    return;
+  }
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = 'Selecione a repartição';
+  placeholder.disabled = true;
+  sel.appendChild(placeholder);
+  list.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = r.nome;
+    sel.appendChild(opt);
+  });
+  if(selectedId && list.some(r => r.id === selectedId)){
+    sel.value = selectedId;
+  } else {
+    placeholder.selected = true;
+  }
+}
+
+function showRegisterPanel({ editMode, reparticaoId }){
   clearLoginError();
   $('loginExisting').classList.add('hidden-view');
   $('loginRegister').classList.remove('hidden-view');
   $('regVerifyStatus').textContent = '';
   $('regCodeField').classList.add('hidden-view');
   $('backToLoginBtn').textContent = editMode ? 'Cancelar' : 'Voltar';
+  populateRegReparticaoSelect(reparticaoId);
   if(editMode){
     regStage = 'edit';
     $('regPinField').classList.remove('hidden-view');
@@ -2430,6 +2595,7 @@ function showRegisterPanel({ editMode }){
   } else {
     regStage = 'info';
     pendingRegEmail = '';
+    pendingRegReparticaoId = '';
     $('regPinField').classList.add('hidden-view');
     $('registerBtn').textContent = 'Enviar código de verificação';
     $('regPin').placeholder = '••••';
@@ -2458,11 +2624,16 @@ async function handleSendCode(){
   const nome = $('regNome').value.trim();
   const cargo = $('regCargo').value;
   const matricula = $('regMatricula').value.trim();
+  const reparticaoId = $('regReparticao').value;
   const email = $('regEmail').value.trim();
   const telefone = $('regTelefone').value.trim();
 
   if(!nome || !cargo || !matricula){
     showLoginError('Preencha nome, cargo e matrícula.');
+    return;
+  }
+  if(!reparticaoId){
+    showLoginError('Selecione a repartição a que você está vinculado.');
     return;
   }
   if(!validateEmailFormat(email)){
@@ -2473,6 +2644,8 @@ async function handleSendCode(){
     showLoginError('Informe um telefone (WhatsApp) válido, com DDD.');
     return;
   }
+
+  pendingRegReparticaoId = reparticaoId;
 
   const btn = $('registerBtn');
   const original = btn.textContent;
@@ -2541,6 +2714,7 @@ $('registerBtn').addEventListener('click', () => {
   const nome = $('regNome').value.trim();
   const cargo = $('regCargo').value;
   const matricula = $('regMatricula').value.trim();
+  const reparticaoIdField = $('regReparticao').value;
   const email = $('regEmail').value.trim();
   const telefone = $('regTelefone').value.trim();
   const pin = $('regPin').value.trim();
@@ -2564,7 +2738,7 @@ $('registerBtn').addEventListener('click', () => {
     }
     const list = loadServidores();
     const existing = list[editingIndex];
-    const updated = { ...existing, nome, cargo, matricula, email, telefone, pin: pin || existing.pin };
+    const updated = { ...existing, nome, cargo, matricula, email, telefone, reparticaoId: reparticaoIdField || existing.reparticaoId, pin: pin || existing.pin };
     list[editingIndex] = updated;
     saveServidores(list);
     currentUser = updated;
@@ -2586,8 +2760,20 @@ $('registerBtn').addEventListener('click', () => {
       return;
     }
     const list = loadServidores();
-    list.push({ nome, cargo, matricula, email: pendingRegEmail, telefone, pin, photo: null });
+    list.push({ nome, cargo, matricula, email: pendingRegEmail, telefone, reparticaoId: pendingRegReparticaoId, pin, photo: null });
     saveServidores(list);
+
+    // registra o cadastro na central da repartição (melhor esforço —
+    // não bloqueia o cadastro local se a rede falhar)
+    const rep = loadReparticoes().find(r => r.id === pendingRegReparticaoId);
+    callAppsScript({
+      action: 'register_user',
+      nome, cargo, matricula,
+      email: pendingRegEmail,
+      reparticaoId: pendingRegReparticaoId,
+      reparticaoNome: rep ? rep.nome : ''
+    }).catch(() => { /* cadastro local já concluído; a sincronização pode ser tentada depois */ });
+
     loginAs(list.length - 1);
   }
 });
@@ -2716,7 +2902,7 @@ $('editProfileBtn').addEventListener('click', () => {
   $('regTelefone').value = currentUser.telefone || '';
   $('regPin').value = '';
   showView('login');
-  showRegisterPanel({ editMode:true });
+  showRegisterPanel({ editMode:true, reparticaoId: currentUser.reparticaoId });
 });
 
 $('startFormBtn').addEventListener('click', () => { showView('form'); });

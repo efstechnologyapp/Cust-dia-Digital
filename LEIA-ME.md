@@ -174,6 +174,96 @@ institucional, capaz de enviar e-mails de verdade em nome dessa conta.
   para uso interno institucional, não para um sistema público de larga
   escala.
 
+## Repartição e habilitação de novos usuários
+
+Desde esta atualização, o cadastro de um novo servidor pede também a
+**repartição** a que ele está vinculado (escolhida numa lista suspensa,
+igual às cadastradas em "🔗 Gerenciar Repartições"). Essa informação —
+junto com nome, cargo, e-mail e matrícula — é enviada para uma **central
+compartilhada**, para que o administrador consiga ver, em qualquer
+aparelho, quem se cadastrou e habilitar o acesso de cada um.
+
+### Por que isso precisa de uma peça a mais (e por que já a temos)
+
+Este app não tem servidor/banco de dados próprio — cada celular guarda
+os dados de cadastro só localmente. Sem uma peça central, o cadastro de
+alguém em um celular nunca apareceria no celular de outra pessoa. A
+solução foi estender o **mesmo Google Apps Script** já usado para a
+verificação de e-mail, adicionando a ele uma pequena "central de
+cadastros": o script cria automaticamente uma Planilha do Google
+(chamada "Custodia Digital - Usuarios Cadastrados") na conta que o
+publicou, e passa a guardar ali a lista de servidores por repartição.
+
+### Se você já tinha publicado o Apps Script antes desta atualização
+
+**É necessário atualizar o script publicado**, porque o arquivo
+`Codigo_Apps_Script_Verificacao_Email.gs` ganhou código novo. O passo a
+passo (a URL final continua a mesma, não precisa mudar nada no app):
+
+1. Acesse [script.google.com](https://script.google.com) e abra o
+   projeto já existente.
+2. Apague todo o conteúdo do arquivo `Código.gs` e cole o conteúdo
+   atualizado (está no pacote).
+3. Salve.
+4. Toque em **"Implantar" → "Gerenciar implantações"**.
+5. Toque no ícone de lápis (editar) na implantação já existente.
+6. Em **"Versão"**, escolha **"Nova versão"**.
+7. Toque em **"Implantar"**.
+   **Importante:** use "Gerenciar implantações" e edite a implantação
+   já existente — não crie uma implantação nova do zero, ou a URL muda
+   e o app para de reconhecer a configuração salva.
+8. Na primeira vez que uma ação nova rodar, o Google pode pedir para
+   autorizar uma permissão adicional (acesso ao Google Sheets) — aceite.
+
+### Como fica o fluxo, na prática
+
+1. Um novo servidor se cadastra normalmente, agora escolhendo também a
+   repartição.
+2. Depois de confirmar o código por e-mail e criar o PIN, o cadastro
+   dele já funciona **localmente**, no aparelho dele — ele já consegue
+   preencher e gerar relatórios normalmente.
+3. Em paralelo, esse cadastro é enviado para a central (planilha),
+   marcado como **pendente de habilitação**.
+4. O administrador (você) abre **"🔗 Gerenciar Repartições"** → toca em
+   ✏️ na repartição correspondente → vê duas listas:
+   - **Pendentes de habilitação**: quem se cadastrou mas ainda não tem
+     acesso liberado ao Google Cloud/Drive da repartição.
+   - **Habilitados**: quem já tem acesso, com a data em que foi
+     habilitado.
+5. Habilitar alguém no app (botão "✓ Marcar como habilitado") é só um
+   **registro informativo** — isso não dá acesso de verdade sozinho. O
+   acesso de verdade continua exigindo os dois passos manuais de
+   sempre, feitos por fora do app:
+   - Compartilhar a pasta do Drive da repartição com o e-mail da
+     pessoa, com permissão de "Editor";
+   - Adicionar o e-mail dela como "usuário de teste" na tela de
+     consentimento OAuth do Google Cloud (necessário enquanto o app
+     estiver em modo de teste — veja mais abaixo).
+   Toque em "Marcar como habilitado" **depois** de já ter feito esses
+   dois passos no Google, para manter a lista do app refletindo a
+   realidade.
+6. O botão 🔄 atualiza a lista, útil se outra pessoa também estiver
+   gerenciando cadastros ao mesmo tempo.
+
+### Usuários já cadastrados antes desta atualização
+
+Servidores que já existiam antes dessa mudança são automaticamente
+vinculados à repartição **"Servidor EFS Technology"** (a primeira
+cadastrada), só localmente, para não quebrar o cadastro deles — isso
+acontece sozinho, sem nenhuma ação necessária. Eles **não** aparecem
+retroativamente nas listas de pendentes/habilitados da central, porque
+já tinham acesso funcionando antes dessa funcionalidade existir.
+
+### Sobre o modo "Teste" do Google Cloud
+
+Enquanto o projeto do Google Cloud estiver no modo "Teste" (que é onde
+recomendamos manter, veja a conversa anterior sobre isso), cada novo
+usuário precisa ser adicionado manualmente como "usuário de teste" na
+tela de consentimento OAuth — sem isso, o login dele é bloqueado pelo
+próprio Google com "Erro 403: access_denied", mesmo que a pasta do
+Drive já esteja compartilhada corretamente com ele. Esse modo permite
+até 100 usuários cadastrados dessa forma.
+
 ## Novo fluxo: Home → Formulário → Concluir Tarefa
 
 O app agora tem uma tela inicial ("Home") separada do formulário:
