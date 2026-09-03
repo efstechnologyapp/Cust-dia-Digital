@@ -1930,6 +1930,17 @@ function getDriveAccessToken(clientId, opts){
   });
 }
 
+// Usa uma conexão já estabelecida (pelo botão "Conectar" da barra lateral),
+// sem NUNCA disparar login sozinha. Se não houver conexão válida para essa
+// repartição, falha com uma mensagem clara pedindo para conectar primeiro —
+// login com o Google só deve acontecer a partir do botão "Conectar".
+function requireExistingDriveToken(clientId){
+  if(gisAccessToken && gisTokenClient && gisTokenClient.__clientId === clientId){
+    return gisAccessToken;
+  }
+  throw new Error('Conecte-se ao Google Drive primeiro (menu ☰ → selecione a repartição → "Conectar").');
+}
+
 $('driveConnectBtn').addEventListener('click', async () => {
   const rep = getSelectedReparticao();
   if(!rep){
@@ -1961,30 +1972,19 @@ $('driveConnectBtn').addEventListener('click', async () => {
   }
 });
 
-// tenta reconectar em silêncio (sem popup) quando a sessão do Google ainda estiver ativa
-async function trySilentDriveReconnect(){
-  if(!isDriveConnectedFlag()){ updateDriveStatusUI(false); return; }
-  const rep = getSelectedReparticao();
-  if(!rep || !(window.google && google.accounts && google.accounts.oauth2)){
-    updateDriveStatusUI(false);
-    return;
-  }
-  try {
-    await getDriveAccessToken(rep.clientId, { silent: true });
-    updateDriveStatusUI(true);
-  } catch(e){
-    // não conseguiu renovar sozinho — usuário precisa tocar em "Conectar" de novo
-    setDriveConnectedFlag(false);
-    updateDriveStatusUI(false);
-  }
+// Apenas reflete o último estado conhecido (salvo localmente), sem fazer
+// nenhuma chamada ao Google — evita qualquer risco de abrir login sozinho
+// ao simplesmente abrir o menu. O login só acontece quando o usuário toca
+// explicitamente em "Conectar".
+function reflectStoredDriveStatus(){
+  updateDriveStatusUI(isDriveConnectedFlag() && !!gisAccessToken);
 }
 
 async function uploadFileToDrive(file, folderId, clientId, statusEl){
-  statusEl.textContent = 'Autenticando com a conta institucional do Google…';
-  statusEl.className = 'loc-status';
-  const token = await getDriveAccessToken(clientId);
+  const token = requireExistingDriveToken(clientId);
 
   statusEl.textContent = 'Enviando arquivo para o Google Drive…';
+  statusEl.className = 'loc-status';
   const metadata = { name: file.name, parents: [folderId] };
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
@@ -1996,17 +1996,20 @@ async function uploadFileToDrive(file, folderId, clientId, statusEl){
     body: form
   });
   if(!res.ok){
+    if(res.status === 401){
+      setDriveConnectedFlag(false);
+      updateDriveStatusUI(false);
+      throw new Error('A conexão com o Google expirou. Conecte-se de novo (menu ☰ → "Conectar").');
+    }
     const errText = await res.text();
     throw new Error(`Falha no envio (HTTP ${res.status}): ${errText.slice(0, 200)}`);
   }
-  setDriveConnectedFlag(true);
-  updateDriveStatusUI(true);
   return res.json();
 }
 
 async function getDriveFolderName(folderId, clientId){
   try {
-    const token = await getDriveAccessToken(clientId);
+    const token = requireExistingDriveToken(clientId);
     const res = await fetch(`https://www.googleapis.com/drive/v3/files/${folderId}?fields=name`, {
       headers: { Authorization: 'Bearer ' + token }
     });
@@ -2680,7 +2683,7 @@ function doLogout(){
 $('sidebarLogoutBtn').addEventListener('click', doLogout);
 
 // ---------- barra lateral ----------
-$('openSidebarBtn').addEventListener('click', () => { refreshUserUI(); renderRepSelectDropdown(); trySilentDriveReconnect(); $('sidebarOverlay').classList.add('open'); });
+$('openSidebarBtn').addEventListener('click', () => { refreshUserUI(); renderRepSelectDropdown(); reflectStoredDriveStatus(); $('sidebarOverlay').classList.add('open'); });
 $('closeSidebarBtn').addEventListener('click', () => $('sidebarOverlay').classList.remove('open'));
 $('sidebarOverlay').addEventListener('click', (e) => { if(e.target.id === 'sidebarOverlay') $('sidebarOverlay').classList.remove('open'); });
 

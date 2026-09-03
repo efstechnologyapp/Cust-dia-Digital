@@ -261,18 +261,26 @@ escolhido.
 
 ### Sobre a conexão "permanente"
 
-O app tenta reconectar sozinho, em silêncio, toda vez que a barra
-lateral é aberta — aproveitando a sessão do Google já salva no
-navegador daquele aparelho, para a repartição atualmente selecionada.
-Na prática, isso significa que a maioria dos servidores só precisa
-conectar uma vez por aparelho (por repartição escolhida). Mas não é uma
-garantia 100% permanente: se o navegador "esquecer" a sessão (dados
-limpos, muito tempo sem uso, troca de conta), o cartão volta a mostrar
-"Desconectado" e a pessoa simplesmente toca em "Conectar" de novo — é
-rápido, mas pode acontecer de vez em quando. Isso é uma limitação do
-próprio sistema de login do Google para aplicativos sem servidor
-próprio, não um defeito do app. Trocar de repartição no seletor também
-encerra a conexão atual, exigindo reconectar para a nova escolhida.
+O login com o Google só é pedido quando o servidor toca explicitamente em
+**"Conectar"** na barra lateral — nunca automaticamente, nem ao abrir o
+menu ☰, nem ao usar os botões "Enviar ao Drive da repartição" ou
+"Concluir Tarefa". Esses dois botões **reaproveitam** a conexão feita
+pelo "Conectar"; se não houver nenhuma conexão ativa no momento, eles
+mostram uma mensagem clara pedindo para conectar primeiro pela barra
+lateral — e não tentam logar sozinhos.
+
+Na prática, isso significa que a sessão do Google dura enquanto o token
+de acesso estiver válido (geralmente por volta de uma hora, ou até a
+página ser recarregada/fechada) — depois disso, basta tocar em
+"Conectar" de novo. Trocar de repartição no seletor também encerra a
+conexão atual, exigindo reconectar para a nova escolhida. Isso é uma
+limitação do próprio sistema de login do Google para aplicativos sem
+servidor próprio (sem servidor, não é possível manter uma sessão
+"para sempre" sem pedir novo consentimento de vez em quando) — não é
+um defeito do app, e a alternativa (tentar renovar sozinho em segundo
+plano) foi testada e descartada, porque o Google às vezes exibe a
+tela de login mesmo em modo "silencioso", dando a impressão de que o
+app estava pedindo login por conta própria.
 
 ### O que isso NÃO faz
 
