@@ -1128,6 +1128,7 @@
     </div>
 
     <button class="sidebar-btn" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gerenciar Repartições</button>
+    <button class="sidebar-btn danger" id="deleteProfileBtn">🗑️ Excluir meu cadastro</button>
     <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Trocar usuário</button>
   </div>
 </div>
@@ -2931,6 +2932,16 @@ function doLogout(){
   populateLoginSelect();
 }
 $('sidebarLogoutBtn').addEventListener('click', doLogout);
+
+$('deleteProfileBtn').addEventListener('click', () => {
+  if(!currentUser) return;
+  const confirmMsg = `Excluir o cadastro de "${currentUser.nome}" deste aparelho?\n\nIsso remove o nome, PIN e demais dados salvos localmente — não pode ser desfeito. Se esse usuário já tiver um registro na planilha central da repartição (pendente ou habilitado), esse registro NÃO é apagado — só o cadastro local, neste aparelho.`;
+  if(!confirm(confirmMsg)) return;
+  const list = loadServidores();
+  list.splice(currentUserIndex, 1);
+  saveServidores(list);
+  doLogout();
+});
 
 // ---------- barra lateral ----------
 $('openSidebarBtn').addEventListener('click', () => { refreshUserUI(); renderRepSelectDropdown(); reflectStoredDriveStatus(); $('sidebarOverlay').classList.add('open'); });
