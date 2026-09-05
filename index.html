@@ -2141,6 +2141,12 @@ $('driveConnectBtn').addEventListener('click', async () => {
     await getDriveAccessToken(rep.clientId);
     setDriveConnectedFlag(true);
     updateDriveStatusUI(true);
+
+    // marca automaticamente o próprio cadastro como habilitado na central
+    // (melhor esforço — se falhar, não atrapalha a conexão já feita)
+    if(currentUser && currentUser.email){
+      callAppsScript({ action: 'auto_enable', email: currentUser.email, reparticaoId: rep.id }).catch(() => {});
+    }
   } catch(err){
     updateDriveStatusUI(false);
     alert('Não foi possível conectar: ' + err.message);

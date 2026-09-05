@@ -274,6 +274,25 @@ Google) — ele entra direto na lista de **Habilitados**, com a data de
 hoje, sem precisar passar pela etapa de "pendente". Isso é só para
 efeito de registro/visualização — não altera nenhum acesso de verdade.
 
+### Habilitação automática ao conectar
+
+Além do botão manual "✓ Marcar como habilitado", o app agora também
+tenta marcar automaticamente como habilitado quando o **próprio
+usuário** consegue conectar ao Google Drive pela primeira vez (botão
+"Conectar" na barra lateral). Isso poupa um passo do administrador na
+maioria dos casos.
+
+**Limitação a saber:** uma conexão bem-sucedida só confirma que o
+e-mail já foi adicionado como "usuário de teste" no Google Cloud — o
+primeiro dos dois passos manuais. Não confirma que a pasta do Drive já
+foi compartilhada com esse e-mail (o segundo passo), já que isso só é
+testado de verdade na hora de enviar um arquivo. Ou seja: é possível
+que alguém apareça como "✅ Habilitado" e ainda assim receba erro ao
+tentar enviar, se faltar o compartilhamento da pasta. Nesses casos, o
+botão manual continua disponível para corrigir/reverter, e o
+compartilhamento da pasta continua sendo um passo separado, sempre
+necessário.
+
 ## Novo fluxo: Home → Formulário → Concluir Tarefa
 
 O app agora tem uma tela inicial ("Home") separada do formulário:

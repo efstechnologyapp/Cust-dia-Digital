@@ -133,6 +133,29 @@ function doPost(e) {
       return respond({ ok: true });
     }
 
+    // marca automaticamente como habilitado quando o próprio usuário
+    // conecta com sucesso ao Google Drive (chamado pelo app, não exige
+    // e-mail no formato do bloco de validação geral, por isso trata aqui
+    // separadamente e sempre responde ok, mesmo se não encontrar nada)
+    if (action === 'auto_enable') {
+      var email = (data.email || '').trim().toLowerCase();
+      var reparticaoId = String(data.reparticaoId || '');
+      if (!email || !reparticaoId) {
+        return respond({ ok: true });
+      }
+      var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        if (String(r[4]) === reparticaoId && String(r[1]).toLowerCase() === email && !r[6]) {
+          sheet.getRange(i + 1, 7).setValue(true);
+          sheet.getRange(i + 1, 8).setValue(new Date());
+          break;
+        }
+      }
+      return respond({ ok: true });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
