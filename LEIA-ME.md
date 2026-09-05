@@ -177,34 +177,86 @@ institucional, capaz de enviar e-mails de verdade em nome dessa conta.
 
 ## Uma repartição nova só existe em um lugar por vez: pendente OU cadastrada
 
-Corrigindo uma inconsistência anterior (uma repartição podia aparecer
-nas duas listas ao mesmo tempo): agora, toda repartição nova nasce
-**só** como "pendente" — não aparece em "Repartições cadastradas", nem
-pode ser escolhida por outros usuários se cadastrando depois. Ela só
-existe (temporariamente) no seletor da barra lateral de quem acabou de
-criá-la, marcada com "(pendente)" ao lado do nome.
+Toda repartição nova nasce **só** como "pendente" — não aparece em
+"Repartições cadastradas", nem no seletor de repartição da barra
+lateral (esse seletor mostra só as já confirmadas).
 
-**A promoção para "cadastrada" acontece automaticamente**, assim que
-alguém toca em "Conectar" usando essa repartição e o login no Google
-funciona de verdade. Nesse momento:
-- Ela passa a aparecer em "Repartições cadastradas", disponível para
-  todo mundo nesse aparelho escolher dali pra frente;
+**A confirmação acontece direto no card da repartição pendente**, na
+tela "Conexões — Repartições": cada card em "Repartições pendentes de
+cadastro" tem um botão **"🔌 Conectar e confirmar"**. Ao tocar nele,
+o app tenta o login no Google usando o Client ID daquela repartição
+específica. Se o login funcionar de verdade:
+- A repartição passa a aparecer em "Repartições cadastradas" e no
+  seletor da barra lateral, disponível para todo mundo nesse aparelho
+  escolher dali pra frente;
 - Ela some da lista central de "Repartições pendentes de cadastro"
-  automaticamente — não precisa mais remover manualmente.
+  automaticamente;
+- Ela já fica selecionada/conectada no app, pronta pra uso imediato.
 
 Ou seja: uma conexão bem-sucedida é a prova de que a configuração no
 Google Cloud (Client ID) e a pasta do Drive estão de verdade
-funcionando — só aí a repartição "sai da experiência" e vira uma opção
-confiável para todos.
+funcionando — só aí a repartição vira uma opção confiável para todos.
 
-**Nota:** essa promoção acontece **localmente, no aparelho de quem
-conectou** — se a mesma repartição foi criada achando estar pendente
-em outro aparelho (por exemplo, o aparelho de quem se cadastrou
-primeiro), ela só passa a aparecer como "cadastrada" nesse OUTRO
-aparelho também quando alguém, nele, também conectar com sucesso (ou o
-administrador cadastrar ela manualmente ali, copiando os mesmos dados,
-depois de ver a confirmação na lista de pendentes/cadastradas de outro
-aparelho).
+**Se uma repartição antiga (cadastrada antes desse controle de status
+existir) aparecer em "Repartições cadastradas" sem nunca ter sido
+testada de verdade**, use o ícone **↩️** no card dela para marcá-la
+como pendente novamente — assim ela volta a exigir confirmação real
+antes de contar como cadastrada.
+
+**Nota:** essa confirmação acontece **localmente, no aparelho de quem
+testou a conexão** — se a mesma repartição foi criada em outro
+aparelho, ela só passa a aparecer como "cadastrada" nesse OUTRO
+aparelho também quando alguém, nele, também tocar em "🔌 Conectar e
+confirmar" com sucesso (o card de pendente continua visível, vindo da
+central, até que isso aconteça em cada aparelho que precisar usá-la).
+
+## Atualização grande: relatório em PDF, tela de Conexões, permissões e sidebar
+
+### Relatório em PDF
+- Cabeçalho agora mostra a logo + "Custódia Digital" centralizados,
+  com o título completo do relatório logo abaixo, também centralizado.
+- Subtítulo removido.
+- Rodapé em todas as páginas: "EFS Technology ©" à esquerda, "Página X
+  de Y" à direita.
+- Ajustadas as regras de quebra de página (linhas de tabela e
+  parágrafos não são mais cortados no meio ao virar de página).
+
+**Importante:** essas mudanças de PDF não puderam ser testadas
+visualmente por mim (o ambiente onde eu testo não tem acesso à
+internet para carregar a biblioteca que gera o PDF). O código segue o
+padrão documentado da biblioteca, mas **teste a geração de um PDF de
+verdade** depois de publicar essa versão, e me avise se o rodapé ou a
+quebra de página não saírem como esperado.
+
+### Tela de Conexões reformulada
+Título agora é **"Conexões do Sistema"**, com duas seções bem
+separadas: **"Conexões de E-mail"** (a configuração de verificação de
+e-mail) e **"Conexões de Repartições"** (tudo que já tínhamos:
+cadastro, pendentes, cadastradas).
+
+### Gerenciamento de conexões restrito
+O botão **"🔗 Gerenciar Repartições"** na barra lateral, e a página que
+ele abre, agora só aparecem para dois logins: `fillipe.firmo@gmail.com`
+e `efstechnology.app@gmail.com`. Para todos os demais usuários, esse
+botão fica oculto — eles continuam podendo normalmente selecionar a
+repartição e conectar pela barra lateral, só não acessam a
+administração completa (cadastrar/editar/ver pendentes).
+
+### Status de conexão no cabeçalho da Home
+Quando conectado a alguma repartição, aparece um texto pequeno logo
+abaixo do nome de quem está preenchendo: "Conectado à repartição
+[nome] ●" (bolinha verde). Some automaticamente ao desconectar.
+
+### Sidebar reorganizada
+- **"Histórico de relatórios"** só aparece quando há conexão ativa com
+  uma repartição — e, quando aparece, mostra **só** os relatórios
+  enviados àquela repartição específica (trocar de repartição conectada
+  também troca o que aparece no histórico).
+- **"Editar perfil"** renomeado para **"Editar cadastro"**.
+- **"Excluir meu cadastro"** saiu da barra lateral e agora é o último
+  botão dentro da própria tela de "Editar cadastro".
+- **"Trocar usuário"** renomeado para **"Sair"** (mesma função de
+  sempre).
 
 ## Repartição selecionada acompanha automaticamente o login
 

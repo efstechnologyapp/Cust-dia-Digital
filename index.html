@@ -380,14 +380,25 @@
   .report-paper h1{
     text-align:center;
     font-size: 21px;
-    margin: 0 0 4px;
-  }
-  .report-paper .subtitle{
-    text-align:center;
-    font-style: italic;
-    font-size: 14px;
     margin: 0 0 26px;
-    color: #3c4652;
+  }
+  .report-header-brand{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .report-header-logo{ width: 34px; height: 34px; border-radius: 8px; }
+  .report-header-name{
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--navy-dark);
+  }
+  .rtable tr, .report-paper p, .sig-block{
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .report-paper h2{
     font-size: 15.5px;
@@ -762,6 +773,20 @@
     font-size: 13.5px;
   }
   .session-bar .who{ color: var(--ink); }
+  .session-conn-status{
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 2px;
+    display:flex;
+    align-items:center;
+    gap: 5px;
+  }
+  .conn-dot{
+    display:inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #2E9E5B;
+  }
   .session-bar .who b{ color: var(--navy-dark); }
   .session-bar .who .mat{ color: var(--muted); font-size:12px; display:block; }
   .session-bar button{
@@ -1158,6 +1183,7 @@
 
         <div class="loc-status" id="regVerifyStatus"></div>
         <button class="btn-primary" id="registerBtn">Enviar código de verificação</button>
+        <button class="sidebar-btn danger hidden-view" id="deleteProfileBtn" style="margin-top:10px;">🗑️ Excluir meu cadastro</button>
       </div>
       <button class="btn-link" id="backToLoginBtn">Voltar</button>
     </div>
@@ -1169,7 +1195,10 @@
 <div class="session-bar hidden-view" id="sessionBar">
   <div style="display:flex;align-items:center;">
     <button class="hamburger-btn" id="openSidebarBtn" aria-label="Abrir menu"><span></span></button>
-    <div class="who">Preenchendo como <b id="sessionNome">—</b><span class="cargo-tag" id="sessionCargo"></span><span class="mat" id="sessionMatricula"></span></div>
+    <div>
+      <div class="who">Preenchendo como <b id="sessionNome">—</b><span class="cargo-tag" id="sessionCargo"></span><span class="mat" id="sessionMatricula"></span></div>
+      <div class="session-conn-status hidden-view" id="sessionConnStatus">Conectado à repartição <b id="sessionConnRepNome"></b> <span class="conn-dot"></span></div>
+    </div>
   </div>
 </div>
 
@@ -1188,8 +1217,8 @@
       <div class="mat-line" id="sidebarMatricula"></div>
     </div>
     <hr class="sidebar-divider">
-    <button class="sidebar-btn" id="editProfileBtn">✏️ Editar perfil</button>
-    <button class="sidebar-btn" id="openHistoryBtn">🕘 Histórico de relatórios</button>
+    <button class="sidebar-btn" id="editProfileBtn">✏️ Editar cadastro</button>
+    <button class="sidebar-btn hidden-view" id="openHistoryBtn">🕘 Histórico de relatórios</button>
 
     <div class="field" style="margin-top:12px;">
       <label style="font-size:12.5px;">Selecione a repartição de destino:</label>
@@ -1204,9 +1233,8 @@
       <button class="sidebar-btn" id="driveConnectBtn" style="margin-top:8px;margin-bottom:0;">Conectar</button>
     </div>
 
-    <button class="sidebar-btn" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gerenciar Repartições</button>
-    <button class="sidebar-btn danger" id="deleteProfileBtn">🗑️ Excluir meu cadastro</button>
-    <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Trocar usuário</button>
+    <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gerenciar Repartições</button>
+    <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Sair</button>
   </div>
 </div>
 
@@ -1216,59 +1244,65 @@
     <button id="connectionsBackBtn">← Voltar</button>
   </div>
   <div class="history-wrap">
-    <h2 class="history-title">Conexões — Repartições</h2>
-    <p class="history-sub">Cada repartição tem seu próprio Client ID (Google Cloud) e pasta de destino no Drive.</p>
+    <h2 class="history-title">Conexões do Sistema</h2>
 
-    <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;color:var(--muted);padding:0;">⚙️ Configurar verificação de e-mail</button>
-    <div class="hidden-view" id="emailConfigPanel" style="margin-top:10px;">
-      <div class="field">
-        <label style="font-size:12px;">URL do Google Apps Script (verificação de e-mail)</label>
-        <input type="text" id="emailVerifyUrlInput" placeholder="https://script.google.com/macros/s/XXXX/exec">
+    <section class="card" style="margin-bottom:18px;">
+      <h2 style="margin-top:0;">Conexões de E-mail</h2>
+      <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;color:var(--muted);padding:0;">⚙️ Configurar verificação de e-mail</button>
+      <div class="hidden-view" id="emailConfigPanel" style="margin-top:10px;">
+        <div class="field">
+          <label style="font-size:12px;">URL do Google Apps Script (verificação de e-mail)</label>
+          <input type="text" id="emailVerifyUrlInput" placeholder="https://script.google.com/macros/s/XXXX/exec">
+        </div>
+        <button class="btn-primary" id="saveEmailConfigBtn" style="margin-bottom:6px;">Salvar</button>
+        <div class="loc-status" id="emailConfigStatus"></div>
+        <p style="font-size:11px;color:var(--muted);line-height:1.5;">Veja o LEIA-ME para o passo a passo de publicar o script no Google Apps Script e obter essa URL. Configuração institucional, salva neste aparelho.</p>
       </div>
-      <button class="btn-primary" id="saveEmailConfigBtn" style="margin-bottom:6px;">Salvar</button>
-      <div class="loc-status" id="emailConfigStatus"></div>
-      <p style="font-size:11px;color:var(--muted);line-height:1.5;">Veja o LEIA-ME para o passo a passo de publicar o script no Google Apps Script e obter essa URL. Configuração institucional, salva neste aparelho.</p>
-    </div>
+    </section>
 
-    <hr class="sidebar-divider">
-    <div class="field-label-row" style="margin-top:4px;">
-      <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Cadastrar nova repartição</h3>
-      <button type="button" class="btn-inline-share" id="toggleNewRepBtn" aria-label="Adicionar repartição" title="Adicionar repartição">+</button>
-    </div>
+    <section class="card">
+      <h2 style="margin-top:0;">Conexões de Repartições</h2>
+      <p class="history-sub">Cada repartição tem seu próprio Client ID (Google Cloud) e pasta de destino no Drive.</p>
 
-    <div class="hidden-view" id="newReparticaoForm" style="margin-top:12px;">
-      <div class="field">
-        <label>Nome da repartição</label>
-        <input type="text" id="repNome" placeholder="Ex.: 14ª Delegacia de Polícia">
+      <div class="field-label-row" style="margin-top:4px;">
+        <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Cadastrar nova repartição</h3>
+        <button type="button" class="btn-inline-share" id="toggleNewRepBtn" aria-label="Adicionar repartição" title="Adicionar repartição">+</button>
       </div>
-      <div class="field">
-        <label>E-mail do Cloud/Drive da repartição</label>
-        <input type="email" id="repEmail" placeholder="Ex.: repartição@gmail.com">
-      </div>
-      <div class="field">
-        <label>Client ID (OAuth)</label>
-        <input type="text" id="repClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
-      </div>
-      <div class="field">
-        <label>ID da pasta compartilhada no Drive</label>
-        <input type="text" id="repFolderId" placeholder="Ex.: 1A2b3C4d5E...">
-      </div>
-      <button class="btn-primary" id="saveReparticaoBtn" style="margin-bottom:8px;">Salvar repartição</button>
-      <div class="loc-status" id="reparticaoFormStatus"></div>
-    </div>
 
-    <hr class="sidebar-divider">
-    <div class="field-label-row">
-      <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Repartições pendentes de cadastro</h3>
-      <button type="button" class="btn-inline-share" id="refreshReparticoesPendentesBtn" title="Atualizar lista">🔄</button>
-    </div>
-    <p class="history-sub" style="margin-bottom:8px;">Vem da central — aparecem aqui repartições recém-cadastradas por qualquer aparelho, aguardando você configurar o acesso real no Google Cloud/Drive.</p>
-    <div class="loc-status" id="reparticoesPendentesStatus"></div>
-    <div id="reparticoesPendentesList"></div>
+      <div class="hidden-view" id="newReparticaoForm" style="margin-top:12px;">
+        <div class="field">
+          <label>Nome da repartição</label>
+          <input type="text" id="repNome" placeholder="Ex.: 14ª Delegacia de Polícia">
+        </div>
+        <div class="field">
+          <label>E-mail do Cloud/Drive da repartição</label>
+          <input type="email" id="repEmail" placeholder="Ex.: repartição@gmail.com">
+        </div>
+        <div class="field">
+          <label>Client ID (OAuth)</label>
+          <input type="text" id="repClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
+        </div>
+        <div class="field">
+          <label>ID da pasta compartilhada no Drive</label>
+          <input type="text" id="repFolderId" placeholder="Ex.: 1A2b3C4d5E...">
+        </div>
+        <button class="btn-primary" id="saveReparticaoBtn" style="margin-bottom:8px;">Salvar repartição</button>
+        <div class="loc-status" id="reparticaoFormStatus"></div>
+      </div>
 
-    <hr class="sidebar-divider">
-    <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:4px 0 12px;">Repartições cadastradas</h3>
-    <div id="reparticoesList"></div>
+      <hr class="sidebar-divider">
+      <div class="field-label-row">
+        <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Repartições pendentes de cadastro</h3>
+        <button type="button" class="btn-inline-share" id="refreshReparticoesPendentesBtn" title="Atualizar lista">🔄</button>
+      </div>
+      <p class="history-sub" style="margin-bottom:8px;">Vem da central — aparecem aqui repartições recém-cadastradas por qualquer aparelho, aguardando confirmação de conexão.</p>
+      <div class="loc-status" id="reparticoesPendentesStatus"></div>
+      <div id="reparticoesPendentesList"></div>
+
+      <hr class="sidebar-divider">
+      <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:4px 0 12px;">Repartições cadastradas</h3>
+      <div id="reparticoesList"></div>
+    </section>
   </div>
 </div>
 
@@ -1895,11 +1929,10 @@ function getConfirmedReparticoes(){
 }
 
 function renderRepSelectDropdown(){
-  // mostra todas as repartições (confirmadas + pendentes) — qualquer
-  // usuário logado pode selecionar e tentar conectar uma pendente,
-  // já que geralmente é o administrador testando a configuração, não
-  // necessariamente alguém cadastrado especificamente naquela repartição
-  const list = loadReparticoes();
+  // seletor da sidebar mostra só repartições já confirmadas — a conexão
+  // inicial de uma pendente agora acontece direto no card dela, na
+  // página de Conexões (veja renderReparticoesPendentesList)
+  const list = getConfirmedReparticoes();
 
   const sel = $('repSelect');
   const currentId = getSelectedReparticaoId();
@@ -1914,7 +1947,7 @@ function renderRepSelectDropdown(){
   list.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r.id;
-    opt.textContent = r.status === 'pendente' ? `${r.nome} (pendente)` : r.nome;
+    opt.textContent = r.nome;
     if(r.id === currentId) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -2196,14 +2229,68 @@ async function renderReparticoesPendentesList(){
             <div class="rep-user-detail">${esc(p.usuarioCargo)} — matrícula ${esc(p.usuarioMatricula)}</div>
           </div>
         ` : ''}
+        <button type="button" class="btn-primary" data-connect="${p.rowIndex}" style="margin-top:10px;">🔌 Conectar e confirmar</button>
+        <div class="loc-status" id="pendConnStatus-${p.rowIndex}"></div>
       </div>
     `).join('');
     listEl.querySelectorAll('button[data-remove]').forEach(btn => {
       btn.addEventListener('click', () => removeReparticaoPendente(btn.dataset.remove));
     });
+    listEl.querySelectorAll('button[data-connect]').forEach(btn => {
+      const p = data.pendentes.find(x => String(x.rowIndex) === btn.dataset.connect);
+      btn.addEventListener('click', () => conectarReparticaoPendente(p, btn));
+    });
   } catch(err){
     statusEl.textContent = 'Não foi possível carregar: ' + err.message;
     statusEl.className = 'loc-status err';
+  }
+}
+
+async function conectarReparticaoPendente(p, btnEl){
+  const statusEl = $('pendConnStatus-' + p.rowIndex);
+  btnEl.disabled = true;
+  const original = btnEl.textContent;
+  btnEl.textContent = 'Conectando…';
+  statusEl.textContent = '';
+  statusEl.className = 'loc-status';
+  try {
+    await getDriveAccessToken(p.clientId);
+
+    // localiza (ou cria) a entrada local correspondente, já como confirmada
+    const list = loadReparticoes();
+    let idx = list.findIndex(r => r.centralRowIndex === p.rowIndex);
+    if(idx < 0) idx = list.findIndex(r => r.clientId === p.clientId && r.folderId === p.folderId);
+    let localRep;
+    if(idx >= 0){
+      list[idx].status = 'confirmada';
+      list[idx].nome = p.nome; list[idx].email = p.email;
+      list[idx].clientId = p.clientId; list[idx].folderId = p.folderId;
+      localRep = list[idx];
+    } else {
+      localRep = { id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, status: 'confirmada', centralRowIndex: null };
+      list.push(localRep);
+    }
+    saveReparticoesList(list);
+
+    // essa repartição passa a ser a selecionada/conectada no app
+    setSelectedReparticaoId(localRep.id);
+    setDriveConnectedFlag(true);
+    updateDriveStatusUI(true);
+    renderRepSelectDropdown();
+    renderReparticoesManageList();
+
+    if(p.rowIndex){
+      try { await callAppsScript({ action: 'remove_reparticao_pendente', rowIndex: p.rowIndex }); }
+      catch(e){ /* já está confirmada localmente mesmo que a remoção central falhe */ }
+    }
+    statusEl.textContent = '✓ Conectado! Movendo para "Repartições cadastradas"…';
+    statusEl.className = 'loc-status ok';
+    setTimeout(() => { renderReparticoesPendentesList(); }, 1200);
+  } catch(err){
+    statusEl.textContent = 'Não foi possível conectar: ' + err.message;
+    statusEl.className = 'loc-status err';
+    btnEl.textContent = original;
+    btnEl.disabled = false;
   }
 }
 
@@ -2220,6 +2307,7 @@ async function removeReparticaoPendente(rowIndex){
 $('refreshReparticoesPendentesBtn').addEventListener('click', renderReparticoesPendentesList);
 
 $('openConnectionsBtn').addEventListener('click', () => {
+  if(!isConnectionsAdmin()) return; // proteção defensiva — o botão já fica oculto para os demais
   $('sidebarOverlay').classList.remove('open');
   $('newReparticaoForm').classList.add('hidden-view');
   resetNewReparticaoForm();
@@ -2244,6 +2332,20 @@ function updateDriveStatusUI(connected){
   $('driveConnectBtn').textContent = connected ? 'Desconectar' : 'Conectar';
   $('driveConnectBtn').className = connected ? 'sidebar-btn danger' : 'sidebar-btn';
   updateHomeStartButtonState(connected);
+
+  // "Histórico de relatórios" só aparece quando há conexão ativa com
+  // uma repartição — o histórico mostrado é sempre relativo a ela
+  $('openHistoryBtn').classList.toggle('hidden-view', !connected);
+
+  // status pequeno no cabeçalho da home ("Conectado à repartição X ●")
+  const connStatusEl = $('sessionConnStatus');
+  if(connected){
+    const rep = getSelectedReparticao();
+    $('sessionConnRepNome').textContent = rep ? rep.nome : '';
+    connStatusEl.classList.remove('hidden-view');
+  } else {
+    connStatusEl.classList.add('hidden-view');
+  }
 }
 
 function updateHomeStartButtonState(connected){
@@ -2881,6 +2983,7 @@ function showRegisterPanel({ editMode, reparticaoId }){
     $('regPinField').classList.remove('hidden-view');
     $('registerBtn').textContent = 'Salvar alterações';
     $('regPin').placeholder = 'Deixe em branco para manter';
+    $('deleteProfileBtn').classList.remove('hidden-view');
   } else {
     regStage = 'info';
     pendingRegEmail = '';
@@ -2890,6 +2993,7 @@ function showRegisterPanel({ editMode, reparticaoId }){
     $('regPinField').classList.add('hidden-view');
     $('registerBtn').textContent = 'Enviar código de verificação';
     $('regPin').placeholder = '••••';
+    $('deleteProfileBtn').classList.add('hidden-view');
   }
 }
 
@@ -3313,6 +3417,12 @@ function initials(nome){
   return parts.length > 1 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : parts[0][0].toUpperCase();
 }
 
+function isConnectionsAdmin(){
+  if(!currentUser || !currentUser.email) return false;
+  const allowlist = ['fillipe.firmo@gmail.com', 'efstechnology.app@gmail.com'];
+  return allowlist.includes(currentUser.email.trim().toLowerCase());
+}
+
 function refreshUserUI(){
   if(!currentUser) return;
   $('sessionNome').textContent = currentUser.nome;
@@ -3322,6 +3432,9 @@ function refreshUserUI(){
   $('sidebarNome').textContent = currentUser.nome;
   $('sidebarCargo').textContent = currentUser.cargo || '';
   $('sidebarMatricula').textContent = 'Matrícula ' + currentUser.matricula;
+
+  // gerenciamento de conexões: visível só para os dois logins administradores
+  $('openConnectionsBtn').classList.toggle('hidden-view', !isConnectionsAdmin());
 
   const avatarCircle = $('avatarCircle');
   const avatarInitial = $('avatarInitial');
@@ -3624,8 +3737,11 @@ function buildReport(){
   }
 
   const html = `
+    <div class="report-header-brand">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" class="report-header-logo" alt="">
+      <span class="report-header-name">Custódia Digital</span>
+    </div>
     <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E VERIFICAÇÃO DE INTEGRIDADE</h1>
-    <p class="subtitle">Arquivo de conversa do WhatsApp extraído de dispositivo móvel</p>
 
     <h2>1. Identificação Geral</h2>
     <table class="rtable">
@@ -3729,9 +3845,11 @@ function saveHistoryList(list){
 function saveReportToHistory(){
   if(!currentUser) return null;
   const meta = window.__lastReportMeta || {};
+  const rep = getSelectedReparticao();
   const record = {
     id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
     matricula: currentUser.matricula,
+    reparticaoId: rep ? rep.id : '',
     relatorioNum: meta.relatorioNum || '',
     responsavel: meta.responsavel || '',
     cargo: meta.cargo || '',
@@ -3762,18 +3880,21 @@ async function renderHistoryList(){
   const container = $('historyList');
   const emptyMsg = $('historyEmpty');
   container.innerHTML = '';
+  const rep = getSelectedReparticao();
   const all = loadHistory();
-  const mine = currentUser ? all.filter(r => r.matricula === currentUser.matricula) : [];
+  // mostra só os relatórios enviados à repartição atualmente conectada
+  const mine = currentUser && rep ? all.filter(r => r.matricula === currentUser.matricula && r.reparticaoId === rep.id) : [];
 
   // busca da central os relatórios que este usuário enviou de QUALQUER
-  // aparelho, e mantém só os que ainda não existem no histórico local
-  // (evita duplicar quando o relatório foi gerado neste mesmo aparelho)
+  // aparelho para ESSA MESMA repartição, e mantém só os que ainda não
+  // existem no histórico local (evita duplicar quando o relatório foi
+  // gerado neste mesmo aparelho)
   const localDriveLinks = new Set(mine.filter(r => r.driveLink).map(r => r.driveLink));
   let centralOnly = [];
-  if(currentUser && currentUser.email){
+  if(currentUser && currentUser.email && rep){
     try {
       const data = await callAppsScript({ action: 'list_reports', email: currentUser.email });
-      centralOnly = (data.relatorios || []).filter(r => r.driveLink && !localDriveLinks.has(r.driveLink));
+      centralOnly = (data.relatorios || []).filter(r => r.driveLink && !localDriveLinks.has(r.driveLink) && r.reparticaoId === rep.id);
     } catch(e){ /* falha silenciosa: mostra ao menos o histórico local */ }
   }
 
@@ -3899,12 +4020,26 @@ async function generateReportFile(){
   const baseName = `Relatorio_${reportNum}_${Date.now()}`;
   if(window.html2pdf){
     try {
-      const pdfBlob = await html2pdf().set({
-        margin: 8,
+      const worker = html2pdf().set({
+        margin: [10, 10, 16, 10],
         image: { type: 'jpeg', quality: 0.95 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      }).from($('reportPaper')).outputPdf('blob');
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'avoid-all'] }
+      }).from($('reportPaper'));
+
+      const pdf = await worker.toPdf().get('pdf');
+      const totalPages = pdf.internal.getNumberOfPages();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      for(let i = 1; i <= totalPages; i++){
+        pdf.setPage(i);
+        pdf.setFontSize(8.5);
+        pdf.setTextColor(110, 110, 110);
+        pdf.text('EFS Technology ©', 10, pageHeight - 6);
+        pdf.text(`Página ${i} de ${totalPages}`, pageWidth - 10, pageHeight - 6, { align: 'right' });
+      }
+      const pdfBlob = pdf.output('blob');
       return new File([pdfBlob], baseName + '.pdf', { type: 'application/pdf' });
     } catch(e){ /* cai no fallback abaixo */ }
   }

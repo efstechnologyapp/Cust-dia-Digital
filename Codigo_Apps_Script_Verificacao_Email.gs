@@ -255,7 +255,8 @@ function doPost(e) {
           relatorioNum: String(r[3]),
           arquivo: String(r[4]),
           driveLink: String(r[5]),
-          dataEnvio: r[6] ? formatDate_(r[6]) : ''
+          dataEnvio: r[6] ? formatDate_(r[6]) : '',
+          reparticaoId: String(r[2])
         });
       }
       relatorios.reverse(); // mais recentes primeiro
