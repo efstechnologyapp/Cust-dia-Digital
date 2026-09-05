@@ -1895,12 +1895,11 @@ function getConfirmedReparticoes(){
 }
 
 function renderRepSelectDropdown(){
-  const confirmed = getConfirmedReparticoes();
-  // a repartição do próprio usuário logado precisa aparecer no seletor
-  // mesmo que ainda esteja pendente, para permitir a primeira conexão
-  const own = currentUser ? loadReparticoes().find(r => r.id === currentUser.reparticaoId) : null;
-  const list = confirmed.slice();
-  if(own && !list.some(r => r.id === own.id)) list.push(own);
+  // mostra todas as repartições (confirmadas + pendentes) — qualquer
+  // usuário logado pode selecionar e tentar conectar uma pendente,
+  // já que geralmente é o administrador testando a configuração, não
+  // necessariamente alguém cadastrado especificamente naquela repartição
+  const list = loadReparticoes();
 
   const sel = $('repSelect');
   const currentId = getSelectedReparticaoId();
@@ -1946,14 +1945,44 @@ function renderReparticoesManageList(){
         <div class="reparticao-card-nome">${esc(r.nome)}</div>
         <div class="reparticao-card-icons">
           <button data-action="edit" title="Editar" aria-label="Editar">✏️</button>
+          <button data-action="unconfirm" title="Marcar como pendente novamente (exigir nova confirmação de conexão)" aria-label="Marcar como pendente">↩️</button>
           <button data-action="delete" title="Excluir" aria-label="Excluir">🗑️</button>
         </div>
       </div>
     `;
     card.querySelector('[data-action="edit"]').addEventListener('click', () => startEditReparticao(r.id));
+    card.querySelector('[data-action="unconfirm"]').addEventListener('click', () => unconfirmReparticao(r.id));
     card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteReparticao(r.id));
     container.appendChild(card);
   });
+}
+
+async function unconfirmReparticao(id){
+  const list = loadReparticoes();
+  const idx = list.findIndex(r => r.id === id);
+  if(idx < 0) return;
+  const rep = list[idx];
+  if(!confirm(`Marcar "${rep.nome}" como pendente de novo? Ela some de "Repartições cadastradas" até que alguém confirme a conexão de verdade novamente.`)) return;
+
+  list[idx].status = 'pendente';
+  saveReparticoesList(list);
+  renderReparticoesManageList();
+  renderRepSelectDropdown();
+
+  // registra (ou re-registra) na central, para aparecer também em
+  // "Repartições pendentes de cadastro"
+  try {
+    const data = await callAppsScript({
+      action: 'register_reparticao_pendente',
+      nome: rep.nome, email: rep.email, clientId: rep.clientId, folderId: rep.folderId
+    });
+    if(data.rowIndex){
+      const l2 = loadReparticoes();
+      const idx2 = l2.findIndex(r => r.id === id);
+      if(idx2 >= 0){ l2[idx2].centralRowIndex = data.rowIndex; saveReparticoesList(l2); }
+    }
+  } catch(e){ /* fica pendente localmente mesmo se a central falhar */ }
+  renderReparticoesPendentesList();
 }
 
 function resetNewReparticaoForm(){
