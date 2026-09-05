@@ -543,23 +543,15 @@
   }
   .rep-users-empty{ font-size:12px; color: var(--muted); font-style:italic; margin-bottom:8px; }
 
-  .central-report-card{
-    background:#fff;
-    border: 1px solid var(--line);
-    border-radius: 9px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    font-size: 12.5px;
-  }
-  .central-report-card .crc-nome{ font-weight:700; color: var(--ink); }
-  .central-report-card .crc-detail{ color: var(--muted); margin-top:2px; }
-  .central-report-card a{
+  .history-drive-link{
     display:inline-block;
     margin-top: 8px;
     color: var(--navy);
     font-weight:600;
     text-decoration: underline;
+    font-size: 12.5px;
   }
+
   .reparticao-card-detail{
     font-family: var(--mono);
     font-size: 11px;
@@ -1619,14 +1611,6 @@
   </div>
   <div class="history-wrap">
     <h2 class="history-title">Histórico de relatórios</h2>
-
-    <h3 style="font-family:var(--serif);font-size:15px;color:var(--navy-dark);margin:6px 0 4px;">📤 Enviados ao Drive da repartição</h3>
-    <p class="history-sub" style="margin-bottom:10px;">Vem da central — aparece em qualquer aparelho em que você entrar.</p>
-    <div class="loc-status" id="centralReportsStatus"></div>
-    <div id="centralReportsList"></div>
-
-    <hr class="sidebar-divider">
-    <h3 style="font-family:var(--serif);font-size:15px;color:var(--navy-dark);margin:6px 0 4px;">💾 Neste aparelho</h3>
     <p class="history-sub">Relatórios gerados por você neste aparelho.</p>
     <div id="historyList"></div>
     <p class="history-empty hidden-view" id="historyEmpty">Nenhum relatório gerado ainda.</p>
@@ -3495,10 +3479,11 @@ function renderHistoryList(){
     const badgeClass = record.hashStatus === 'ok' ? 'ok' : (record.hashStatus === 'warn' ? 'warn' : 'neutral');
     const badgeText = record.hashStatus === 'ok' ? 'HASHES IDÊNTICOS' : (record.hashStatus === 'warn' ? 'VERIFICAR HASHES' : 'NÃO VERIFICADO');
     const driveBadge = record.enviadoDrive
-      ? (record.driveLink
-          ? `<a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-badge ok" style="text-decoration:none;">☁️ Enviado ao Drive</a>`
-          : `<span class="history-badge ok">☁️ Enviado ao Drive</span>`)
+      ? `<span class="history-badge ok">☁️ Enviado ao Drive</span>`
       : `<span class="history-badge neutral">☁️ Não enviado ao Drive</span>`;
+    const driveLinkHtml = record.driveLink
+      ? `<div><a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>`
+      : '';
 
     const card = document.createElement('div');
     card.className = 'history-card';
@@ -3512,6 +3497,7 @@ function renderHistoryList(){
         <span class="history-badge ${badgeClass}">${badgeText}</span>
         ${driveBadge}
       </div>
+      ${driveLinkHtml}
       <div class="history-card-actions">
         <button data-action="open">Abrir</button>
         <button data-action="delete" class="danger">Excluir</button>
@@ -3538,41 +3524,9 @@ function deleteHistoryRecord(id){
   renderHistoryList();
 }
 
-async function renderCentralReportsList(){
-  const statusEl = $('centralReportsStatus');
-  const listEl = $('centralReportsList');
-  listEl.innerHTML = '';
-  if(!currentUser || !currentUser.email){
-    statusEl.textContent = '';
-    listEl.innerHTML = '<div class="rep-users-empty">Cadastre um e-mail no seu perfil para ver esta lista.</div>';
-    return;
-  }
-  statusEl.textContent = 'Carregando…';
-  statusEl.className = 'loc-status';
-  try {
-    const data = await callAppsScript({ action: 'list_reports', email: currentUser.email });
-    statusEl.textContent = '';
-    if(!data.relatorios || data.relatorios.length === 0){
-      listEl.innerHTML = '<div class="rep-users-empty">Nenhum relatório enviado ao Drive ainda.</div>';
-      return;
-    }
-    listEl.innerHTML = data.relatorios.map(r => `
-      <div class="central-report-card">
-        <div class="crc-nome">${esc(r.arquivo)}</div>
-        <div class="crc-detail">${r.relatorioNum ? `Nº ${esc(r.relatorioNum)} — ` : ''}enviado em ${esc(r.dataEnvio)}</div>
-        ${r.driveLink ? `<a href="${esc(r.driveLink)}" target="_blank" rel="noopener">🔗 Abrir no Drive</a>` : ''}
-      </div>
-    `).join('');
-  } catch(err){
-    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
-    statusEl.className = 'loc-status err';
-  }
-}
-
 $('openHistoryBtn').addEventListener('click', () => {
   $('sidebarOverlay').classList.remove('open');
   renderHistoryList();
-  renderCentralReportsList();
   showView('history');
 });
 $('historyBackBtn').addEventListener('click', () => {

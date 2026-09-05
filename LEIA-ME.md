@@ -327,27 +327,26 @@ aparelho em que ele entrar — não ficam mais presos a um único celular.
 
 ### Histórico de relatórios enviados ao Drive
 
-Na tela **"Histórico de relatórios"**, agora há duas seções:
+A tela **"Histórico de relatórios"** continua mostrando o histórico
+local de sempre — relatórios com todos os detalhes, para reabrir e
+reimprimir sem precisar de internet. Cada card agora também indica se
+aquele relatório foi enviado ao Drive (veja "Selo de envio ao Drive"
+logo abaixo), com um link direto **"🔗 Abrir no Drive"** quando o envio
+deu certo.
 
-1. **"📤 Enviados ao Drive da repartição"** — busca da central, mostra
-   em qualquer aparelho que o usuário usar. Cada item tem um link
-   **"🔗 Abrir no Drive"**, que abre o arquivo de verdade, direto na
-   pasta da repartição no Google Drive.
-2. **"💾 Neste aparelho"** — o histórico local de sempre (relatórios
-   com todos os detalhes, para reabrir e reimprimir sem precisar de
-   internet).
-
-Essa central de relatórios é alimentada automaticamente sempre que
-alguém usa **"✅ Concluir Tarefa"** com sucesso — o link do Drive que o
-Google devolve no envio é guardado junto, sem nenhuma ação manual
-necessária.
+Nos bastidores, todo envio bem-sucedido feito por **"✅ Concluir
+Tarefa"** também é registrado numa central (planilha), o que permite,
+no futuro, consultar o histórico de relatórios enviados de qualquer
+aparelho — mesmo não havendo hoje uma tela específica para isso no
+app.
 
 ### Selo de envio ao Drive no histórico local
 
-Cada relatório listado em **"💾 Neste aparelho"** agora mostra um selo:
-- **"☁️ Enviado ao Drive"** (verde, clicável) — o envio ao Drive da
-  repartição deu certo ao concluir aquela tarefa; toque para abrir o
-  arquivo direto no Drive.
+Cada relatório listado no histórico agora mostra um selo:
+- **"☁️ Enviado ao Drive"** (verde) — o envio ao Drive da repartição
+  deu certo ao concluir aquela tarefa. Logo abaixo, aparece também um
+  link separado **"🔗 Abrir no Drive"**, que abre o arquivo de verdade
+  direto no Google Drive.
 - **"☁️ Não enviado ao Drive"** (cinza) — por algum motivo o envio não
   aconteceu (sem conexão no momento, falha de rede, repartição sem
   Client ID/pasta configurados, etc.). O relatório continua salvo
