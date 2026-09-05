@@ -175,6 +175,58 @@ institucional, capaz de enviar e-mails de verdade em nome dessa conta.
   para uso interno institucional, não para um sistema público de larga
   escala.
 
+## Uma repartição nova só existe em um lugar por vez: pendente OU cadastrada
+
+Corrigindo uma inconsistência anterior (uma repartição podia aparecer
+nas duas listas ao mesmo tempo): agora, toda repartição nova nasce
+**só** como "pendente" — não aparece em "Repartições cadastradas", nem
+pode ser escolhida por outros usuários se cadastrando depois. Ela só
+existe (temporariamente) no seletor da barra lateral de quem acabou de
+criá-la, marcada com "(pendente)" ao lado do nome.
+
+**A promoção para "cadastrada" acontece automaticamente**, assim que
+alguém toca em "Conectar" usando essa repartição e o login no Google
+funciona de verdade. Nesse momento:
+- Ela passa a aparecer em "Repartições cadastradas", disponível para
+  todo mundo nesse aparelho escolher dali pra frente;
+- Ela some da lista central de "Repartições pendentes de cadastro"
+  automaticamente — não precisa mais remover manualmente.
+
+Ou seja: uma conexão bem-sucedida é a prova de que a configuração no
+Google Cloud (Client ID) e a pasta do Drive estão de verdade
+funcionando — só aí a repartição "sai da experiência" e vira uma opção
+confiável para todos.
+
+**Nota:** essa promoção acontece **localmente, no aparelho de quem
+conectou** — se a mesma repartição foi criada achando estar pendente
+em outro aparelho (por exemplo, o aparelho de quem se cadastrou
+primeiro), ela só passa a aparecer como "cadastrada" nesse OUTRO
+aparelho também quando alguém, nele, também conectar com sucesso (ou o
+administrador cadastrar ela manualmente ali, copiando os mesmos dados,
+depois de ver a confirmação na lista de pendentes/cadastradas de outro
+aparelho).
+
+## Repartição selecionada acompanha automaticamente o login
+
+Cada usuário guarda, no próprio cadastro, a repartição a que pertence
+(escolhida no momento do cadastro). A partir desta atualização, sempre
+que alguém faz login, o app **corrige automaticamente** o seletor de
+repartição da barra lateral para bater com a repartição do próprio
+usuário, caso estivesse apontando para outra.
+
+Isso evita um problema real: como o seletor da barra lateral é uma
+configuração do **aparelho**, não da pessoa, um aparelho compartilhado
+por servidores de repartições diferentes (ou mesmo o mesmo aparelho ao
+longo do tempo) poderia ficar com o seletor "preso" na repartição do
+último usuário — fazendo com que o próximo usuário mandasse arquivos
+para o Drive errado, sem perceber. Agora, cada login já garante que o
+envio vai para a repartição certa por padrão.
+
+**Detalhe técnico:** essa correção automática **desconecta** a sessão
+do Google Drive anterior, se a repartição mudou — é esperado ter que
+tocar em "Conectar" de novo depois de logar com um usuário de uma
+repartição diferente da que estava selecionada antes.
+
 ## Reorganização do formulário, login e cadastro (mudanças grandes)
 
 ### Formulário — campos automáticos e ocultos

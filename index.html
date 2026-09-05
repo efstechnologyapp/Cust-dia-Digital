@@ -1887,8 +1887,21 @@ function getSelectedReparticao(){
   return loadReparticoes().find(r => r.id === id) || null;
 }
 
+// Repartições "confirmadas" são as que já tiveram uma conexão bem-sucedida
+// pelo menos uma vez (nunca marcadas como pendentes, ou sem o campo —
+// repartições antigas, de antes desta atualização, contam como confirmadas).
+function getConfirmedReparticoes(){
+  return loadReparticoes().filter(r => r.status !== 'pendente');
+}
+
 function renderRepSelectDropdown(){
-  const list = loadReparticoes();
+  const confirmed = getConfirmedReparticoes();
+  // a repartição do próprio usuário logado precisa aparecer no seletor
+  // mesmo que ainda esteja pendente, para permitir a primeira conexão
+  const own = currentUser ? loadReparticoes().find(r => r.id === currentUser.reparticaoId) : null;
+  const list = confirmed.slice();
+  if(own && !list.some(r => r.id === own.id)) list.push(own);
+
   const sel = $('repSelect');
   const currentId = getSelectedReparticaoId();
   sel.innerHTML = '';
@@ -1902,7 +1915,7 @@ function renderRepSelectDropdown(){
   list.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r.id;
-    opt.textContent = r.nome;
+    opt.textContent = r.status === 'pendente' ? `${r.nome} (pendente)` : r.nome;
     if(r.id === currentId) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -1925,7 +1938,7 @@ let editingReparticaoId = null;
 function renderReparticoesManageList(){
   const container = $('reparticoesList');
   container.innerHTML = '';
-  loadReparticoes().forEach(r => {
+  getConfirmedReparticoes().forEach(r => {
     const card = document.createElement('div');
     card.className = 'reparticao-card';
     card.innerHTML = `
@@ -2061,7 +2074,7 @@ function deleteReparticao(id){
   renderRepSelectDropdown();
 }
 
-$('saveReparticaoBtn').addEventListener('click', () => {
+$('saveReparticaoBtn').addEventListener('click', async () => {
   const nome = $('repNome').value.trim();
   const email = $('repEmail').value.trim();
   const clientId = $('repClientId').value.trim();
@@ -2072,13 +2085,21 @@ $('saveReparticaoBtn').addEventListener('click', () => {
     statusEl.className = 'loc-status err';
     return;
   }
+  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, status: 'pendente', centralRowIndex: null };
   const list = loadReparticoes();
-  list.push({ id: 'rep-' + Date.now(), nome, email, clientId, folderId });
+  list.push(newRep);
   saveReparticoesList(list);
-  // avisa a central, para outros aparelhos também saberem que essa
-  // repartição existe (sem usuário associado, pois foi cadastrada por
-  // quem já administra o app)
-  callAppsScript({ action: 'register_reparticao_pendente', nome, email, clientId, folderId }).catch(() => {});
+  // avisa a central (para outros aparelhos também saberem que essa
+  // repartição existe) — fica como "pendente" até alguém conectar de
+  // verdade usando ela, o que a promove automaticamente a "cadastrada"
+  try {
+    const data = await callAppsScript({ action: 'register_reparticao_pendente', nome, email, clientId, folderId });
+    if(data.rowIndex){
+      const l2 = loadReparticoes();
+      const idx = l2.findIndex(r => r.id === newRep.id);
+      if(idx >= 0){ l2[idx].centralRowIndex = data.rowIndex; saveReparticoesList(l2); }
+    }
+  } catch(e){ /* segue mesmo assim — a repartição já está pendente localmente */ }
   resetNewReparticaoForm();
   $('newReparticaoForm').classList.add('hidden-view');
   renderReparticoesManageList();
@@ -2265,6 +2286,22 @@ $('driveConnectBtn').addEventListener('click', async () => {
     // (melhor esforço — se falhar, não atrapalha a conexão já feita)
     if(currentUser && currentUser.email){
       callAppsScript({ action: 'auto_enable', email: currentUser.email, reparticaoId: rep.id }).catch(() => {});
+    }
+
+    // uma conexão bem-sucedida confirma que a repartição está de
+    // verdade funcionando — promove de "pendente" para "cadastrada"
+    if(rep.status === 'pendente'){
+      const list = loadReparticoes();
+      const idx = list.findIndex(r => r.id === rep.id);
+      if(idx >= 0){
+        list[idx].status = 'confirmada';
+        saveReparticoesList(list);
+        renderRepSelectDropdown();
+        renderReparticoesManageList();
+      }
+      if(rep.centralRowIndex){
+        callAppsScript({ action: 'remove_reparticao_pendente', rowIndex: rep.centralRowIndex }).catch(() => {});
+      }
     }
   } catch(err){
     updateDriveStatusUI(false);
@@ -2766,7 +2803,14 @@ function showLoginError(msg){
 function clearLoginError(){ $('loginErrorBox').classList.remove('show'); }
 
 function populateRegReparticaoSelect(selectedId){
-  const list = loadReparticoes();
+  const confirmed = getConfirmedReparticoes();
+  // se a repartição atualmente associada ao usuário (modo edição) ainda
+  // estiver pendente, ela precisa continuar aparecendo como opção
+  const all = loadReparticoes();
+  const selectedRep = selectedId ? all.find(r => r.id === selectedId) : null;
+  const list = confirmed.slice();
+  if(selectedRep && !list.some(r => r.id === selectedRep.id)) list.push(selectedRep);
+
   const sel = $('regReparticao');
   sel.innerHTML = '';
   const placeholder = document.createElement('option');
@@ -2777,7 +2821,7 @@ function populateRegReparticaoSelect(selectedId){
   list.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r.id;
-    opt.textContent = r.nome;
+    opt.textContent = r.status === 'pendente' ? `${r.nome} (pendente)` : r.nome;
     sel.appendChild(opt);
   });
   const newOpt = document.createElement('option');
@@ -2847,12 +2891,12 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
     return;
   }
   const list = loadReparticoes();
-  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId };
+  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, status: 'pendente', centralRowIndex: null };
   list.push(newRep);
   saveReparticoesList(list);
   // guardado para, ao concluir o cadastro do usuário, avisar a central
   // com os dados da repartição + de quem a cadastrou
-  pendingNewReparticaoData = { nome, email, clientId, folderId };
+  pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId };
   populateRegReparticaoSelect(newRep.id);
   $('regReparticao').value = newRep.id;
   $('regNewReparticaoForm').classList.add('hidden-view');
@@ -3182,6 +3226,7 @@ $('registerBtn').addEventListener('click', () => {
     // (com os dados de quem cadastrou, para o administrador habilitar no
     // Google Cloud e compartilhar a pasta do Drive)
     if(pendingNewReparticaoData){
+      const newRepId = pendingNewReparticaoData.id;
       callAppsScript({
         action: 'register_reparticao_pendente',
         nome: pendingNewReparticaoData.nome,
@@ -3192,6 +3237,12 @@ $('registerBtn').addEventListener('click', () => {
         usuarioCargo: cargo,
         usuarioMatricula: matricula,
         usuarioEmail: pendingRegEmail
+      }).then(data => {
+        if(data.rowIndex){
+          const l2 = loadReparticoes();
+          const idx = l2.findIndex(r => r.id === newRepId);
+          if(idx >= 0){ l2[idx].centralRowIndex = data.rowIndex; saveReparticoesList(l2); }
+        }
       }).catch(() => {});
       pendingNewReparticaoData = null;
     }
@@ -3267,8 +3318,23 @@ function refreshUserUI(){
 function enterApp(){
   showView('home');
   refreshUserUI();
+
+  // garante que a repartição selecionada para envio seja a do próprio
+  // usuário logado, para evitar mandar arquivos para o Drive de outra
+  // repartição por engano (ex.: aparelho compartilhado, ou seletor
+  // deixado em outra repartição por outro usuário)
+  const list = loadReparticoes();
+  if(currentUser.reparticaoId && list.some(r => r.id === currentUser.reparticaoId)){
+    if(getSelectedReparticaoId() !== currentUser.reparticaoId){
+      setSelectedReparticaoId(currentUser.reparticaoId);
+      gisTokenClient = null;
+      setDriveConnectedFlag(false);
+    }
+  }
   renderRepSelectDropdown();
   reflectStoredDriveStatus();
+  updateCustodiaOriginalReparticaoLabel();
+
   // autopreenche Responsável pela coleta se estiver vazio
   const respField = $('f_responsavel');
   if(!respField.value.trim()){

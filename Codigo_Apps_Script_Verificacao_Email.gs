@@ -276,7 +276,7 @@ function doPost(e) {
         data.usuarioEmail || '',
         new Date()
       ]);
-      return respond({ ok: true });
+      return respond({ ok: true, rowIndex: sheet.getLastRow() });
     }
 
     if (action === 'list_reparticoes_pendentes') {
