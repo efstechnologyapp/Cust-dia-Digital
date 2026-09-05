@@ -533,7 +533,33 @@
     font-size: 12px;
     cursor:pointer;
   }
+  .copy-email-btn{
+    margin-top:0 !important;
+    border:none !important;
+    background:none !important;
+    padding:0 2px !important;
+    font-size:12px !important;
+    vertical-align:middle;
+  }
   .rep-users-empty{ font-size:12px; color: var(--muted); font-style:italic; margin-bottom:8px; }
+
+  .central-report-card{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+  }
+  .central-report-card .crc-nome{ font-weight:700; color: var(--ink); }
+  .central-report-card .crc-detail{ color: var(--muted); margin-top:2px; }
+  .central-report-card a{
+    display:inline-block;
+    margin-top: 8px;
+    color: var(--navy);
+    font-weight:600;
+    text-decoration: underline;
+  }
   .reparticao-card-detail{
     font-family: var(--mono);
     font-size: 11px;
@@ -878,11 +904,18 @@
   }
   .sidebar-overlay.open .sidebar-panel{ transform: translateX(0); }
   .edit-rep-panel{
-    left:auto; right:0;
-    box-shadow: -6px 0 24px rgba(0,0,0,.18);
-    transform: translateX(100%);
+    position: fixed;
+    left: 0; right: 0; top: auto; bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    max-height: 88vh;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -6px 24px rgba(0,0,0,.18);
+    transform: translateY(100%);
+    transition: transform .22s ease-out;
   }
-  #editRepOverlay.open .edit-rep-panel{ transform: translateX(0); }
+  #editRepOverlay.open .edit-rep-panel{ transform: translateY(0); }
   .sidebar-close{
     align-self:flex-end;
     background:none; border:none;
@@ -1105,17 +1138,6 @@
       <button class="btn-link" id="backToLoginBtn">Voltar</button>
     </div>
 
-    <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;margin-top:14px;color:var(--muted);">⚙️ Configurar verificação de e-mail</button>
-    <div class="hidden-view" id="emailConfigPanel" style="margin-top:10px;">
-      <div class="field">
-        <label style="font-size:12px;">URL do Google Apps Script (verificação de e-mail)</label>
-        <input type="text" id="emailVerifyUrlInput" placeholder="https://script.google.com/macros/s/XXXX/exec">
-      </div>
-      <button class="btn-primary" id="saveEmailConfigBtn" style="margin-bottom:6px;">Salvar</button>
-      <div class="loc-status" id="emailConfigStatus"></div>
-      <p style="font-size:11px;color:var(--muted);line-height:1.5;">Veja o LEIA-ME para o passo a passo de publicar o script no Google Apps Script e obter essa URL. Configuração institucional, salva neste aparelho.</p>
-    </div>
-
     <p class="login-note">Esta identificação fica salva apenas neste aparelho e serve para preencher automaticamente o responsável e a assinatura do relatório. Não substitui controles de segurança institucionais.</p>
   </div>
 </div>
@@ -1173,6 +1195,18 @@
     <h2 class="history-title">Conexões — Repartições</h2>
     <p class="history-sub">Cada repartição tem seu próprio Client ID (Google Cloud) e pasta de destino no Drive.</p>
 
+    <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;color:var(--muted);padding:0;">⚙️ Configurar verificação de e-mail</button>
+    <div class="hidden-view" id="emailConfigPanel" style="margin-top:10px;">
+      <div class="field">
+        <label style="font-size:12px;">URL do Google Apps Script (verificação de e-mail)</label>
+        <input type="text" id="emailVerifyUrlInput" placeholder="https://script.google.com/macros/s/XXXX/exec">
+      </div>
+      <button class="btn-primary" id="saveEmailConfigBtn" style="margin-bottom:6px;">Salvar</button>
+      <div class="loc-status" id="emailConfigStatus"></div>
+      <p style="font-size:11px;color:var(--muted);line-height:1.5;">Veja o LEIA-ME para o passo a passo de publicar o script no Google Apps Script e obter essa URL. Configuração institucional, salva neste aparelho.</p>
+    </div>
+
+    <hr class="sidebar-divider">
     <div class="field-label-row" style="margin-top:4px;">
       <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Cadastrar nova repartição</h3>
       <button type="button" class="btn-inline-share" id="toggleNewRepBtn" aria-label="Adicionar repartição" title="Adicionar repartição">+</button>
@@ -1242,28 +1276,6 @@
 
     <div class="rep-users-section-title">✅ Habilitados</div>
     <div id="repUsersHabilitados"></div>
-
-    <button type="button" class="btn-link" id="toggleAddLegacyUserBtn" style="font-size:12px;margin-top:6px;">+ Adicionar usuário já existente (cadastro anterior)</button>
-    <div class="hidden-view" id="addLegacyUserForm" style="margin-top:10px;">
-      <div class="field">
-        <label style="font-size:12px;">Nome completo</label>
-        <input type="text" id="legacyNome">
-      </div>
-      <div class="field">
-        <label style="font-size:12px;">E-mail</label>
-        <input type="email" id="legacyEmail">
-      </div>
-      <div class="field">
-        <label style="font-size:12px;">Cargo</label>
-        <input type="text" id="legacyCargo">
-      </div>
-      <div class="field">
-        <label style="font-size:12px;">Matrícula</label>
-        <input type="text" id="legacyMatricula">
-      </div>
-      <button class="btn-primary" id="saveLegacyUserBtn" style="margin-bottom:6px;">Adicionar como habilitado</button>
-      <div class="loc-status" id="legacyUserStatus"></div>
-    </div>
   </div>
 </div>
 
@@ -1606,6 +1618,14 @@
   </div>
   <div class="history-wrap">
     <h2 class="history-title">Histórico de relatórios</h2>
+
+    <h3 style="font-family:var(--serif);font-size:15px;color:var(--navy-dark);margin:6px 0 4px;">📤 Enviados ao Drive da repartição</h3>
+    <p class="history-sub" style="margin-bottom:10px;">Vem da central — aparece em qualquer aparelho em que você entrar.</p>
+    <div class="loc-status" id="centralReportsStatus"></div>
+    <div id="centralReportsList"></div>
+
+    <hr class="sidebar-divider">
+    <h3 style="font-family:var(--serif);font-size:15px;color:var(--navy-dark);margin:6px 0 4px;">💾 Neste aparelho</h3>
     <p class="history-sub">Relatórios gerados por você neste aparelho.</p>
     <div id="historyList"></div>
     <p class="history-empty hidden-view" id="historyEmpty">Nenhum relatório gerado ainda.</p>
@@ -1925,14 +1945,16 @@ function startEditReparticao(id){
 function closeEditReparticaoModal(){
   editingReparticaoId = null;
   $('editRepOverlay').classList.remove('open');
-  $('addLegacyUserForm').classList.add('hidden-view');
 }
 
 // ---------- usuários cadastrados por repartição (central via Apps Script) ----------
 function repUserCardHtml(u, showEnableBtn){
+  const emailPart = showEnableBtn
+    ? `(${esc(u.email)} <button type="button" class="copy-email-btn" data-copy-email="${esc(u.email)}" title="Copiar e-mail" aria-label="Copiar e-mail">📋</button>)`
+    : `(${esc(u.email)})`;
   return `
     <div class="rep-user-card">
-      <div class="rep-user-nome">${esc(u.nome)} (${esc(u.email)})</div>
+      <div class="rep-user-nome">${esc(u.nome)} ${emailPart}</div>
       <div class="rep-user-detail">${esc(u.cargo)} — matrícula ${esc(u.matricula)}</div>
       ${u.habilitadoEm ? `<div class="rep-user-habilitado-em">Habilitado em: ${esc(u.habilitadoEm)}</div>` : ''}
       ${showEnableBtn ? `<button data-row="${u.rowIndex}">✓ Marcar como habilitado</button>` : ''}
@@ -1959,6 +1981,18 @@ async function renderRepUsersLists(reparticaoId){
       pendentesEl.innerHTML = data.pendentes.map(u => repUserCardHtml(u, true)).join('');
       pendentesEl.querySelectorAll('button[data-row]').forEach(btn => {
         btn.addEventListener('click', () => enableRepUser(btn.dataset.row, reparticaoId));
+      });
+      pendentesEl.querySelectorAll('button[data-copy-email]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const email = btn.dataset.copyEmail;
+          (navigator.clipboard && navigator.clipboard.writeText
+            ? navigator.clipboard.writeText(email)
+            : Promise.reject()).then(() => {
+              btn.textContent = '✓';
+              setTimeout(() => { btn.textContent = '📋'; }, 1200);
+            }).catch(() => {});
+        });
       });
     }
 
@@ -1988,47 +2022,6 @@ async function enableRepUser(rowIndex, reparticaoId){
 
 $('refreshRepUsersBtn').addEventListener('click', () => {
   if(editingReparticaoId) renderRepUsersLists(editingReparticaoId);
-});
-
-$('toggleAddLegacyUserBtn').addEventListener('click', () => {
-  const form = $('addLegacyUserForm');
-  const opening = form.classList.contains('hidden-view');
-  if(opening){
-    $('legacyNome').value = ''; $('legacyEmail').value = '';
-    $('legacyCargo').value = ''; $('legacyMatricula').value = '';
-    $('legacyUserStatus').textContent = '';
-  }
-  form.classList.toggle('hidden-view');
-});
-
-$('saveLegacyUserBtn').addEventListener('click', async () => {
-  const nome = $('legacyNome').value.trim();
-  const email = $('legacyEmail').value.trim();
-  const cargo = $('legacyCargo').value.trim();
-  const matricula = $('legacyMatricula').value.trim();
-  const statusEl = $('legacyUserStatus');
-  if(!nome || !email || !cargo || !matricula){
-    statusEl.textContent = 'Preencha todos os campos.';
-    statusEl.className = 'loc-status err';
-    return;
-  }
-  const rep = loadReparticoes().find(r => r.id === editingReparticaoId);
-  statusEl.textContent = 'Adicionando…';
-  statusEl.className = 'loc-status';
-  try {
-    await callAppsScript({
-      action: 'register_user',
-      nome, email, cargo, matricula,
-      reparticaoId: editingReparticaoId,
-      reparticaoNome: rep ? rep.nome : '',
-      habilitado: true
-    });
-    $('addLegacyUserForm').classList.add('hidden-view');
-    renderRepUsersLists(editingReparticaoId);
-  } catch(err){
-    statusEl.textContent = 'Não foi possível adicionar: ' + err.message;
-    statusEl.className = 'loc-status err';
-  }
 });
 
 function deleteReparticao(id){
@@ -2862,7 +2855,7 @@ $('syncBtn').addEventListener('click', () => {
       email: pendingSyncEmail,
       telefone: '',
       reparticaoId: pendingSyncProfile.reparticaoId,
-      pin, photo: null
+      pin, photo: pendingSyncProfile.foto || null
     });
     saveServidores(list);
     loginAs(list.length - 1);
@@ -3101,6 +3094,26 @@ function enterApp(){
     const cargoTxt = currentUser.cargo ? `, ${currentUser.cargo}` : '';
     respField.value = `${currentUser.nome}${cargoTxt}, matrícula funcional nº ${currentUser.matricula}`;
   }
+  // se este aparelho ainda não tem foto salva localmente, busca da central
+  // (assim a foto cadastrada aparece mesmo em um aparelho novo)
+  if(!currentUser.photo && currentUser.email){
+    callAppsScript({ action: 'get_user', email: currentUser.email })
+      .then(data => {
+        if(data.found && data.foto){
+          currentUser.photo = data.foto;
+          if(currentUserIndex !== null){
+            const list = loadServidores();
+            if(list[currentUserIndex]){
+              list[currentUserIndex].photo = data.foto;
+              saveServidores(list);
+            }
+          }
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+          refreshUserUI();
+        }
+      })
+      .catch(() => {});
+  }
 }
 
 function doLogout(){
@@ -3133,12 +3146,34 @@ $('closeSidebarBtn').addEventListener('click', () => $('sidebarOverlay').classLi
 $('sidebarOverlay').addEventListener('click', (e) => { if(e.target.id === 'sidebarOverlay') $('sidebarOverlay').classList.remove('open'); });
 
 $('avatarCircle').addEventListener('click', () => $('avatarInput').click());
-$('avatarInput').addEventListener('change', (e) => {
+function compressImageDataUrl(file, maxSize){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        const scale = Math.min(1, maxSize / Math.max(width, height));
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+$('avatarInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if(!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const dataUrl = reader.result;
+  try {
+    const dataUrl = await compressImageDataUrl(file, 128);
     currentUser.photo = dataUrl;
     if(currentUserIndex !== null){
       const list = loadServidores();
@@ -3147,8 +3182,13 @@ $('avatarInput').addEventListener('change', (e) => {
     }
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
     refreshUserUI();
-  };
-  reader.readAsDataURL(file);
+    // envia para a central, para a foto aparecer também em outros aparelhos
+    if(currentUser.email && currentUser.reparticaoId){
+      callAppsScript({ action: 'update_photo', email: currentUser.email, reparticaoId: currentUser.reparticaoId, foto: dataUrl }).catch(() => {});
+    }
+  } catch(err){
+    alert('Não foi possível processar essa imagem.');
+  }
 });
 
 $('editProfileBtn').addEventListener('click', () => {
@@ -3461,9 +3501,41 @@ function deleteHistoryRecord(id){
   renderHistoryList();
 }
 
+async function renderCentralReportsList(){
+  const statusEl = $('centralReportsStatus');
+  const listEl = $('centralReportsList');
+  listEl.innerHTML = '';
+  if(!currentUser || !currentUser.email){
+    statusEl.textContent = '';
+    listEl.innerHTML = '<div class="rep-users-empty">Cadastre um e-mail no seu perfil para ver esta lista.</div>';
+    return;
+  }
+  statusEl.textContent = 'Carregando…';
+  statusEl.className = 'loc-status';
+  try {
+    const data = await callAppsScript({ action: 'list_reports', email: currentUser.email });
+    statusEl.textContent = '';
+    if(!data.relatorios || data.relatorios.length === 0){
+      listEl.innerHTML = '<div class="rep-users-empty">Nenhum relatório enviado ao Drive ainda.</div>';
+      return;
+    }
+    listEl.innerHTML = data.relatorios.map(r => `
+      <div class="central-report-card">
+        <div class="crc-nome">${esc(r.arquivo)}</div>
+        <div class="crc-detail">${r.relatorioNum ? `Nº ${esc(r.relatorioNum)} — ` : ''}enviado em ${esc(r.dataEnvio)}</div>
+        ${r.driveLink ? `<a href="${esc(r.driveLink)}" target="_blank" rel="noopener">🔗 Abrir no Drive</a>` : ''}
+      </div>
+    `).join('');
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
 $('openHistoryBtn').addEventListener('click', () => {
   $('sidebarOverlay').classList.remove('open');
   renderHistoryList();
+  renderCentralReportsList();
   showView('history');
 });
 $('historyBackBtn').addEventListener('click', () => {
@@ -3537,7 +3609,19 @@ async function concludeTask(){
       btn.textContent = 'Gerando arquivo…';
       const file = await generateReportFile();
       btn.textContent = 'Enviando ao Drive…';
-      await uploadFileToDrive(file, rep.folderId, rep.clientId, { textContent: '' });
+      const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, { textContent: '' });
+      // registra na central, para o histórico aparecer em qualquer aparelho
+      if(currentUser && currentUser.email){
+        callAppsScript({
+          action: 'log_report',
+          email: currentUser.email,
+          nome: currentUser.nome,
+          reparticaoId: rep.id,
+          relatorioNum: $('f_relatorio_num').value || '',
+          arquivo: file.name,
+          driveLink: result.webViewLink || ''
+        }).catch(() => {});
+      }
     } catch(err){
       alert('O relatório foi salvo no histórico, mas não foi possível enviar ao Google Drive: ' + err.message);
     }

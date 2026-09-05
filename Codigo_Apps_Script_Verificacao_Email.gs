@@ -81,17 +81,50 @@ function doPost(e) {
     if (action === 'register_user') {
       var email = (data.email || '').trim().toLowerCase();
       var jaHabilitado = data.habilitado === true;
+      var reparticaoId = data.reparticaoId || '';
+      var foto = data.foto || '';
       var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+
+      // procura um cadastro já existente com o mesmo e-mail + repartição,
+      // para atualizar em vez de duplicar
+      var existingRow = -1;
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][1]).toLowerCase() === email && String(rows[i][4]) === String(reparticaoId)) {
+          existingRow = i + 1;
+          break;
+        }
+      }
+
+      if (existingRow > 0) {
+        var jaEstavaHabilitado = !!rows[existingRow - 1][6];
+        sheet.getRange(existingRow, 1).setValue(data.nome || '');
+        sheet.getRange(existingRow, 3).setValue(data.cargo || '');
+        sheet.getRange(existingRow, 4).setValue(data.matricula || '');
+        sheet.getRange(existingRow, 6).setValue(data.reparticaoNome || '');
+        // nunca "desabilita" quem já estava habilitado; só habilita se pedido e ainda não estava
+        if (jaHabilitado && !jaEstavaHabilitado) {
+          sheet.getRange(existingRow, 7).setValue(true);
+          sheet.getRange(existingRow, 8).setValue(new Date());
+        }
+        // só sobrescreve a foto se uma nova foi enviada; preserva a existente caso contrário
+        if (foto) {
+          sheet.getRange(existingRow, 10).setValue(foto);
+        }
+        return respond({ ok: true, updated: true });
+      }
+
       sheet.appendRow([
         data.nome || '',
         email,
         data.cargo || '',
         data.matricula || '',
-        data.reparticaoId || '',
+        reparticaoId,
         data.reparticaoNome || '',
         jaHabilitado,
         jaHabilitado ? new Date() : '',
-        new Date()
+        new Date(),
+        foto
       ]);
       return respond({ ok: true });
     }
@@ -149,11 +182,30 @@ function doPost(e) {
           return respond({
             ok: true, found: true,
             nome: String(r[0]), cargo: String(r[2]), matricula: String(r[3]),
-            reparticaoId: String(r[4]), reparticaoNome: String(r[5])
+            reparticaoId: String(r[4]), reparticaoNome: String(r[5]),
+            foto: r[9] ? String(r[9]) : ''
           });
         }
       }
       return respond({ ok: true, found: false });
+    }
+
+    // atualiza só a foto de um cadastro já existente (chamado ao trocar
+    // a foto de perfil), sem mexer nos demais campos
+    if (action === 'update_photo') {
+      var email = (data.email || '').trim().toLowerCase();
+      var reparticaoId = String(data.reparticaoId || '');
+      var foto = data.foto || '';
+      if (!email) return respond({ ok: true });
+      var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][1]).toLowerCase() === email && String(rows[i][4]) === reparticaoId) {
+          sheet.getRange(i + 1, 10).setValue(foto);
+          break;
+        }
+      }
+      return respond({ ok: true });
     }
 
     if (action === 'auto_enable') {
@@ -173,6 +225,41 @@ function doPost(e) {
         }
       }
       return respond({ ok: true });
+    }
+
+    // ---------- histórico central de relatórios enviados ao Drive ----------
+    if (action === 'log_report') {
+      var sheet = getOrCreateReportsSheet();
+      sheet.appendRow([
+        (data.email || '').trim().toLowerCase(),
+        data.nome || '',
+        data.reparticaoId || '',
+        data.relatorioNum || '',
+        data.arquivo || '',
+        data.driveLink || '',
+        new Date()
+      ]);
+      return respond({ ok: true });
+    }
+
+    if (action === 'list_reports') {
+      var email = (data.email || '').trim().toLowerCase();
+      if (!email) return respond({ ok: true, relatorios: [] });
+      var sheet = getOrCreateReportsSheet();
+      var rows = sheet.getDataRange().getValues();
+      var relatorios = [];
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        if (String(r[0]).toLowerCase() !== email) continue;
+        relatorios.push({
+          relatorioNum: String(r[3]),
+          arquivo: String(r[4]),
+          driveLink: String(r[5]),
+          dataEnvio: r[6] ? formatDate_(r[6]) : ''
+        });
+      }
+      relatorios.reverse(); // mais recentes primeiro
+      return respond({ ok: true, relatorios: relatorios });
     }
 
     return respond({ ok: false, error: 'Ação inválida.' });
@@ -196,11 +283,38 @@ function getOrCreateUsersSheet() {
     props.setProperty('USERS_SHEET_ID', ss.getId());
     var sheet = ss.getSheets()[0];
     sheet.setName('Usuarios');
-    sheet.appendRow(['Nome', 'Email', 'Cargo', 'Matricula', 'ReparticaoId', 'ReparticaoNome', 'Habilitado', 'HabilitadoEm', 'DataCadastro']);
+    sheet.appendRow(['Nome', 'Email', 'Cargo', 'Matricula', 'ReparticaoId', 'ReparticaoNome', 'Habilitado', 'HabilitadoEm', 'DataCadastro', 'FotoBase64']);
     return sheet;
   }
 
-  return ss.getSheetByName('Usuarios') || ss.getSheets()[0];
+  var sheet = ss.getSheetByName('Usuarios') || ss.getSheets()[0];
+  // garante a coluna de foto mesmo em planilhas criadas antes desta atualização
+  if (sheet.getRange(1, 10).getValue() !== 'FotoBase64') {
+    sheet.getRange(1, 10).setValue('FotoBase64');
+  }
+  return sheet;
+}
+
+function getOrCreateReportsSheet() {
+  var props = PropertiesService.getScriptProperties();
+  var ssId = props.getProperty('USERS_SHEET_ID');
+  var ss = null;
+
+  if (ssId) {
+    try { ss = SpreadsheetApp.openById(ssId); } catch (e) { ss = null; }
+  }
+  if (!ss) {
+    // garante que a planilha (com a aba de usuários) já exista antes
+    getOrCreateUsersSheet();
+    ss = SpreadsheetApp.openById(props.getProperty('USERS_SHEET_ID'));
+  }
+
+  var sheet = ss.getSheetByName('Relatorios');
+  if (!sheet) {
+    sheet = ss.insertSheet('Relatorios');
+    sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio']);
+  }
+  return sheet;
 }
 
 function formatDate_(d) {

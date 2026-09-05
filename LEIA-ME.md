@@ -136,8 +136,9 @@ institucional, capaz de enviar e-mails de verdade em nome dessa conta.
 5. Clique em **Implantar**. O Google vai pedir para autorizar
    permissões (enviar e-mail em seu nome) — aceite.
 6. Copie a URL gerada (termina em `/exec`).
-7. No app, na tela de login, toque em **"⚙️ Configurar verificação de
-   e-mail"**, cole essa URL e toque em **Salvar**.
+7. No app, entre com um cadastro existente → menu ☰ → **"🔗 Gerenciar
+   Repartições"** → toque em **"⚙️ Configurar verificação de e-mail"**
+   (fica no topo dessa tela), cole essa URL e toque em **Salvar**.
 
 ### Como funciona, depois de configurado
 
@@ -264,16 +265,6 @@ próprio Google com "Erro 403: access_denied", mesmo que a pasta do
 Drive já esteja compartilhada corretamente com ele. Esse modo permite
 até 100 usuários cadastrados dessa forma.
 
-### Adicionando manualmente quem já tinha acesso antes desta atualização
-
-No modal da repartição, abaixo da lista de "Habilitados", há um link
-**"+ Adicionar usuário já existente (cadastro anterior)"**. Use isso
-para incluir, na central, alguém que já usava o app antes dessa
-funcionalidade existir (e que já tem acesso de verdade configurado no
-Google) — ele entra direto na lista de **Habilitados**, com a data de
-hoje, sem precisar passar pela etapa de "pendente". Isso é só para
-efeito de registro/visualização — não altera nenhum acesso de verdade.
-
 ### Habilitação automática ao conectar
 
 Além do botão manual "✓ Marcar como habilitado", o app agora também
@@ -317,6 +308,39 @@ segurança (se guardasse, qualquer pessoa com acesso à planilha veria o
 PIN de todo mundo). O PIN é sempre uma trava local, específica de cada
 aparelho; só os dados de identificação (nome, cargo, matrícula,
 repartição) são recuperados da central.
+
+## Foto de perfil e histórico de relatórios entre aparelhos
+
+Desde esta atualização, tanto a **foto de perfil** quanto o **histórico
+de relatórios enviados ao Drive** acompanham o usuário para qualquer
+aparelho em que ele entrar — não ficam mais presos a um único celular.
+
+### Foto de perfil
+
+- Ao trocar a foto (menu ☰ → toque no círculo do avatar), o app já
+  comprime a imagem automaticamente antes de salvar (fica bem leve,
+  poucos KB) e envia essa foto para a central, além de salvar
+  localmente.
+- Ao entrar num aparelho onde esse usuário ainda não tinha foto salva
+  (por exemplo, depois de usar "📲 Já tenho cadastro"), o app busca a
+  foto automaticamente da central e já mostra ela.
+
+### Histórico de relatórios enviados ao Drive
+
+Na tela **"Histórico de relatórios"**, agora há duas seções:
+
+1. **"📤 Enviados ao Drive da repartição"** — busca da central, mostra
+   em qualquer aparelho que o usuário usar. Cada item tem um link
+   **"🔗 Abrir no Drive"**, que abre o arquivo de verdade, direto na
+   pasta da repartição no Google Drive.
+2. **"💾 Neste aparelho"** — o histórico local de sempre (relatórios
+   com todos os detalhes, para reabrir e reimprimir sem precisar de
+   internet).
+
+Essa central de relatórios é alimentada automaticamente sempre que
+alguém usa **"✅ Concluir Tarefa"** com sucesso — o link do Drive que o
+Google devolve no envio é guardado junto, sem nenhuma ação manual
+necessária.
 
 ## Novo fluxo: Home → Formulário → Concluir Tarefa
 
