@@ -175,6 +175,80 @@ institucional, capaz de enviar e-mails de verdade em nome dessa conta.
   para uso interno institucional, não para um sistema público de larga
   escala.
 
+## Reorganização do formulário, login e cadastro (mudanças grandes)
+
+### Formulário — campos automáticos e ocultos
+
+- **Seção 1** agora mostra só Nº do relatório, Finalidade e Local da
+  coleta. Responsável, Data da coleta e os dois Horários continuam
+  preenchidos e presentes no relatório gerado, mas não aparecem mais
+  no formulário — são automáticos:
+  - **Data e horário de início**: gravados sozinhos no momento em que
+    você toca em "📍 Usar localização atual".
+  - **Horário de término**: gravado sozinho no momento em que você
+    toca em "Gerar relatório".
+  - **Responsável pela coleta**: continua vindo do seu cadastro,
+    como já era.
+- **Seção 2** foi reordenada (Usuário/proprietário → Número da linha →
+  Aparelho → Sistema operacional → IMEI) e o campo **"Aplicativo"**
+  foi removido (do formulário e do relatório).
+- **Seção 9 — Cadeia de Custódia**: o campo "Custódia do dispositivo
+  original" agora tem um seletor acima do texto, com duas opções:
+  - **"Repartição"** — preenche automaticamente com o nome da
+    repartição em que você está conectado no momento.
+  - **"Entregue ao usuário/proprietário informado"** — preenche com o
+    nome informado no campo "Usuário/proprietário" da Seção 2, **e**
+    adiciona, no relatório gerado, um bloco extra logo abaixo da sua
+    assinatura: *"Aparelho/dispositivo [nome do aparelho] recebido por
+    [nome do proprietário], em ____, às ___h."*, com dois campos em
+    branco (data e hora) que podem ser preenchidos diretamente no
+    relatório antes de imprimir ou concluir a tarefa, e uma linha para
+    a assinatura física de quem recebeu.
+  Nos dois casos, o texto preenchido automaticamente continua editável
+  manualmente, se precisar ajustar.
+- **Seção 10 — Declaração e Assinatura** não aparece mais no
+  formulário (já que corresponde aos dados de quem está logado) —
+  mas o nome, cargo e matrícula de quem está logado continuam
+  aparecendo normalmente no relatório gerado, como sempre.
+
+### Tela de login
+
+- Removido o texto "Identificação do servidor" / "Selecione seu
+  cadastro para preencher o relatório".
+- O texto abaixo do nome do app agora é o texto completo: "Extração e
+  verificação de integridade de arquivos digitais".
+
+### Cadastro de novo servidor — repartição vem primeiro
+
+- Ao cadastrar um novo servidor, agora só aparece, de início, o
+  seletor **"Repartição"**. Os demais campos (nome, cargo, matrícula,
+  e-mail, telefone) só aparecem depois de uma repartição ser
+  escolhida.
+- Se a repartição desejada ainda não existir, o seletor tem uma opção
+  **"+ Cadastrar repartição"** — escolhendo ela, aparece um mini-
+  formulário (nome, e-mail, Client ID, ID da pasta — os mesmos campos
+  de "Gerenciar Repartições") acima do restante. Depois de salvar, a
+  repartição nova já fica selecionada e os campos de usuário aparecem
+  normalmente.
+- Repartições criadas dessa forma (pelo cadastro de um novo servidor)
+  são automaticamente registradas na aba **"Repartições pendentes de
+  cadastro"** (veja abaixo), já com os dados de quem fez o cadastro —
+  para o administrador saber quem precisa ser habilitado assim que
+  configurar o acesso de verdade no Google Cloud/Drive.
+
+### Conexões — Repartições pendentes de cadastro
+
+Nova seção na tela "Conexões — Repartições", entre "Cadastrar nova
+repartição" e "Repartições cadastradas". Mostra, vindo da central
+(visível em qualquer aparelho), toda repartição recém-criada — seja
+pelo cadastro de um novo servidor, seja pelo próprio formulário
+"Cadastrar nova repartição" desta tela — junto com os dados de quem a
+cadastrou, quando aplicável. Tem um botão 🗑️ para remover da lista
+depois de já ter configurado o acesso manualmente (compartilhamento da
+pasta + usuário de teste no Google Cloud). Remover da lista de
+pendentes **não** apaga a repartição já cadastrada localmente, se
+houver.
+
 ## Repartição e habilitação de novos usuários
 
 Desde esta atualização, o cadastro de um novo servidor pede também a
@@ -327,18 +401,21 @@ aparelho em que ele entrar — não ficam mais presos a um único celular.
 
 ### Histórico de relatórios enviados ao Drive
 
-A tela **"Histórico de relatórios"** continua mostrando o histórico
-local de sempre — relatórios com todos os detalhes, para reabrir e
-reimprimir sem precisar de internet. Cada card agora também indica se
-aquele relatório foi enviado ao Drive (veja "Selo de envio ao Drive"
-logo abaixo), com um link direto **"🔗 Abrir no Drive"** quando o envio
-deu certo.
+A tela **"Histórico de relatórios"** mostra uma lista única, mesclando
+duas fontes:
 
-Nos bastidores, todo envio bem-sucedido feito por **"✅ Concluir
-Tarefa"** também é registrado numa central (planilha), o que permite,
-no futuro, consultar o histórico de relatórios enviados de qualquer
-aparelho — mesmo não havendo hoje uma tela específica para isso no
-app.
+1. **Relatórios gerados neste aparelho** — vêm do armazenamento local,
+   com todos os detalhes (dá pra reabrir e reimprimir sem internet).
+2. **Relatórios enviados de outro aparelho** — vêm da central (a
+   planilha alimentada automaticamente a cada "✅ Concluir Tarefa" bem-
+   sucedido). Esses aparecem com a marcação **"📱 Enviado de outro
+   aparelho"**, só com os dados básicos (número, arquivo, data) e o
+   link **"🔗 Abrir no Drive"** — não há conteúdo local pra reabrir/
+   reimprimir nesse caso, já que o relatório foi gerado em outro
+   celular ou computador.
+
+O app evita duplicar: se um relatório já aparece no histórico local
+(mesmo link do Drive), ele não é repetido como "de outro aparelho".
 
 ### Selo de envio ao Drive no histórico local
 

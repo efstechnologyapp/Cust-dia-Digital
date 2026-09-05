@@ -262,6 +262,56 @@ function doPost(e) {
       return respond({ ok: true, relatorios: relatorios });
     }
 
+    // ---------- repartições pendentes de cadastro ----------
+    if (action === 'register_reparticao_pendente') {
+      var sheet = getOrCreateReparticoesPendentesSheet();
+      sheet.appendRow([
+        data.nome || '',
+        data.email || '',
+        data.clientId || '',
+        data.folderId || '',
+        data.usuarioNome || '',
+        data.usuarioCargo || '',
+        data.usuarioMatricula || '',
+        data.usuarioEmail || '',
+        new Date()
+      ]);
+      return respond({ ok: true });
+    }
+
+    if (action === 'list_reparticoes_pendentes') {
+      var sheet = getOrCreateReparticoesPendentesSheet();
+      var rows = sheet.getDataRange().getValues();
+      var pendentes = [];
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        pendentes.push({
+          rowIndex: i + 1,
+          nome: String(r[0]),
+          email: String(r[1]),
+          clientId: String(r[2]),
+          folderId: String(r[3]),
+          usuarioNome: String(r[4]),
+          usuarioCargo: String(r[5]),
+          usuarioMatricula: String(r[6]),
+          usuarioEmail: String(r[7]),
+          dataCadastro: r[8] ? formatDate_(r[8]) : ''
+        });
+      }
+      pendentes.reverse();
+      return respond({ ok: true, pendentes: pendentes });
+    }
+
+    if (action === 'remove_reparticao_pendente') {
+      var rowIndex = Number(data.rowIndex);
+      if (!rowIndex || rowIndex < 2) {
+        return respond({ ok: false, error: 'Registro inválido.' });
+      }
+      var sheet = getOrCreateReparticoesPendentesSheet();
+      sheet.deleteRow(rowIndex);
+      return respond({ ok: true });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
@@ -313,6 +363,27 @@ function getOrCreateReportsSheet() {
   if (!sheet) {
     sheet = ss.insertSheet('Relatorios');
     sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio']);
+  }
+  return sheet;
+}
+
+function getOrCreateReparticoesPendentesSheet() {
+  var props = PropertiesService.getScriptProperties();
+  var ssId = props.getProperty('USERS_SHEET_ID');
+  var ss = null;
+
+  if (ssId) {
+    try { ss = SpreadsheetApp.openById(ssId); } catch (e) { ss = null; }
+  }
+  if (!ss) {
+    getOrCreateUsersSheet();
+    ss = SpreadsheetApp.openById(props.getProperty('USERS_SHEET_ID'));
+  }
+
+  var sheet = ss.getSheetByName('ReparticoesPendentes');
+  if (!sheet) {
+    sheet = ss.insertSheet('ReparticoesPendentes');
+    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro']);
   }
   return sheet;
 }

@@ -445,6 +445,15 @@
     width: 300px;
     padding-top: 6px;
   }
+  .inline-blank-input{
+    border: none;
+    border-bottom: 1px solid #333;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: center;
+    padding: 0 2px;
+  }
   .badge-match{
     display:inline-block;
     font-family: var(--sans);
@@ -1030,9 +1039,7 @@
   <div class="login-card">
     <div class="logo-badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital"></div>
     <h2 class="app-brand-name">Custódia Digital</h2>
-    <p class="app-brand-tagline">Extração e verificação de integridade</p>
-    <h1>Identificação do servidor</h1>
-    <p class="sub">Selecione seu cadastro para preencher o relatório</p>
+    <p class="app-brand-tagline">Extração e verificação de integridade de arquivos digitais</p>
 
     <div id="loginErrorBox" class="login-error"></div>
 
@@ -1082,51 +1089,76 @@
 
     <div id="loginRegister" class="hidden-view">
       <div class="field">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Nome completo</label>
-        <input type="text" id="regNome" placeholder="Ex.: João da Silva Santos">
-      </div>
-      <div class="field">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Cargo</label>
-        <select id="regCargo">
-          <option value="" disabled selected>Selecione o cargo</option>
-          <option>Servidor Requisitado</option>
-          <option>Agente Administrativo</option>
-          <option>Investigador de Polícia</option>
-          <option>Escrivão de Polícia</option>
-          <option>Perito</option>
-          <option>Delegado de Polícia</option>
-        </select>
-      </div>
-      <div class="field">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
-        <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
-      </div>
-      <div class="field">
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Repartição</label>
         <select id="regReparticao"></select>
       </div>
-      <div class="field" id="regEmailField">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">E-mail</label>
-        <input type="email" id="regEmail" placeholder="Ex.: joao.santos@exemplo.com">
-      </div>
-      <div class="field" id="regTelefoneField">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Telefone (WhatsApp)</label>
-        <input type="tel" id="regTelefone" placeholder="Ex.: (83) 99876-5432">
+
+      <div class="hidden-view" id="regNewReparticaoForm" style="background:#F7F9FB;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:14px;">
+        <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0 0 10px;">Cadastrar nova repartição</h4>
+        <div class="field">
+          <label style="font-size:12px;">Nome da repartição</label>
+          <input type="text" id="regNewRepNome" placeholder="Ex.: 14ª Delegacia de Polícia">
+        </div>
+        <div class="field">
+          <label style="font-size:12px;">E-mail do Cloud/Drive da repartição</label>
+          <input type="email" id="regNewRepEmail" placeholder="Ex.: repartição@gmail.com">
+        </div>
+        <div class="field">
+          <label style="font-size:12px;">Client ID (OAuth)</label>
+          <input type="text" id="regNewRepClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
+        </div>
+        <div class="field">
+          <label style="font-size:12px;">ID da pasta compartilhada no Drive</label>
+          <input type="text" id="regNewRepFolderId" placeholder="Ex.: 1A2b3C4d5E...">
+        </div>
+        <button class="btn-primary" id="regNewRepSaveBtn" style="margin-bottom:6px;">Salvar repartição</button>
+        <div class="loc-status" id="regNewRepStatus"></div>
       </div>
 
-      <div class="field hidden-view" id="regCodeField">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Código recebido por e-mail</label>
-        <input type="text" id="regCode" inputmode="numeric" maxlength="6" placeholder="000000">
-        <button type="button" class="btn-link" id="resendCodeBtn" style="margin-top:6px;font-size:12px;">Reenviar código</button>
-      </div>
+      <div class="hidden-view" id="regRestFields">
+        <div class="field">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Nome completo</label>
+          <input type="text" id="regNome" placeholder="Ex.: João da Silva Santos">
+        </div>
+        <div class="field">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Cargo</label>
+          <select id="regCargo">
+            <option value="" disabled selected>Selecione o cargo</option>
+            <option>Servidor Requisitado</option>
+            <option>Agente Administrativo</option>
+            <option>Investigador de Polícia</option>
+            <option>Escrivão de Polícia</option>
+            <option>Perito</option>
+            <option>Delegado de Polícia</option>
+          </select>
+        </div>
+        <div class="field">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
+          <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
+        </div>
+        <div class="field" id="regEmailField">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">E-mail</label>
+          <input type="email" id="regEmail" placeholder="Ex.: joao.santos@exemplo.com">
+        </div>
+        <div class="field" id="regTelefoneField">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Telefone (WhatsApp)</label>
+          <input type="tel" id="regTelefone" placeholder="Ex.: (83) 99876-5432">
+        </div>
 
-      <div class="field hidden-view" id="regPinField">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Criar PIN (4 dígitos)</label>
-        <input type="password" id="regPin" inputmode="numeric" maxlength="4" placeholder="••••">
-      </div>
+        <div class="field hidden-view" id="regCodeField">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Código recebido por e-mail</label>
+          <input type="text" id="regCode" inputmode="numeric" maxlength="6" placeholder="000000">
+          <button type="button" class="btn-link" id="resendCodeBtn" style="margin-top:6px;font-size:12px;">Reenviar código</button>
+        </div>
 
-      <div class="loc-status" id="regVerifyStatus"></div>
-      <button class="btn-primary" id="registerBtn">Enviar código de verificação</button>
+        <div class="field hidden-view" id="regPinField">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Criar PIN (4 dígitos)</label>
+          <input type="password" id="regPin" inputmode="numeric" maxlength="4" placeholder="••••">
+        </div>
+
+        <div class="loc-status" id="regVerifyStatus"></div>
+        <button class="btn-primary" id="registerBtn">Enviar código de verificação</button>
+      </div>
       <button class="btn-link" id="backToLoginBtn">Voltar</button>
     </div>
 
@@ -1226,6 +1258,15 @@
     </div>
 
     <hr class="sidebar-divider">
+    <div class="field-label-row">
+      <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Repartições pendentes de cadastro</h3>
+      <button type="button" class="btn-inline-share" id="refreshReparticoesPendentesBtn" title="Atualizar lista">🔄</button>
+    </div>
+    <p class="history-sub" style="margin-bottom:8px;">Vem da central — aparecem aqui repartições recém-cadastradas por qualquer aparelho, aguardando você configurar o acesso real no Google Cloud/Drive.</p>
+    <div class="loc-status" id="reparticoesPendentesStatus"></div>
+    <div id="reparticoesPendentesList"></div>
+
+    <hr class="sidebar-divider">
     <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:4px 0 12px;">Repartições cadastradas</h3>
     <div id="reparticoesList"></div>
   </div>
@@ -1312,29 +1353,6 @@
       <input type="text" id="f_relatorio_num" placeholder="Ex.: REL-EXT-2026-0142">
       <div class="hint"><b>Como localizar:</b> numeração sequencial de controle interno da unidade (livro de registro ou planilha de controle).</div>
     </div>
-    <div class="row2">
-      <div class="field">
-        <label>Data da coleta</label>
-        <input type="text" id="f_data_coleta" class="mono" placeholder="dd/mm/aaaa" readonly data-wp="date">
-      </div>
-      <div class="field">
-        <label>Horário de início</label>
-        <input type="text" id="f_horario_inicio" class="mono" placeholder="hh:mm" readonly data-wp="time">
-      </div>
-    </div>
-    <div class="row2">
-      <div class="field">
-        <label>Horário de término</label>
-        <input type="text" id="f_horario_fim" class="mono" placeholder="hh:mm" readonly data-wp="time">
-        <div class="hint"><b>Como localizar:</b> horário do relógio do computador/celular oficial usado na coleta.</div>
-      </div>
-      <div class="field"></div>
-    </div>
-    <div class="field">
-      <label>Responsável pela coleta</label>
-      <input type="text" id="f_responsavel" placeholder="Nome e matrícula funcional">
-      <div class="hint"><b>Como localizar:</b> identificação funcional/crachá do servidor que conduziu a extração.</div>
-    </div>
     <div class="field">
       <label>Finalidade</label>
       <textarea id="f_finalidade" placeholder="Ex.: Extração de conversa de WhatsApp para instrução do procedimento nº ..."></textarea>
@@ -1347,13 +1365,47 @@
         <button type="button" class="btn-loc" id="detectLocBtn">📍 Usar localização atual</button>
       </div>
       <div class="loc-status" id="locStatus"></div>
-      <div class="hint"><b>Como localizar:</b> o botão usa o GPS do aparelho para preencher automaticamente; funciona apenas com o app hospedado em endereço https e permissão de localização concedida. Confira e complete manualmente se necessário.</div>
+      <div class="hint"><b>Como localizar:</b> o botão usa o GPS do aparelho para preencher automaticamente e também registra a data/hora de início da coleta; funciona apenas com o app hospedado em endereço https e permissão de localização concedida. Confira e complete manualmente se necessário.</div>
+    </div>
+
+    <!-- Campos preenchidos automaticamente pelo sistema — ficam ocultos no
+         formulário, mas continuam presentes no relatório gerado. -->
+    <div class="row2 hidden-view">
+      <div class="field">
+        <label>Data da coleta</label>
+        <input type="text" id="f_data_coleta" class="mono" placeholder="dd/mm/aaaa" readonly data-wp="date">
+      </div>
+      <div class="field">
+        <label>Horário de início</label>
+        <input type="text" id="f_horario_inicio" class="mono" placeholder="hh:mm" readonly data-wp="time">
+      </div>
+    </div>
+    <div class="row2 hidden-view">
+      <div class="field">
+        <label>Horário de término</label>
+        <input type="text" id="f_horario_fim" class="mono" placeholder="hh:mm" readonly data-wp="time">
+      </div>
+      <div class="field"></div>
+    </div>
+    <div class="field hidden-view">
+      <label>Responsável pela coleta</label>
+      <input type="text" id="f_responsavel" placeholder="Nome e matrícula funcional">
     </div>
   </section>
 
   <!-- SECTION 2 -->
   <section class="card">
     <h2><span class="num">2</span>Identificação do Dispositivo de Origem</h2>
+    <div class="field">
+      <label>Usuário/proprietário informado</label>
+      <input type="text" id="f_proprietario" placeholder="Nome completo">
+      <div class="hint"><b>Como localizar:</b> não é extraído do aparelho — declarar verbalmente pelo detentor, com conferência de documento de identificação.</div>
+    </div>
+    <div class="field">
+      <label>Número da linha associada</label>
+      <input type="text" id="f_linha" placeholder="Ex.: (83) 9 9876-5432">
+      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Status do SIM. iOS: Ajustes > Telefone > "Meu Número". Se não constar, confirmar com o usuário.</div>
+    </div>
     <div class="field">
       <label>Aparelho</label>
       <input type="text" id="f_aparelho" placeholder="Ex.: Samsung Galaxy A54 5G">
@@ -1377,21 +1429,6 @@
       <div class="loc-status" id="f_imei_ocr_status"></div>
       <div id="f_imei_ocr_candidates"></div>
       <div class="hint"><b>Como localizar:</b> disque *#06# (botão acima) ou anexe um print da tela com o IMEI — o app tenta ler o número automaticamente por OCR, mas sempre exibe o valor encontrado para você confirmar antes de preencher (requer internet só para essa leitura; a leitura pode errar dígitos, então confira sempre).</div>
-    </div>
-    <div class="field">
-      <label>Número da linha associada</label>
-      <input type="text" id="f_linha" placeholder="Ex.: (83) 9 9876-5432">
-      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Status do SIM. iOS: Ajustes > Telefone > "Meu Número". Se não constar, confirmar com o usuário.</div>
-    </div>
-    <div class="field">
-      <label>Usuário/proprietário informado</label>
-      <input type="text" id="f_proprietario" placeholder="Nome completo">
-      <div class="hint"><b>Como localizar:</b> não é extraído do aparelho — declarar verbalmente pelo detentor, com conferência de documento de identificação.</div>
-    </div>
-    <div class="field">
-      <label>Aplicativo</label>
-      <input type="text" id="f_app" placeholder="Ex.: WhatsApp Messenger, versão 2.26.14.78">
-      <div class="hint"><b>Como localizar:</b> dentro do WhatsApp, em Configurações/Ajuda > Informações do app.</div>
     </div>
   </section>
 
@@ -1561,6 +1598,11 @@
     <h2><span class="num">9</span>Cadeia de Custódia</h2>
     <div class="field">
       <label>Custódia do dispositivo original</label>
+      <select id="f_custodia_original_tipo" style="margin-bottom:8px;">
+        <option value="">Selecione uma opção…</option>
+        <option value="reparticao">Repartição</option>
+        <option value="proprietario">Entregue ao usuário/proprietário informado</option>
+      </select>
       <textarea id="f_custodia_dispositivo" placeholder="Ex.: Devolvido ao(à) proprietário(a) em .../.../..., às ..., mediante recibo"></textarea>
     </div>
     <div class="field">
@@ -1577,8 +1619,8 @@
     </div>
   </section>
 
-  <!-- SECTION 10 -->
-  <section class="card">
+  <!-- SECTION 10 (oculta — dados vêm do usuário logado; permanece no relatório) -->
+  <section class="card hidden-view">
     <h2><span class="num">10</span>Declaração e Assinatura</h2>
     <div class="field">
       <label>Nome de quem assina</label>
@@ -1874,6 +1916,7 @@ $('repSelect').addEventListener('change', () => {
   gisTokenClient = null;
   setDriveConnectedFlag(false);
   updateDriveStatusUI(false);
+  updateCustodiaOriginalReparticaoLabel();
 });
 
 // ---------- página de gerenciamento de repartições ----------
@@ -2032,10 +2075,15 @@ $('saveReparticaoBtn').addEventListener('click', () => {
   const list = loadReparticoes();
   list.push({ id: 'rep-' + Date.now(), nome, email, clientId, folderId });
   saveReparticoesList(list);
+  // avisa a central, para outros aparelhos também saberem que essa
+  // repartição existe (sem usuário associado, pois foi cadastrada por
+  // quem já administra o app)
+  callAppsScript({ action: 'register_reparticao_pendente', nome, email, clientId, folderId }).catch(() => {});
   resetNewReparticaoForm();
   $('newReparticaoForm').classList.add('hidden-view');
   renderReparticoesManageList();
   renderRepSelectDropdown();
+  renderReparticoesPendentesList();
 });
 
 $('saveReparticaoEditBtn').addEventListener('click', () => {
@@ -2066,11 +2114,67 @@ $('closeEditRepBtn').addEventListener('click', closeEditReparticaoModal);
 $('cancelEditRepBtn').addEventListener('click', closeEditReparticaoModal);
 $('editRepOverlay').addEventListener('click', (e) => { if(e.target.id === 'editRepOverlay') closeEditReparticaoModal(); });
 
+async function renderReparticoesPendentesList(){
+  const statusEl = $('reparticoesPendentesStatus');
+  const listEl = $('reparticoesPendentesList');
+  listEl.innerHTML = '';
+  statusEl.textContent = 'Carregando…';
+  statusEl.className = 'loc-status';
+  try {
+    const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
+    statusEl.textContent = '';
+    if(!data.pendentes || data.pendentes.length === 0){
+      listEl.innerHTML = '<div class="rep-users-empty">Nenhuma repartição pendente.</div>';
+      return;
+    }
+    listEl.innerHTML = data.pendentes.map(p => `
+      <div class="reparticao-card">
+        <div class="reparticao-card-top">
+          <div class="reparticao-card-nome">${esc(p.nome)}</div>
+          <div class="reparticao-card-icons">
+            <button data-remove="${p.rowIndex}" title="Remover" aria-label="Remover">🗑️</button>
+          </div>
+        </div>
+        <div class="reparticao-card-detail">E-mail: ${esc(p.email)}</div>
+        <div class="reparticao-card-detail">Client ID: ${esc(p.clientId)}</div>
+        <div class="reparticao-card-detail">Pasta: ${esc(p.folderId)}</div>
+        <div class="reparticao-card-detail">Cadastrada em: ${esc(p.dataCadastro)}</div>
+        ${p.usuarioNome ? `
+          <div class="rep-users-section-title" style="margin:10px 0 4px;">Cadastrada pelo usuário</div>
+          <div class="rep-user-card" style="margin-bottom:0;">
+            <div class="rep-user-nome">${esc(p.usuarioNome)} (${esc(p.usuarioEmail)})</div>
+            <div class="rep-user-detail">${esc(p.usuarioCargo)} — matrícula ${esc(p.usuarioMatricula)}</div>
+          </div>
+        ` : ''}
+      </div>
+    `).join('');
+    listEl.querySelectorAll('button[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => removeReparticaoPendente(btn.dataset.remove));
+    });
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
+async function removeReparticaoPendente(rowIndex){
+  if(!confirm('Remover esta repartição da lista de pendentes? Isso não afeta a repartição já cadastrada localmente, se houver.')) return;
+  try {
+    await callAppsScript({ action: 'remove_reparticao_pendente', rowIndex });
+    renderReparticoesPendentesList();
+  } catch(err){
+    alert('Não foi possível remover: ' + err.message);
+  }
+}
+
+$('refreshReparticoesPendentesBtn').addEventListener('click', renderReparticoesPendentesList);
+
 $('openConnectionsBtn').addEventListener('click', () => {
   $('sidebarOverlay').classList.remove('open');
   $('newReparticaoForm').classList.add('hidden-view');
   resetNewReparticaoForm();
   renderReparticoesManageList();
+  renderReparticoesPendentesList();
   showView('connections');
 });
 $('connectionsBackBtn').addEventListener('click', () => { showView('home'); });
@@ -2268,6 +2372,23 @@ async function handleCustodyShare(){
   }
 }
 $('shareRepBtn').addEventListener('click', handleCustodyShare);
+
+// ---------- Seção 9: seletor de custódia do dispositivo original ----------
+function updateCustodiaOriginalReparticaoLabel(){
+  const rep = getSelectedReparticao();
+  const opt = document.querySelector('#f_custodia_original_tipo option[value="reparticao"]');
+  if(opt) opt.textContent = rep ? `Repartição (${rep.nome})` : 'Repartição';
+}
+$('f_custodia_original_tipo').addEventListener('change', () => {
+  const tipo = $('f_custodia_original_tipo').value;
+  const rep = getSelectedReparticao();
+  if(tipo === 'reparticao'){
+    $('f_custodia_dispositivo').value = `Permanece em custódia da repartição${rep ? ' ' + rep.nome : ''}.`;
+  } else if(tipo === 'proprietario'){
+    const nomeProprietario = $('f_proprietario').value || '(nome não informado)';
+    $('f_custodia_dispositivo').value = `Devolvido ao(à) proprietário(a) informado(a), ${nomeProprietario}, mediante recibo.`;
+  }
+});
 
 function setupFileAttach({ btnId, inputId, nameId, statusId, hashFieldId, nomeFieldId, tamanhoFieldId, modificacaoFieldId, horaHashFieldId, attachKey }){
   const btn = $(btnId), input = $(inputId), nameEl = $(nameId), statusEl = $(statusId);
@@ -2505,6 +2626,13 @@ $('detectLocBtn').addEventListener('click', () => {
     } catch(e){ /* sem internet ou serviço indisponível — segue só com coordenadas */ }
 
     $('f_local_coleta').value = address ? `${address}\nCoordenadas: ${coordsText}` : `Coordenadas: ${coordsText}`;
+
+    // registra automaticamente a data e o horário de início da coleta,
+    // no momento exato em que a localização é obtida
+    const nowStart = new Date();
+    $('f_data_coleta').value = `${pad2(nowStart.getDate())}/${pad2(nowStart.getMonth()+1)}/${nowStart.getFullYear()}`;
+    $('f_horario_inicio').value = `${pad2(nowStart.getHours())}:${pad2(nowStart.getMinutes())}`;
+
     statusEl.textContent = address ? 'Endereço obtido por geolocalização — confira antes de gerar o relatório.' : 'Apenas coordenadas obtidas (endereço não pôde ser determinado) — complete manualmente se necessário.';
     statusEl.className = 'loc-status ok';
     btn.disabled = false;
@@ -2533,6 +2661,7 @@ let editingIndex = null; // null = cadastro novo; número = editando perfil exis
 let regStage = 'info'; // 'info' | 'code' | 'pin' | 'edit'
 let pendingRegEmail = '';
 let pendingRegReparticaoId = '';
+let pendingNewReparticaoData = null; // repartição criada durante o próprio cadastro do usuário
 
 // ---------- verificação de e-mail (Google Apps Script) ----------
 const EMAIL_VERIFY_URL_KEY = 'extracao_wa_email_verify_url';
@@ -2640,13 +2769,6 @@ function populateRegReparticaoSelect(selectedId){
   const list = loadReparticoes();
   const sel = $('regReparticao');
   sel.innerHTML = '';
-  if(list.length === 0){
-    const opt = document.createElement('option');
-    opt.textContent = 'Nenhuma repartição cadastrada';
-    opt.disabled = true; opt.selected = true;
-    sel.appendChild(opt);
-    return;
-  }
   const placeholder = document.createElement('option');
   placeholder.value = '';
   placeholder.textContent = 'Selecione a repartição';
@@ -2658,6 +2780,11 @@ function populateRegReparticaoSelect(selectedId){
     opt.textContent = r.nome;
     sel.appendChild(opt);
   });
+  const newOpt = document.createElement('option');
+  newOpt.value = '__new__';
+  newOpt.textContent = '+ Cadastrar repartição';
+  sel.appendChild(newOpt);
+
   if(selectedId && list.some(r => r.id === selectedId)){
     sel.value = selectedId;
   } else {
@@ -2672,10 +2799,12 @@ function showRegisterPanel({ editMode, reparticaoId }){
   $('loginRegister').classList.remove('hidden-view');
   $('regVerifyStatus').textContent = '';
   $('regCodeField').classList.add('hidden-view');
+  $('regNewReparticaoForm').classList.add('hidden-view');
   $('backToLoginBtn').textContent = editMode ? 'Cancelar' : 'Voltar';
   populateRegReparticaoSelect(reparticaoId);
   if(editMode){
     regStage = 'edit';
+    $('regRestFields').classList.remove('hidden-view');
     $('regPinField').classList.remove('hidden-view');
     $('registerBtn').textContent = 'Salvar alterações';
     $('regPin').placeholder = 'Deixe em branco para manter';
@@ -2683,11 +2812,53 @@ function showRegisterPanel({ editMode, reparticaoId }){
     regStage = 'info';
     pendingRegEmail = '';
     pendingRegReparticaoId = '';
+    pendingNewReparticaoData = null;
+    $('regRestFields').classList.toggle('hidden-view', !reparticaoId);
     $('regPinField').classList.add('hidden-view');
     $('registerBtn').textContent = 'Enviar código de verificação';
     $('regPin').placeholder = '••••';
   }
 }
+
+$('regReparticao').addEventListener('change', () => {
+  if(regStage === 'edit') return; // na edição, os campos já ficam sempre visíveis
+  const val = $('regReparticao').value;
+  if(val === '__new__'){
+    $('regNewReparticaoForm').classList.remove('hidden-view');
+    $('regRestFields').classList.add('hidden-view');
+  } else if(val){
+    $('regNewReparticaoForm').classList.add('hidden-view');
+    $('regRestFields').classList.remove('hidden-view');
+  } else {
+    $('regNewReparticaoForm').classList.add('hidden-view');
+    $('regRestFields').classList.add('hidden-view');
+  }
+});
+
+$('regNewRepSaveBtn').addEventListener('click', () => {
+  const nome = $('regNewRepNome').value.trim();
+  const email = $('regNewRepEmail').value.trim();
+  const clientId = $('regNewRepClientId').value.trim();
+  const folderId = $('regNewRepFolderId').value.trim();
+  const statusEl = $('regNewRepStatus');
+  if(!nome || !email || !clientId || !folderId){
+    statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const list = loadReparticoes();
+  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId };
+  list.push(newRep);
+  saveReparticoesList(list);
+  // guardado para, ao concluir o cadastro do usuário, avisar a central
+  // com os dados da repartição + de quem a cadastrou
+  pendingNewReparticaoData = { nome, email, clientId, folderId };
+  populateRegReparticaoSelect(newRep.id);
+  $('regReparticao').value = newRep.id;
+  $('regNewReparticaoForm').classList.add('hidden-view');
+  $('regRestFields').classList.remove('hidden-view');
+  statusEl.textContent = '';
+});
 
 $('showRegisterBtn').addEventListener('click', () => {
   editingIndex = null;
@@ -3007,6 +3178,24 @@ $('registerBtn').addEventListener('click', () => {
       reparticaoNome: rep ? rep.nome : ''
     }).catch(() => { /* cadastro local já concluído; a sincronização pode ser tentada depois */ });
 
+    // se este cadastro também criou uma repartição nova, avisa a central
+    // (com os dados de quem cadastrou, para o administrador habilitar no
+    // Google Cloud e compartilhar a pasta do Drive)
+    if(pendingNewReparticaoData){
+      callAppsScript({
+        action: 'register_reparticao_pendente',
+        nome: pendingNewReparticaoData.nome,
+        email: pendingNewReparticaoData.email,
+        clientId: pendingNewReparticaoData.clientId,
+        folderId: pendingNewReparticaoData.folderId,
+        usuarioNome: nome,
+        usuarioCargo: cargo,
+        usuarioMatricula: matricula,
+        usuarioEmail: pendingRegEmail
+      }).catch(() => {});
+      pendingNewReparticaoData = null;
+    }
+
     loginAs(list.length - 1);
   }
 });
@@ -3203,7 +3392,7 @@ $('editProfileBtn').addEventListener('click', () => {
   showRegisterPanel({ editMode:true, reparticaoId: currentUser.reparticaoId });
 });
 
-$('startFormBtn').addEventListener('click', () => { showView('form'); });
+$('startFormBtn').addEventListener('click', () => { updateCustodiaOriginalReparticaoLabel(); showView('form'); });
 
 // restaura sessão ativa, se houver
 (function initSession(){
@@ -3327,6 +3516,18 @@ function buildReport(){
   const dataColeta = v('f_data_coleta');
   const horarioRange = [v('f_horario_inicio'), v('f_horario_fim')].filter(Boolean).join(' às ');
 
+  let custodiaProprietarioHtml = '';
+  if(v('f_custodia_original_tipo') === 'proprietario'){
+    const nomeProprietario = esc(v('f_proprietario')) || '(nome não informado)';
+    const nomeAparelho = esc(v('f_aparelho')) || '(aparelho não informado)';
+    custodiaProprietarioHtml = `
+      <div class="sig-block">
+        <p class="body-text">Aparelho/dispositivo ${nomeAparelho} recebido por ${nomeProprietario}, em <input type="text" class="inline-blank-input" style="width:78px;" value="">, às <input type="text" class="inline-blank-input" style="width:44px;" value="">h.</p>
+        <div class="sig-line">&nbsp;</div>
+      </div>
+    `;
+  }
+
   const html = `
     <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E VERIFICAÇÃO DE INTEGRIDADE</h1>
     <p class="subtitle">Arquivo de conversa do WhatsApp extraído de dispositivo móvel</p>
@@ -3347,7 +3548,6 @@ function buildReport(){
       ${row('IMEI', v('f_imei'))}
       ${row('Número da linha associada', v('f_linha'))}
       ${row('Usuário/proprietário informado', v('f_proprietario'))}
-      ${row('Aplicativo', v('f_app'))}
     </table>
 
     <h2>3. Arquivo Extraído (Original)</h2>
@@ -3415,6 +3615,7 @@ function buildReport(){
         Data e hora da emissão: ${emissaoTexto}
       </div>
     </div>
+    ${custodiaProprietarioHtml}
   `;
   $('reportPaper').innerHTML = html;
 }
@@ -3658,6 +3859,9 @@ async function concludeTask(){
 
 // ---------- view switching ----------
 $('generateBtn').addEventListener('click', () => {
+  // registra automaticamente o horário de término no exato momento em que o relatório é gerado
+  const nowEnd = new Date();
+  $('f_horario_fim').value = `${pad2(nowEnd.getHours())}:${pad2(nowEnd.getMinutes())}`;
   buildReport();
   cameFromHistory = false;
   $('backBtn').textContent = '✅ Concluir Tarefa';
