@@ -342,6 +342,21 @@ alguém usa **"✅ Concluir Tarefa"** com sucesso — o link do Drive que o
 Google devolve no envio é guardado junto, sem nenhuma ação manual
 necessária.
 
+### Selo de envio ao Drive no histórico local
+
+Cada relatório listado em **"💾 Neste aparelho"** agora mostra um selo:
+- **"☁️ Enviado ao Drive"** (verde, clicável) — o envio ao Drive da
+  repartição deu certo ao concluir aquela tarefa; toque para abrir o
+  arquivo direto no Drive.
+- **"☁️ Não enviado ao Drive"** (cinza) — por algum motivo o envio não
+  aconteceu (sem conexão no momento, falha de rede, repartição sem
+  Client ID/pasta configurados, etc.). O relatório continua salvo
+  normalmente neste aparelho, só não foi parar no Drive.
+
+Isso ajuda a identificar rapidamente relatórios que precisam ser
+reenviados manualmente (reabrindo o relatório e reenviando pela Seção 9,
+por exemplo), sem precisar adivinhar o que já chegou à repartição.
+
 ## Conexão obrigatória antes de iniciar o formulário
 
 A partir desta atualização, a tela inicial (Home) só mostra o botão

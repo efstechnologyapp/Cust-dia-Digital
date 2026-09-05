@@ -3447,7 +3447,7 @@ function saveHistoryList(list){
   localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
 }
 function saveReportToHistory(){
-  if(!currentUser) return;
+  if(!currentUser) return null;
   const meta = window.__lastReportMeta || {};
   const record = {
     id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
@@ -3457,11 +3457,25 @@ function saveReportToHistory(){
     cargo: meta.cargo || '',
     emissao: meta.emissao || '',
     hashStatus: meta.hashStatus || 'neutral',
-    html: $('reportPaper').innerHTML
+    html: $('reportPaper').innerHTML,
+    enviadoDrive: false,
+    driveLink: ''
   };
   const list = loadHistory();
   list.unshift(record);
   saveHistoryList(list.slice(0, 200)); // limite de segurança para não crescer sem controle
+  return record.id;
+}
+
+function markHistoryRecordDriveSent(id, driveLink){
+  if(!id) return;
+  const list = loadHistory();
+  const idx = list.findIndex(r => r.id === id);
+  if(idx >= 0){
+    list[idx].enviadoDrive = true;
+    list[idx].driveLink = driveLink || '';
+    saveHistoryList(list);
+  }
 }
 
 function renderHistoryList(){
@@ -3480,6 +3494,11 @@ function renderHistoryList(){
   mine.forEach(record => {
     const badgeClass = record.hashStatus === 'ok' ? 'ok' : (record.hashStatus === 'warn' ? 'warn' : 'neutral');
     const badgeText = record.hashStatus === 'ok' ? 'HASHES IDÊNTICOS' : (record.hashStatus === 'warn' ? 'VERIFICAR HASHES' : 'NÃO VERIFICADO');
+    const driveBadge = record.enviadoDrive
+      ? (record.driveLink
+          ? `<a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-badge ok" style="text-decoration:none;">☁️ Enviado ao Drive</a>`
+          : `<span class="history-badge ok">☁️ Enviado ao Drive</span>`)
+      : `<span class="history-badge neutral">☁️ Não enviado ao Drive</span>`;
 
     const card = document.createElement('div');
     card.className = 'history-card';
@@ -3489,7 +3508,10 @@ function renderHistoryList(){
         <div class="history-card-date">${esc(record.emissao || '')}</div>
       </div>
       <div class="history-card-row"><b>Responsável:</b> ${esc(record.responsavel || '—')}${record.cargo ? ' — ' + esc(record.cargo) : ''}</div>
-      <span class="history-badge ${badgeClass}">${badgeText}</span>
+      <div style="margin:4px 0;">
+        <span class="history-badge ${badgeClass}">${badgeText}</span>
+        ${driveBadge}
+      </div>
       <div class="history-card-actions">
         <button data-action="open">Abrir</button>
         <button data-action="delete" class="danger">Excluir</button>
@@ -3616,7 +3638,7 @@ async function concludeTask(){
   btn.disabled = true;
   const originalText = btn.textContent;
 
-  saveReportToHistory();
+  const historyId = saveReportToHistory();
 
   const rep = getSelectedReparticao();
   if(rep && rep.clientId && rep.folderId){
@@ -3625,6 +3647,7 @@ async function concludeTask(){
       const file = await generateReportFile();
       btn.textContent = 'Enviando ao Drive…';
       const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, { textContent: '' });
+      markHistoryRecordDriveSent(historyId, result.webViewLink || '');
       // registra na central, para o histórico aparecer em qualquer aparelho
       if(currentUser && currentUser.email){
         callAppsScript({
