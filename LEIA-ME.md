@@ -342,6 +342,23 @@ alguém usa **"✅ Concluir Tarefa"** com sucesso — o link do Drive que o
 Google devolve no envio é guardado junto, sem nenhuma ação manual
 necessária.
 
+## Conexão obrigatória antes de iniciar o formulário
+
+A partir desta atualização, a tela inicial (Home) só mostra o botão
+**"▶️ Iniciar Formulário"** depois que o usuário estiver **conectado ao
+Google Drive** naquela sessão. Enquanto não conectado, aparece no lugar
+o botão **"🔒 Conecte-se à repartição"**, que abre a barra lateral
+diretamente no botão "Conectar" — bastando um toque a mais para
+completar a conexão e liberar o formulário.
+
+Isso evita a situação de alguém preencher todo o relatório e só
+descobrir na hora de gerar/enviar que esqueceu de conectar. Como a
+conexão dura só enquanto a página estiver aberta (token expira em
+cerca de 1h, ou some ao fechar/recarregar o app — veja a seção sobre
+conexão "permanente" mais abaixo), o botão "Conecte-se à repartição"
+pode voltar a aparecer depois de um tempo, mesmo que a pessoa já
+tivesse conectado antes naquele mesmo dia — isso é esperado.
+
 ## Novo fluxo: Home → Formulário → Concluir Tarefa
 
 O app agora tem uma tela inicial ("Home") separada do formulário:

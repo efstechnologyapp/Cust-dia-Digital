@@ -1290,6 +1290,7 @@
   </header>
   <div class="home-start-wrap">
     <button class="btn-generate" id="startFormBtn">▶️ Iniciar Formulário</button>
+    <button class="btn-generate hidden-view" id="connectRepBtn">🔒 Conecte-se à repartição</button>
   </div>
 </div>
 
@@ -2104,6 +2105,12 @@ function updateDriveStatusUI(connected){
   $('driveStatusText').textContent = connected ? 'Conectado ao Google Drive' : 'Desconectado do Google Drive';
   $('driveConnectBtn').textContent = connected ? 'Desconectar' : 'Conectar';
   $('driveConnectBtn').className = connected ? 'sidebar-btn danger' : 'sidebar-btn';
+  updateHomeStartButtonState(connected);
+}
+
+function updateHomeStartButtonState(connected){
+  $('startFormBtn').classList.toggle('hidden-view', !connected);
+  $('connectRepBtn').classList.toggle('hidden-view', connected);
 }
 
 function getDriveAccessToken(clientId, opts){
@@ -3088,6 +3095,7 @@ function enterApp(){
   showView('home');
   refreshUserUI();
   renderRepSelectDropdown();
+  reflectStoredDriveStatus();
   // autopreenche Responsável pela coleta se estiver vazio
   const respField = $('f_responsavel');
   if(!respField.value.trim()){
@@ -3141,7 +3149,14 @@ $('deleteProfileBtn').addEventListener('click', () => {
 });
 
 // ---------- barra lateral ----------
-$('openSidebarBtn').addEventListener('click', () => { refreshUserUI(); renderRepSelectDropdown(); reflectStoredDriveStatus(); $('sidebarOverlay').classList.add('open'); });
+function openSidebar(){
+  refreshUserUI();
+  renderRepSelectDropdown();
+  reflectStoredDriveStatus();
+  $('sidebarOverlay').classList.add('open');
+}
+$('openSidebarBtn').addEventListener('click', openSidebar);
+$('connectRepBtn').addEventListener('click', openSidebar);
 $('closeSidebarBtn').addEventListener('click', () => $('sidebarOverlay').classList.remove('open'));
 $('sidebarOverlay').addEventListener('click', (e) => { if(e.target.id === 'sidebarOverlay') $('sidebarOverlay').classList.remove('open'); });
 
