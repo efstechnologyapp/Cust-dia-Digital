@@ -3241,7 +3241,7 @@ function updateHashCompare(){
 ['f_hash_original','f_hash_copia'].forEach(id => $(id).addEventListener('input', updateHashCompare));
 
 function esc(s){
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function row(label, value, mono){

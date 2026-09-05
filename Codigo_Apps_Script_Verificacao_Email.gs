@@ -108,10 +108,10 @@ function doPost(e) {
         if (String(r[4]) !== reparticaoId) continue;
         var user = {
           rowIndex: i + 1,
-          nome: r[0],
-          email: r[1],
-          cargo: r[2],
-          matricula: r[3],
+          nome: String(r[0]),
+          email: String(r[1]),
+          cargo: String(r[2]),
+          matricula: String(r[3]),
           habilitado: !!r[6],
           habilitadoEm: r[7] ? formatDate_(r[7]) : ''
         };
@@ -148,8 +148,8 @@ function doPost(e) {
         if (String(r[1]).toLowerCase() === email) {
           return respond({
             ok: true, found: true,
-            nome: r[0], cargo: r[2], matricula: r[3],
-            reparticaoId: r[4], reparticaoNome: r[5]
+            nome: String(r[0]), cargo: String(r[2]), matricula: String(r[3]),
+            reparticaoId: String(r[4]), reparticaoNome: String(r[5])
           });
         }
       }
