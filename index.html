@@ -3462,14 +3462,26 @@ function markHistoryRecordDriveSent(id, driveLink){
   }
 }
 
-function renderHistoryList(){
+async function renderHistoryList(){
   const container = $('historyList');
   const emptyMsg = $('historyEmpty');
   container.innerHTML = '';
   const all = loadHistory();
   const mine = currentUser ? all.filter(r => r.matricula === currentUser.matricula) : [];
 
-  if(mine.length === 0){
+  // busca da central os relatórios que este usuário enviou de QUALQUER
+  // aparelho, e mantém só os que ainda não existem no histórico local
+  // (evita duplicar quando o relatório foi gerado neste mesmo aparelho)
+  const localDriveLinks = new Set(mine.filter(r => r.driveLink).map(r => r.driveLink));
+  let centralOnly = [];
+  if(currentUser && currentUser.email){
+    try {
+      const data = await callAppsScript({ action: 'list_reports', email: currentUser.email });
+      centralOnly = (data.relatorios || []).filter(r => r.driveLink && !localDriveLinks.has(r.driveLink));
+    } catch(e){ /* falha silenciosa: mostra ao menos o histórico local */ }
+  }
+
+  if(mine.length === 0 && centralOnly.length === 0){
     emptyMsg.classList.remove('hidden-view');
     return;
   }
@@ -3505,6 +3517,25 @@ function renderHistoryList(){
     `;
     card.querySelector('[data-action="open"]').addEventListener('click', () => openHistoryRecord(record.id));
     card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteHistoryRecord(record.id));
+    container.appendChild(card);
+  });
+
+  // relatórios enviados de OUTRO aparelho: não há conteúdo local para
+  // reabrir/imprimir, então o card só mostra os dados básicos + o link do Drive
+  centralOnly.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'history-card';
+    card.innerHTML = `
+      <div class="history-card-top">
+        <div class="history-card-num">${esc(r.relatorioNum || r.arquivo || 'Sem número')}</div>
+        <div class="history-card-date">${esc(r.dataEnvio || '')}</div>
+      </div>
+      <div class="history-card-row" style="color:var(--muted);font-style:italic;">📱 Enviado de outro aparelho</div>
+      <div style="margin:4px 0;">
+        <span class="history-badge ok">☁️ Enviado ao Drive</span>
+      </div>
+      <div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>
+    `;
     container.appendChild(card);
   });
 }
