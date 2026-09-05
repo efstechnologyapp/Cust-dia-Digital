@@ -80,6 +80,7 @@ function doPost(e) {
     // ---------- registro de usuário por repartição ----------
     if (action === 'register_user') {
       var email = (data.email || '').trim().toLowerCase();
+      var jaHabilitado = data.habilitado === true;
       var sheet = getOrCreateUsersSheet();
       sheet.appendRow([
         data.nome || '',
@@ -88,8 +89,8 @@ function doPost(e) {
         data.matricula || '',
         data.reparticaoId || '',
         data.reparticaoNome || '',
-        false,
-        '',
+        jaHabilitado,
+        jaHabilitado ? new Date() : '',
         new Date()
       ]);
       return respond({ ok: true });

@@ -264,6 +264,16 @@ próprio Google com "Erro 403: access_denied", mesmo que a pasta do
 Drive já esteja compartilhada corretamente com ele. Esse modo permite
 até 100 usuários cadastrados dessa forma.
 
+### Adicionando manualmente quem já tinha acesso antes desta atualização
+
+No modal da repartição, abaixo da lista de "Habilitados", há um link
+**"+ Adicionar usuário já existente (cadastro anterior)"**. Use isso
+para incluir, na central, alguém que já usava o app antes dessa
+funcionalidade existir (e que já tem acesso de verdade configurado no
+Google) — ele entra direto na lista de **Habilitados**, com a data de
+hoje, sem precisar passar pela etapa de "pendente". Isso é só para
+efeito de registro/visualização — não altera nenhum acesso de verdade.
+
 ## Novo fluxo: Home → Formulário → Concluir Tarefa
 
 O app agora tem uma tela inicial ("Home") separada do formulário:

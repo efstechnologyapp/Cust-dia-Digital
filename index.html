@@ -1210,6 +1210,28 @@
 
     <div class="rep-users-section-title">✅ Habilitados</div>
     <div id="repUsersHabilitados"></div>
+
+    <button type="button" class="btn-link" id="toggleAddLegacyUserBtn" style="font-size:12px;margin-top:6px;">+ Adicionar usuário já existente (cadastro anterior)</button>
+    <div class="hidden-view" id="addLegacyUserForm" style="margin-top:10px;">
+      <div class="field">
+        <label style="font-size:12px;">Nome completo</label>
+        <input type="text" id="legacyNome">
+      </div>
+      <div class="field">
+        <label style="font-size:12px;">E-mail</label>
+        <input type="email" id="legacyEmail">
+      </div>
+      <div class="field">
+        <label style="font-size:12px;">Cargo</label>
+        <input type="text" id="legacyCargo">
+      </div>
+      <div class="field">
+        <label style="font-size:12px;">Matrícula</label>
+        <input type="text" id="legacyMatricula">
+      </div>
+      <button class="btn-primary" id="saveLegacyUserBtn" style="margin-bottom:6px;">Adicionar como habilitado</button>
+      <div class="loc-status" id="legacyUserStatus"></div>
+    </div>
   </div>
 </div>
 
@@ -1871,6 +1893,7 @@ function startEditReparticao(id){
 function closeEditReparticaoModal(){
   editingReparticaoId = null;
   $('editRepOverlay').classList.remove('open');
+  $('addLegacyUserForm').classList.add('hidden-view');
 }
 
 // ---------- usuários cadastrados por repartição (central via Apps Script) ----------
@@ -1933,6 +1956,47 @@ async function enableRepUser(rowIndex, reparticaoId){
 
 $('refreshRepUsersBtn').addEventListener('click', () => {
   if(editingReparticaoId) renderRepUsersLists(editingReparticaoId);
+});
+
+$('toggleAddLegacyUserBtn').addEventListener('click', () => {
+  const form = $('addLegacyUserForm');
+  const opening = form.classList.contains('hidden-view');
+  if(opening){
+    $('legacyNome').value = ''; $('legacyEmail').value = '';
+    $('legacyCargo').value = ''; $('legacyMatricula').value = '';
+    $('legacyUserStatus').textContent = '';
+  }
+  form.classList.toggle('hidden-view');
+});
+
+$('saveLegacyUserBtn').addEventListener('click', async () => {
+  const nome = $('legacyNome').value.trim();
+  const email = $('legacyEmail').value.trim();
+  const cargo = $('legacyCargo').value.trim();
+  const matricula = $('legacyMatricula').value.trim();
+  const statusEl = $('legacyUserStatus');
+  if(!nome || !email || !cargo || !matricula){
+    statusEl.textContent = 'Preencha todos os campos.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const rep = loadReparticoes().find(r => r.id === editingReparticaoId);
+  statusEl.textContent = 'Adicionando…';
+  statusEl.className = 'loc-status';
+  try {
+    await callAppsScript({
+      action: 'register_user',
+      nome, email, cargo, matricula,
+      reparticaoId: editingReparticaoId,
+      reparticaoNome: rep ? rep.nome : '',
+      habilitado: true
+    });
+    $('addLegacyUserForm').classList.add('hidden-view');
+    renderRepUsersLists(editingReparticaoId);
+  } catch(err){
+    statusEl.textContent = 'Não foi possível adicionar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
 });
 
 function deleteReparticao(id){
@@ -2450,7 +2514,7 @@ let pendingRegReparticaoId = '';
 
 // ---------- verificação de e-mail (Google Apps Script) ----------
 const EMAIL_VERIFY_URL_KEY = 'extracao_wa_email_verify_url';
-const DEFAULT_EMAIL_VERIFY_URL = 'https://script.google.com/macros/s/AKfycbyFIamYib5OaR8RnMMpN5khItxeLOAV74N0S86k3YZkYzAZ6FUUfw_CpB3utNPFQFnG8Q/exec';
+const DEFAULT_EMAIL_VERIFY_URL = 'https://script.google.com/macros/s/AKfycbwIDmsszH3ubdMTMP3TySebkioGloDR7Mn2dSGwYCbKbg-jGtOpIdxaxWSs14t96rMHnw/exec';
 
 function getEmailVerifyUrl(){ return localStorage.getItem(EMAIL_VERIFY_URL_KEY) || DEFAULT_EMAIL_VERIFY_URL; }
 function setEmailVerifyUrl(url){ localStorage.setItem(EMAIL_VERIFY_URL_KEY, url); }
