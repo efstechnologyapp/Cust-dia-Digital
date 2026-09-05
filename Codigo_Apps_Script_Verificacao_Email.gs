@@ -28,7 +28,7 @@ function doPost(e) {
     var data = JSON.parse(e.postData.contents);
     var action = data.action;
 
-    if (action === 'send' || action === 'verify' || action === 'register_user') {
+    if (action === 'send' || action === 'verify' || action === 'register_user' || action === 'get_user') {
       var email = (data.email || '').trim().toLowerCase();
       if (!email) {
         return respond({ ok: false, error: 'E-mail não informado.' });
@@ -137,6 +137,25 @@ function doPost(e) {
     // conecta com sucesso ao Google Drive (chamado pelo app, não exige
     // e-mail no formato do bloco de validação geral, por isso trata aqui
     // separadamente e sempre responde ok, mesmo se não encontrar nada)
+    // busca o cadastro de alguém pelo e-mail, para permitir entrar num
+    // novo aparelho sem reescrever nome/cargo/matrícula/repartição
+    if (action === 'get_user') {
+      var email = (data.email || '').trim().toLowerCase();
+      var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        if (String(r[1]).toLowerCase() === email) {
+          return respond({
+            ok: true, found: true,
+            nome: r[0], cargo: r[2], matricula: r[3],
+            reparticaoId: r[4], reparticaoNome: r[5]
+          });
+        }
+      }
+      return respond({ ok: true, found: false });
+    }
+
     if (action === 'auto_enable') {
       var email = (data.email || '').trim().toLowerCase();
       var reparticaoId = String(data.reparticaoId || '');

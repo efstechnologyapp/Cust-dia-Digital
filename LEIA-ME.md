@@ -293,6 +293,31 @@ botão manual continua disponível para corrigir/reverter, e o
 compartilhamento da pasta continua sendo um passo separado, sempre
 necessário.
 
+## Entrar em outro aparelho sem recadastrar tudo
+
+Na tela de login, o link **"📲 Já tenho cadastro (entrar em outro
+aparelho)"** permite recuperar nome, cargo, matrícula e repartição de
+um cadastro já existente na central — sem precisar redigitar tudo.
+
+### Como funciona
+
+1. Informe o e-mail já cadastrado.
+2. Se for encontrado na central, um código de verificação é enviado
+   por e-mail (o mesmo mecanismo do cadastro).
+3. Depois de confirmar o código, o app mostra o perfil encontrado
+   (nome, cargo, matrícula, repartição) e pede para **criar um PIN
+   novo — específico deste aparelho**.
+4. Pronto — já entra logado, sem precisar do fluxo completo de
+   cadastro de novo.
+
+### Por que o PIN precisa ser recriado a cada aparelho
+
+A planilha central **nunca guarda o PIN** — de propósito, por
+segurança (se guardasse, qualquer pessoa com acesso à planilha veria o
+PIN de todo mundo). O PIN é sempre uma trava local, específica de cada
+aparelho; só os dados de identificação (nome, cargo, matrícula,
+repartição) são recuperados da central.
+
 ## Novo fluxo: Home → Formulário → Concluir Tarefa
 
 O app agora tem uma tela inicial ("Home") separada do formulário:

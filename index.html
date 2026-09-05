@@ -1022,6 +1022,37 @@
       </div>
       <button class="btn-primary" id="loginBtn">Entrar</button>
       <button class="btn-link" id="showRegisterBtn">Cadastrar novo servidor</button>
+      <button class="btn-link" id="showSyncBtn" style="font-size:12.5px;">📲 Já tenho cadastro (entrar em outro aparelho)</button>
+    </div>
+
+    <div id="loginSync" class="hidden-view">
+      <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0 0 4px;" id="syncTitle">Entrar em outro aparelho</h3>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 14px;">Confirme seu e-mail para recuperar seus dados já cadastrados e criar um PIN para este aparelho.</p>
+
+      <div class="field" id="syncEmailField">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">E-mail cadastrado</label>
+        <input type="email" id="syncEmail" placeholder="Ex.: joao.santos@exemplo.com">
+      </div>
+
+      <div class="field hidden-view" id="syncCodeField">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Código recebido por e-mail</label>
+        <input type="text" id="syncCode" inputmode="numeric" maxlength="6" placeholder="000000">
+        <button type="button" class="btn-link" id="resendSyncCodeBtn" style="margin-top:6px;font-size:12px;">Reenviar código</button>
+      </div>
+
+      <div class="hidden-view" id="syncFoundBox" style="background:#F7F9FB;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:13px;">
+        <div><b id="syncFoundNome">—</b></div>
+        <div style="color:var(--muted);margin-top:2px;" id="syncFoundDetail">—</div>
+      </div>
+
+      <div class="field hidden-view" id="syncPinField">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Criar PIN para este aparelho (4 dígitos)</label>
+        <input type="password" id="syncPin" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+
+      <div class="loc-status" id="syncStatus"></div>
+      <button class="btn-primary" id="syncBtn">Enviar código de verificação</button>
+      <button class="btn-link" id="backFromSyncBtn">Voltar</button>
     </div>
 
     <div id="loginRegister" class="hidden-view">
@@ -2653,6 +2684,7 @@ function populateRegReparticaoSelect(selectedId){
 function showRegisterPanel({ editMode, reparticaoId }){
   clearLoginError();
   $('loginExisting').classList.add('hidden-view');
+  $('loginSync').classList.add('hidden-view');
   $('loginRegister').classList.remove('hidden-view');
   $('regVerifyStatus').textContent = '';
   $('regCodeField').classList.add('hidden-view');
@@ -2688,6 +2720,152 @@ $('backToLoginBtn').addEventListener('click', () => {
   } else {
     $('loginExisting').classList.remove('hidden-view');
     populateLoginSelect();
+  }
+});
+
+// ---------- entrar em outro aparelho (recuperar cadastro pelo e-mail) ----------
+let syncStage = 'email'; // 'email' | 'code' | 'pin'
+let pendingSyncEmail = '';
+let pendingSyncProfile = null;
+
+function resetSyncPanel(){
+  syncStage = 'email';
+  pendingSyncEmail = '';
+  pendingSyncProfile = null;
+  $('syncEmail').value = '';
+  $('syncCode').value = '';
+  $('syncPin').value = '';
+  $('syncCodeField').classList.add('hidden-view');
+  $('syncFoundBox').classList.add('hidden-view');
+  $('syncPinField').classList.add('hidden-view');
+  $('syncStatus').textContent = '';
+  $('syncBtn').textContent = 'Enviar código de verificação';
+}
+
+$('showSyncBtn').addEventListener('click', () => {
+  clearLoginError();
+  resetSyncPanel();
+  $('loginExisting').classList.add('hidden-view');
+  $('loginRegister').classList.add('hidden-view');
+  $('loginSync').classList.remove('hidden-view');
+});
+$('backFromSyncBtn').addEventListener('click', () => {
+  $('loginSync').classList.add('hidden-view');
+  $('loginExisting').classList.remove('hidden-view');
+  populateLoginSelect();
+});
+
+async function handleSyncLookupAndSend(){
+  const email = $('syncEmail').value.trim();
+  const statusEl = $('syncStatus');
+  if(!validateEmailFormat(email)){
+    statusEl.textContent = 'Informe um e-mail válido.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const btn = $('syncBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Procurando cadastro…';
+  statusEl.textContent = '';
+  try {
+    const data = await callAppsScript({ action: 'get_user', email });
+    if(!data.found){
+      statusEl.textContent = 'Não encontramos nenhum cadastro com esse e-mail. Você pode se cadastrar como novo servidor.';
+      statusEl.className = 'loc-status err';
+      btn.textContent = original;
+      return;
+    }
+    pendingSyncEmail = email;
+    pendingSyncProfile = data;
+    btn.textContent = 'Enviando código…';
+    await callVerifyEndpoint('send', email);
+    syncStage = 'code';
+    $('syncCodeField').classList.remove('hidden-view');
+    btn.textContent = 'Verificar código';
+    statusEl.textContent = `Código enviado para ${email}. Confira sua caixa de entrada (e a pasta de spam).`;
+    statusEl.className = 'loc-status ok';
+  } catch(err){
+    statusEl.textContent = 'Não foi possível continuar: ' + err.message;
+    statusEl.className = 'loc-status err';
+    btn.textContent = original;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleSyncVerifyCode(){
+  const code = $('syncCode').value.trim();
+  const statusEl = $('syncStatus');
+  if(!/^\d{4,8}$/.test(code)){
+    statusEl.textContent = 'Informe o código recebido por e-mail.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const btn = $('syncBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+  try {
+    await callVerifyEndpoint('verify', pendingSyncEmail, code);
+    syncStage = 'pin';
+    $('syncCodeField').classList.add('hidden-view');
+    $('syncFoundNome').textContent = pendingSyncProfile.nome;
+    $('syncFoundDetail').textContent = `${pendingSyncProfile.cargo} — matrícula ${pendingSyncProfile.matricula} — ${pendingSyncProfile.reparticaoNome}`;
+    $('syncFoundBox').classList.remove('hidden-view');
+    $('syncPinField').classList.remove('hidden-view');
+    btn.textContent = 'Concluir e entrar';
+    statusEl.textContent = '✓ E-mail verificado. Crie um PIN para este aparelho.';
+    statusEl.className = 'loc-status ok';
+  } catch(err){
+    statusEl.textContent = err.message;
+    statusEl.className = 'loc-status err';
+    btn.textContent = original;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+$('resendSyncCodeBtn').addEventListener('click', async () => {
+  if(!pendingSyncEmail) return;
+  const statusEl = $('syncStatus');
+  statusEl.textContent = 'Reenviando código…';
+  statusEl.className = 'loc-status';
+  try {
+    await callVerifyEndpoint('send', pendingSyncEmail);
+    statusEl.textContent = `Novo código enviado para ${pendingSyncEmail}.`;
+    statusEl.className = 'loc-status ok';
+  } catch(err){
+    statusEl.textContent = 'Não foi possível reenviar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+});
+
+$('syncBtn').addEventListener('click', () => {
+  if(syncStage === 'email'){
+    handleSyncLookupAndSend();
+  } else if(syncStage === 'code'){
+    handleSyncVerifyCode();
+  } else if(syncStage === 'pin'){
+    const pin = $('syncPin').value.trim();
+    const statusEl = $('syncStatus');
+    if(!/^\d{4}$/.test(pin)){
+      statusEl.textContent = 'Crie um PIN de 4 dígitos.';
+      statusEl.className = 'loc-status err';
+      return;
+    }
+    const list = loadServidores();
+    list.push({
+      nome: pendingSyncProfile.nome,
+      cargo: pendingSyncProfile.cargo,
+      matricula: pendingSyncProfile.matricula,
+      email: pendingSyncEmail,
+      telefone: '',
+      reparticaoId: pendingSyncProfile.reparticaoId,
+      pin, photo: null
+    });
+    saveServidores(list);
+    loginAs(list.length - 1);
   }
 });
 
