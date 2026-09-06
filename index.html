@@ -1113,7 +1113,7 @@
     </div>
 
     <div id="loginRegister" class="hidden-view">
-      <div class="field">
+      <div class="field" id="regReparticaoField">
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Repartição</label>
         <select id="regReparticao"></select>
       </div>
@@ -1140,50 +1140,73 @@
         <div class="loc-status" id="regNewRepStatus"></div>
       </div>
 
+      <div class="hidden-view" id="regTabsBar" style="display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line);">
+        <button type="button" class="reg-tab-btn active" id="regTabBtnPersonal" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--navy-dark);border-bottom:2px solid var(--navy-dark);cursor:pointer;">Dados pessoais</button>
+        <button type="button" class="reg-tab-btn" id="regTabBtnConexoes" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Conexões</button>
+      </div>
+
       <div class="hidden-view" id="regRestFields">
-        <div class="field">
-          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Nome completo</label>
-          <input type="text" id="regNome" placeholder="Ex.: João da Silva Santos">
-        </div>
-        <div class="field">
-          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Cargo</label>
-          <select id="regCargo">
-            <option value="" disabled selected>Selecione o cargo</option>
-            <option>Servidor Requisitado</option>
-            <option>Agente Administrativo</option>
-            <option>Investigador de Polícia</option>
-            <option>Escrivão de Polícia</option>
-            <option>Perito</option>
-            <option>Delegado de Polícia</option>
-          </select>
-        </div>
-        <div class="field">
-          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
-          <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
-        </div>
-        <div class="field" id="regEmailField">
-          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">E-mail</label>
-          <input type="email" id="regEmail" placeholder="Ex.: joao.santos@exemplo.com">
-        </div>
-        <div class="field" id="regTelefoneField">
-          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Telefone (WhatsApp)</label>
-          <input type="tel" id="regTelefone" placeholder="Ex.: (83) 99876-5432">
+        <div id="regTabPersonal">
+          <div class="field">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Nome completo</label>
+            <input type="text" id="regNome" placeholder="Ex.: João da Silva Santos">
+          </div>
+          <div class="field">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Cargo</label>
+            <select id="regCargo">
+              <option value="" disabled selected>Selecione o cargo</option>
+              <option>Servidor Requisitado</option>
+              <option>Agente Administrativo</option>
+              <option>Investigador de Polícia</option>
+              <option>Escrivão de Polícia</option>
+              <option>Perito</option>
+              <option>Delegado de Polícia</option>
+            </select>
+          </div>
+          <div class="field">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
+            <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
+          </div>
+          <div class="field" id="regEmailField">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">E-mail</label>
+            <input type="email" id="regEmail" placeholder="Ex.: joao.santos@exemplo.com">
+          </div>
+          <div class="field" id="regTelefoneField">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Telefone (WhatsApp)</label>
+            <input type="tel" id="regTelefone" placeholder="Ex.: (83) 99876-5432">
+          </div>
+
+          <div class="field hidden-view" id="regCodeField">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Código recebido por e-mail</label>
+            <input type="text" id="regCode" inputmode="numeric" maxlength="6" placeholder="000000">
+            <button type="button" class="btn-link" id="resendCodeBtn" style="margin-top:6px;font-size:12px;">Reenviar código</button>
+          </div>
+
+          <div class="field hidden-view" id="regPinField">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Criar PIN (4 dígitos)</label>
+            <input type="password" id="regPin" inputmode="numeric" maxlength="4" placeholder="••••">
+          </div>
+
+          <div class="loc-status" id="regVerifyStatus"></div>
+          <button class="btn-primary" id="registerBtn">Enviar código de verificação</button>
+          <button class="sidebar-btn danger hidden-view" id="deleteProfileBtn" style="margin-top:10px;">🗑️ Excluir meu cadastro</button>
         </div>
 
-        <div class="field hidden-view" id="regCodeField">
-          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Código recebido por e-mail</label>
-          <input type="text" id="regCode" inputmode="numeric" maxlength="6" placeholder="000000">
-          <button type="button" class="btn-link" id="resendCodeBtn" style="margin-top:6px;font-size:12px;">Reenviar código</button>
-        </div>
+        <div class="hidden-view" id="regTabConexoes">
+          <p class="history-sub" style="margin-bottom:10px;">Repartições em que você está cadastrado. Fica pendente em cada uma até conectar de verdade com os serviços Google dela.</p>
+          <div class="loc-status" id="userReparticoesStatus"></div>
+          <div id="userReparticoesList"></div>
 
-        <div class="field hidden-view" id="regPinField">
-          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Criar PIN (4 dígitos)</label>
-          <input type="password" id="regPin" inputmode="numeric" maxlength="4" placeholder="••••">
+          <button type="button" class="btn-link" id="toggleAddUserRepBtn" style="font-size:12.5px;margin-top:10px;">+ Adicionar repartição</button>
+          <div class="hidden-view" id="addUserRepForm" style="margin-top:10px;">
+            <div class="field">
+              <label style="font-size:12px;">Selecione a repartição</label>
+              <select id="addUserRepSelect"></select>
+            </div>
+            <button class="btn-primary" id="addUserRepConfirmBtn" style="margin-bottom:6px;">Adicionar</button>
+            <div class="loc-status" id="addUserRepStatus"></div>
+          </div>
         </div>
-
-        <div class="loc-status" id="regVerifyStatus"></div>
-        <button class="btn-primary" id="registerBtn">Enviar código de verificação</button>
-        <button class="sidebar-btn danger hidden-view" id="deleteProfileBtn" style="margin-top:10px;">🗑️ Excluir meu cadastro</button>
       </div>
       <button class="btn-link" id="backToLoginBtn">Voltar</button>
     </div>
@@ -2060,7 +2083,7 @@ async function loadRepCadastradaPorInfo(rep){
     const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
     const match = (data.pendentes || []).find(p => p.clientId === rep.clientId && p.folderId === rep.folderId && p.usuarioNome);
     if(match){
-      $('repCadastradaPorTexto').textContent = `${match.usuarioNome}${match.usuarioCargo ? ' — ' + match.usuarioCargo : ''} (${match.usuarioEmail})`;
+      $('repCadastradaPorTexto').textContent = `${match.usuarioNome}${match.usuarioCargo ? ' — ' + match.usuarioCargo : ''} (${match.usuarioEmail})${match.dataCadastro ? ', em ' + match.dataCadastro : ''}`;
       box.classList.remove('hidden-view');
     }
   } catch(e){ /* se falhar, só não mostra essa info — não é crítico */ }
@@ -2077,7 +2100,10 @@ function repUserCardHtml(u, showEnableBtn){
     : `(${esc(u.email)})`;
   return `
     <div class="rep-user-card">
-      <div class="rep-user-nome">${esc(u.nome)} ${emailPart}</div>
+      <div class="reparticao-card-top" style="margin-bottom:0;">
+        <div class="rep-user-nome">${esc(u.nome)} ${emailPart}</div>
+        <button type="button" class="copy-email-btn" data-remove-user="${u.rowIndex}" title="Excluir usuário" aria-label="Excluir usuário" style="font-size:15px;color:#B23B3B;">✕</button>
+      </div>
       <div class="rep-user-detail">${esc(u.cargo)} — matrícula ${esc(u.matricula)}</div>
       ${u.habilitadoEm ? `<div class="rep-user-habilitado-em">Habilitado em: ${esc(u.habilitadoEm)}</div>` : ''}
       ${showEnableBtn ? `<button data-row="${u.rowIndex}">✓ Marcar como habilitado</button>` : ''}
@@ -2117,15 +2143,35 @@ async function renderRepUsersLists(reparticaoId){
             }).catch(() => {});
         });
       });
+      pendentesEl.querySelectorAll('button[data-remove-user]').forEach(btn => {
+        btn.addEventListener('click', () => removeRepUser(btn.dataset.removeUser, reparticaoId));
+      });
     }
 
     if(data.habilitados.length === 0){
       habilitadosEl.innerHTML = '<div class="rep-users-empty">Nenhum usuário habilitado ainda.</div>';
     } else {
       habilitadosEl.innerHTML = data.habilitados.map(u => repUserCardHtml(u, false)).join('');
+      habilitadosEl.querySelectorAll('button[data-remove-user]').forEach(btn => {
+        btn.addEventListener('click', () => removeRepUser(btn.dataset.removeUser, reparticaoId));
+      });
     }
   } catch(err){
     statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
+async function removeRepUser(rowIndex, reparticaoId){
+  if(!confirm('Excluir este usuário da repartição? Isso remove o cadastro dele da central — não afeta relatórios já enviados por ele.')) return;
+  const statusEl = $('repUsersStatus');
+  statusEl.textContent = 'Excluindo…';
+  statusEl.className = 'loc-status';
+  try {
+    await callAppsScript({ action: 'remove_user', rowIndex });
+    renderRepUsersLists(reparticaoId);
+  } catch(err){
+    statusEl.textContent = 'Não foi possível excluir: ' + err.message;
     statusEl.className = 'loc-status err';
   }
 }
@@ -3154,6 +3200,11 @@ function showRegisterPanel({ editMode, reparticaoId }){
     $('registerBtn').textContent = 'Salvar alterações';
     $('regPin').placeholder = 'Deixe em branco para manter';
     $('deleteProfileBtn').classList.remove('hidden-view');
+    // no modo de edição, a repartição é gerenciada pela aba "Conexões",
+    // não mais por um único seletor fixo no topo
+    $('regReparticaoField').classList.add('hidden-view');
+    $('regTabsBar').classList.remove('hidden-view');
+    switchRegTab('personal');
   } else {
     regStage = 'info';
     pendingRegEmail = '';
@@ -3164,8 +3215,128 @@ function showRegisterPanel({ editMode, reparticaoId }){
     $('registerBtn').textContent = 'Enviar código de verificação';
     $('regPin').placeholder = '••••';
     $('deleteProfileBtn').classList.add('hidden-view');
+    $('regReparticaoField').classList.remove('hidden-view');
+    $('regTabsBar').classList.add('hidden-view');
   }
 }
+
+// ---------- abas da tela "Editar cadastro": Dados pessoais / Conexões ----------
+function switchRegTab(tab){
+  const isPersonal = tab === 'personal';
+  $('regTabPersonal').classList.toggle('hidden-view', !isPersonal);
+  $('regTabConexoes').classList.toggle('hidden-view', isPersonal);
+  $('regTabBtnPersonal').classList.toggle('active', isPersonal);
+  $('regTabBtnPersonal').style.borderBottomColor = isPersonal ? 'var(--navy-dark)' : 'transparent';
+  $('regTabBtnPersonal').style.color = isPersonal ? 'var(--navy-dark)' : 'var(--muted)';
+  $('regTabBtnConexoes').classList.toggle('active', !isPersonal);
+  $('regTabBtnConexoes').style.borderBottomColor = !isPersonal ? 'var(--navy-dark)' : 'transparent';
+  $('regTabBtnConexoes').style.color = !isPersonal ? 'var(--navy-dark)' : 'var(--muted)';
+  if(!isPersonal) renderUserReparticoesList();
+}
+$('regTabBtnPersonal').addEventListener('click', () => switchRegTab('personal'));
+$('regTabBtnConexoes').addEventListener('click', () => switchRegTab('conexoes'));
+
+async function renderUserReparticoesList(){
+  const statusEl = $('userReparticoesStatus');
+  const listEl = $('userReparticoesList');
+  listEl.innerHTML = '';
+  $('addUserRepForm').classList.add('hidden-view');
+  if(!currentUser || !currentUser.email){
+    statusEl.textContent = '';
+    return;
+  }
+  statusEl.textContent = 'Carregando…';
+  statusEl.className = 'loc-status';
+  try {
+    const data = await callAppsScript({ action: 'list_user_reparticoes', email: currentUser.email });
+    statusEl.textContent = '';
+    const reparticoes = data.reparticoes || [];
+    if(reparticoes.length === 0){
+      listEl.innerHTML = '<div class="rep-users-empty">Nenhuma repartição encontrada.</div>';
+    } else {
+      listEl.innerHTML = reparticoes.map(r => `
+        <div class="rep-user-card">
+          <div class="rep-user-nome">${esc(r.reparticaoNome)}</div>
+          <div class="rep-user-detail">${esc(r.cargo)} — matrícula ${esc(r.matricula)}</div>
+          <span class="history-badge ${r.habilitado ? 'ok' : 'neutral'}">${r.habilitado ? '✅ Habilitado' : '🕒 Pendente'}</span>
+        </div>
+      `).join('');
+    }
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
+$('toggleAddUserRepBtn').addEventListener('click', async () => {
+  const form = $('addUserRepForm');
+  const opening = form.classList.contains('hidden-view');
+  if(!opening){ form.classList.add('hidden-view'); return; }
+  $('addUserRepStatus').textContent = '';
+  const sel = $('addUserRepSelect');
+  sel.innerHTML = '<option>Carregando…</option>';
+  form.classList.remove('hidden-view');
+  try {
+    const [todasData, minhasData] = await Promise.all([
+      callAppsScript({ action: 'list_reparticoes_pendentes' }),
+      callAppsScript({ action: 'list_user_reparticoes', email: currentUser.email })
+    ]);
+    const minhasIds = new Set((minhasData.reparticoes || []).map(r => r.reparticaoId));
+    const todas = todasData.pendentes || [];
+    const dedupMap = new Map();
+    todas.forEach(p => {
+      if(minhasIds.has(p.clientId)) return; // já está cadastrado nela
+      const key = p.clientId + '|' + p.folderId;
+      if(!dedupMap.has(key)) dedupMap.set(key, p);
+    });
+    const disponiveis = Array.from(dedupMap.values());
+    sel.innerHTML = '';
+    if(disponiveis.length === 0){
+      const opt = document.createElement('option');
+      opt.textContent = 'Nenhuma repartição disponível';
+      opt.disabled = true; opt.selected = true;
+      sel.appendChild(opt);
+      return;
+    }
+    disponiveis.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.clientId + '|||' + p.nome;
+      opt.textContent = p.nome;
+      sel.appendChild(opt);
+    });
+  } catch(err){
+    sel.innerHTML = '';
+    $('addUserRepStatus').textContent = 'Não foi possível carregar: ' + err.message;
+    $('addUserRepStatus').className = 'loc-status err';
+  }
+});
+
+$('addUserRepConfirmBtn').addEventListener('click', async () => {
+  const statusEl = $('addUserRepStatus');
+  const sel = $('addUserRepSelect');
+  if(!sel.value || !sel.value.includes('|||')){
+    statusEl.textContent = 'Selecione uma repartição.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const [clientId, nome] = sel.value.split('|||');
+  statusEl.textContent = 'Adicionando…';
+  statusEl.className = 'loc-status';
+  try {
+    await callAppsScript({
+      action: 'register_user',
+      nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
+      email: currentUser.email,
+      reparticaoId: clientId,
+      reparticaoNome: nome
+    });
+    $('addUserRepForm').classList.add('hidden-view');
+    renderUserReparticoesList();
+  } catch(err){
+    statusEl.textContent = 'Não foi possível adicionar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+});
 
 $('regReparticao').addEventListener('change', () => {
   if(regStage === 'edit') return; // na edição, os campos já ficam sempre visíveis

@@ -388,6 +388,27 @@ pasta + usuário de teste no Google Cloud). Remover da lista de
 pendentes **não** apaga a repartição já cadastrada localmente, se
 houver.
 
+## Editar cadastro — abas "Dados pessoais" e "Conexões"
+
+A tela "Editar cadastro" agora tem duas abas:
+
+- **Dados pessoais**: nome, cargo, matrícula, e-mail, telefone e PIN —
+  os mesmos campos de sempre.
+- **Conexões**: mostra em quais repartições você está cadastrado, com
+  o status de cada uma (🕒 Pendente / ✅ Habilitado). Tem um botão
+  **"+ Adicionar repartição"**, que mostra um seletor com as
+  repartições já conhecidas (cadastradas por qualquer usuário, em
+  qualquer aparelho) que você ainda não está cadastrado. Ao escolher
+  uma e confirmar, você entra como pendente nela — e passa a
+  habilitado assim que conectar de verdade com os serviços Google
+  dessa repartição, usando seu próprio e-mail (do mesmo jeito que já
+  funciona para a primeira repartição, no cadastro inicial).
+
+Isso substitui o antigo campo único "Repartição" na tela de edição —
+agora um usuário pode estar vinculado a mais de uma repartição ao
+mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
+pedindo a repartição logo de início, antes dos demais campos.
+
 ## Repartição e habilitação de novos usuários
 
 Desde esta atualização, o cadastro de um novo servidor pede também a

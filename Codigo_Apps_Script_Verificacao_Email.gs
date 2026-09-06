@@ -166,6 +166,16 @@ function doPost(e) {
       return respond({ ok: true });
     }
 
+    if (action === 'remove_user') {
+      var rowIndex = Number(data.rowIndex);
+      if (!rowIndex || rowIndex < 2) {
+        return respond({ ok: false, error: 'Registro inválido.' });
+      }
+      var sheet = getOrCreateUsersSheet();
+      sheet.deleteRow(rowIndex);
+      return respond({ ok: true });
+    }
+
     // marca automaticamente como habilitado quando o próprio usuário
     // conecta com sucesso ao Google Drive (chamado pelo app, não exige
     // e-mail no formato do bloco de validação geral, por isso trata aqui
@@ -188,6 +198,29 @@ function doPost(e) {
         }
       }
       return respond({ ok: true, found: false });
+    }
+
+    // lista TODAS as repartições em que este e-mail está cadastrado
+    // (pendente ou habilitado) — usado na aba "Conexões" do perfil
+    if (action === 'list_user_reparticoes') {
+      var email = (data.email || '').trim().toLowerCase();
+      var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+      var reparticoes = [];
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        if (String(r[1]).toLowerCase() === email) {
+          reparticoes.push({
+            reparticaoId: String(r[4]),
+            reparticaoNome: String(r[5]),
+            cargo: String(r[2]),
+            matricula: String(r[3]),
+            habilitado: !!r[6],
+            habilitadoEm: r[7] ? formatDate_(r[7]) : ''
+          });
+        }
+      }
+      return respond({ ok: true, reparticoes: reparticoes });
     }
 
     // atualiza só a foto de um cadastro já existente (chamado ao trocar
