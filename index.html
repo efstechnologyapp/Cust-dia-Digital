@@ -3254,17 +3254,93 @@ async function renderUserReparticoesList(){
     if(reparticoes.length === 0){
       listEl.innerHTML = '<div class="rep-users-empty">Nenhuma repartição encontrada.</div>';
     } else {
-      listEl.innerHTML = reparticoes.map(r => `
+      listEl.innerHTML = reparticoes.map((r, idx) => `
         <div class="rep-user-card">
           <div class="rep-user-nome">${esc(r.reparticaoNome)}</div>
           <div class="rep-user-detail">${esc(r.cargo)} — matrícula ${esc(r.matricula)}</div>
           <span class="history-badge ${r.habilitado ? 'ok' : 'neutral'}">${r.habilitado ? '✅ Habilitado' : '🕒 Pendente'}</span>
+          ${!r.habilitado ? `
+            <div>
+              <button type="button" class="btn-primary" data-connect-my-rep="${idx}" style="margin-top:8px;">🔌 Conectar</button>
+            </div>
+            <div class="loc-status" id="myRepConnStatus-${idx}"></div>
+          ` : ''}
         </div>
       `).join('');
+      listEl.querySelectorAll('button[data-connect-my-rep]').forEach(btn => {
+        const r = reparticoes[Number(btn.dataset.connectMyRep)];
+        btn.addEventListener('click', () => conectarMinhaReparticaoPendente(r, btn));
+      });
     }
   } catch(err){
     statusEl.textContent = 'Não foi possível carregar: ' + err.message;
     statusEl.className = 'loc-status err';
+  }
+}
+
+// permite que o PRÓPRIO usuário (mesmo sem acesso à tela administrativa
+// de repartições) conecte, com seu e-mail Google, uma repartição em que
+// esteja pendente — encontrada na aba "Conexões" do seu perfil
+async function conectarMinhaReparticaoPendente(r, btnEl){
+  const idx = btnEl.dataset.connectMyRep;
+  const statusEl = $('myRepConnStatus-' + idx);
+  btnEl.disabled = true;
+  const original = btnEl.textContent;
+  btnEl.textContent = 'Conectando…';
+  statusEl.textContent = '';
+  statusEl.className = 'loc-status';
+  try {
+    // a lista de usuários não guarda o Client ID/pasta — busca na
+    // central de repartições pra achar esses dados
+    const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
+    const match = (data.pendentes || []).find(p => p.clientId === r.reparticaoId);
+    if(!match){
+      throw new Error('Não foi possível localizar os dados de conexão dessa repartição. Peça para um administrador conferir o cadastro dela.');
+    }
+
+    await getDriveAccessToken(match.clientId);
+
+    // adiciona (ou atualiza) a repartição localmente neste aparelho, já
+    // confirmada — a conexão bem-sucedida é a prova de que funciona
+    const list = loadReparticoes();
+    let idxLocal = list.findIndex(rp => rp.clientId === match.clientId && rp.folderId === match.folderId);
+    let localRep;
+    if(idxLocal >= 0){
+      list[idxLocal].status = 'confirmada';
+      list[idxLocal].nome = match.nome; list[idxLocal].email = match.email;
+      localRep = list[idxLocal];
+    } else {
+      localRep = { id: 'rep-' + Date.now(), nome: match.nome, email: match.email, clientId: match.clientId, folderId: match.folderId, status: 'confirmada', centralRowIndex: null };
+      list.push(localRep);
+    }
+    saveReparticoesList(list);
+    setSelectedReparticaoId(localRep.id);
+    setDriveConnectedFlag(true);
+    updateDriveStatusUI(true);
+    renderRepSelectDropdown();
+
+    // marca a si mesmo como habilitado nessa repartição
+    await callAppsScript({
+      action: 'register_user',
+      nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
+      email: currentUser.email, telefone: currentUser.telefone,
+      reparticaoId: match.clientId, reparticaoNome: match.nome,
+      habilitado: true
+    });
+
+    // promove a repartição na central, se ainda estivesse pendente
+    if(match.status !== 'confirmada' && match.rowIndex){
+      callAppsScript({ action: 'confirm_reparticao_central', rowIndex: match.rowIndex }).catch(() => {});
+    }
+
+    statusEl.textContent = '✓ Conectado! Já disponível no seletor da barra lateral.';
+    statusEl.className = 'loc-status ok';
+    setTimeout(() => { renderUserReparticoesList(); }, 1200);
+  } catch(err){
+    statusEl.textContent = 'Não foi possível conectar: ' + err.message;
+    statusEl.className = 'loc-status err';
+    btnEl.textContent = original;
+    btnEl.disabled = false;
   }
 }
 

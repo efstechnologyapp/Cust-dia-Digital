@@ -399,10 +399,19 @@ A tela "Editar cadastro" agora tem duas abas:
   **"+ Adicionar repartição"**, que mostra um seletor com as
   repartições já conhecidas (cadastradas por qualquer usuário, em
   qualquer aparelho) que você ainda não está cadastrado. Ao escolher
-  uma e confirmar, você entra como pendente nela — e passa a
-  habilitado assim que conectar de verdade com os serviços Google
-  dessa repartição, usando seu próprio e-mail (do mesmo jeito que já
-  funciona para a primeira repartição, no cadastro inicial).
+  uma e confirmar, você entra como pendente nela.
+
+  **Cada repartição pendente nessa aba tem um botão "🔌 Conectar"**,
+  que permite ao **próprio usuário** — mesmo sem acesso à tela
+  administrativa "Gerenciar Repartições" — estabelecer a conexão de
+  verdade com os serviços Google dessa repartição, usando o próprio
+  e-mail. Ao conectar com sucesso: a repartição passa a ser
+  selecionável no seletor da barra lateral desse aparelho, o usuário
+  passa a habilitado nela, e (se ainda estivesse pendente) a
+  repartição em si é promovida para confirmada na central. Ou seja,
+  qualquer usuário comum consegue completar sozinho o ciclo de
+  "adicionar repartição → conectar → ficar habilitado", sem depender
+  de um administrador.
 
 Isso substitui o antigo campo único "Repartição" na tela de edição —
 agora um usuário pode estar vinculado a mais de uma repartição ao
