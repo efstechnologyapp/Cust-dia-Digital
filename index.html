@@ -3473,7 +3473,7 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
   // guardado para, ao concluir o cadastro do usuário, avisar a central
   // com os dados da repartição + de quem a cadastrou
   pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId };
-  populateRegReparticaoSelect(newRep.id);
+  populateRegReparticaoSelect(newRep.clientId);
   $('regReparticao').value = newRep.id;
   $('regNewReparticaoForm').classList.add('hidden-view');
   $('regRestFields').classList.remove('hidden-view');
