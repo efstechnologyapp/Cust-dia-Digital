@@ -83,6 +83,7 @@ function doPost(e) {
       var jaHabilitado = data.habilitado === true;
       var reparticaoId = data.reparticaoId || '';
       var foto = data.foto || '';
+      var telefone = data.telefone || '';
       var sheet = getOrCreateUsersSheet();
       var rows = sheet.getDataRange().getValues();
 
@@ -111,6 +112,9 @@ function doPost(e) {
         if (foto) {
           sheet.getRange(existingRow, 10).setValue(foto);
         }
+        if (telefone) {
+          sheet.getRange(existingRow, 11).setValue(telefone);
+        }
         return respond({ ok: true, updated: true });
       }
 
@@ -124,7 +128,8 @@ function doPost(e) {
         jaHabilitado,
         jaHabilitado ? new Date() : '',
         new Date(),
-        foto
+        foto,
+        telefone
       ]);
       return respond({ ok: true });
     }
@@ -193,7 +198,8 @@ function doPost(e) {
             ok: true, found: true,
             nome: String(r[0]), cargo: String(r[2]), matricula: String(r[3]),
             reparticaoId: String(r[4]), reparticaoNome: String(r[5]),
-            foto: r[9] ? String(r[9]) : ''
+            foto: r[9] ? String(r[9]) : '',
+            telefone: r[10] ? String(r[10]) : ''
           });
         }
       }
@@ -382,14 +388,17 @@ function getOrCreateUsersSheet() {
     props.setProperty('USERS_SHEET_ID', ss.getId());
     var sheet = ss.getSheets()[0];
     sheet.setName('Usuarios');
-    sheet.appendRow(['Nome', 'Email', 'Cargo', 'Matricula', 'ReparticaoId', 'ReparticaoNome', 'Habilitado', 'HabilitadoEm', 'DataCadastro', 'FotoBase64']);
+    sheet.appendRow(['Nome', 'Email', 'Cargo', 'Matricula', 'ReparticaoId', 'ReparticaoNome', 'Habilitado', 'HabilitadoEm', 'DataCadastro', 'FotoBase64', 'Telefone']);
     return sheet;
   }
 
   var sheet = ss.getSheetByName('Usuarios') || ss.getSheets()[0];
-  // garante a coluna de foto mesmo em planilhas criadas antes desta atualização
+  // garante as colunas de foto/telefone mesmo em planilhas criadas antes desta atualização
   if (sheet.getRange(1, 10).getValue() !== 'FotoBase64') {
     sheet.getRange(1, 10).setValue('FotoBase64');
+  }
+  if (sheet.getRange(1, 11).getValue() !== 'Telefone') {
+    sheet.getRange(1, 11).setValue('Telefone');
   }
   return sheet;
 }

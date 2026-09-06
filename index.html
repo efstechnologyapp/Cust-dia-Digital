@@ -2265,7 +2265,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
     callAppsScript({
       action: 'register_user',
       nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
-      email: currentUser.email,
+      email: currentUser.email, telefone: currentUser.telefone,
       reparticaoId: newRep.clientId,
       reparticaoNome: nome
     }).catch(() => {});
@@ -2474,7 +2474,7 @@ async function conectarReparticaoPendente(p, btnEl){
       callAppsScript({
         action: 'register_user',
         nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
-        email: currentUser.email,
+        email: currentUser.email, telefone: currentUser.telefone,
         reparticaoId: localRep.clientId,
         reparticaoNome: localRep.nome,
         habilitado: true
@@ -2627,7 +2627,7 @@ $('driveConnectBtn').addEventListener('click', async () => {
       callAppsScript({
         action: 'register_user',
         nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
-        email: currentUser.email,
+        email: currentUser.email, telefone: currentUser.telefone,
         reparticaoId: rep.clientId,
         reparticaoNome: rep.nome,
         habilitado: true
@@ -3326,7 +3326,7 @@ $('addUserRepConfirmBtn').addEventListener('click', async () => {
     await callAppsScript({
       action: 'register_user',
       nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
-      email: currentUser.email,
+      email: currentUser.email, telefone: currentUser.telefone,
       reparticaoId: clientId,
       reparticaoNome: nome
     });
@@ -3533,7 +3533,7 @@ $('syncBtn').addEventListener('click', () => {
       cargo: pendingSyncProfile.cargo,
       matricula: pendingSyncProfile.matricula,
       email: pendingSyncEmail,
-      telefone: '',
+      telefone: pendingSyncProfile.telefone || '',
       reparticaoId: pendingSyncProfile.reparticaoId,
       pin, photo: pendingSyncProfile.foto || null
     });
@@ -3670,6 +3670,18 @@ $('registerBtn').addEventListener('click', () => {
     currentUser = updated;
     currentUserIndex = editingIndex;
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+
+    // sincroniza as alterações com a central, para refletir em outros
+    // aparelhos também (melhor esforço — não bloqueia a edição local)
+    if(email){
+      callAppsScript({
+        action: 'register_user',
+        nome, cargo, matricula, email, telefone,
+        reparticaoId: reparticaoClientIdEdit,
+        reparticaoNome: repEditSelecionada ? repEditSelecionada.nome : ''
+      }).catch(() => {});
+    }
+
     editingIndex = null;
     showView('home');
     refreshUserUI();
@@ -3699,7 +3711,7 @@ $('registerBtn').addEventListener('click', () => {
     callAppsScript({
       action: 'register_user',
       nome, cargo, matricula,
-      email: pendingRegEmail,
+      email: pendingRegEmail, telefone,
       reparticaoId: reparticaoClientId,
       reparticaoNome: repSelecionada ? repSelecionada.nome : ''
     }).catch(() => { /* cadastro local já concluído; a sincronização pode ser tentada depois */ });
@@ -3833,17 +3845,21 @@ function enterApp(){
     const cargoTxt = currentUser.cargo ? `, ${currentUser.cargo}` : '';
     respField.value = `${currentUser.nome}${cargoTxt}, matrícula funcional nº ${currentUser.matricula}`;
   }
-  // se este aparelho ainda não tem foto salva localmente, busca da central
-  // (assim a foto cadastrada aparece mesmo em um aparelho novo)
-  if(!currentUser.photo && currentUser.email){
+  // se este aparelho ainda não tem foto ou telefone salvos localmente,
+  // busca da central (assim esses dados aparecem mesmo em um aparelho novo)
+  if((!currentUser.photo || !currentUser.telefone) && currentUser.email){
     callAppsScript({ action: 'get_user', email: currentUser.email })
       .then(data => {
-        if(data.found && data.foto){
-          currentUser.photo = data.foto;
+        if(!data.found) return;
+        let changed = false;
+        if(!currentUser.photo && data.foto){ currentUser.photo = data.foto; changed = true; }
+        if(!currentUser.telefone && data.telefone){ currentUser.telefone = data.telefone; changed = true; }
+        if(changed){
           if(currentUserIndex !== null){
             const list = loadServidores();
             if(list[currentUserIndex]){
-              list[currentUserIndex].photo = data.foto;
+              list[currentUserIndex].photo = currentUser.photo;
+              list[currentUserIndex].telefone = currentUser.telefone;
               saveServidores(list);
             }
           }
