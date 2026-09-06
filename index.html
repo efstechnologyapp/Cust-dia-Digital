@@ -1964,7 +1964,34 @@ function renderRepSelectDropdown(){
   // logado já conectou de verdade — seja a de cadastro, seja qualquer
   // outra adicionada depois pela aba "Conexões" do perfil
   const conectadas = new Set(currentUser ? (currentUser.conectadas || []) : []);
-  const list = loadReparticoes().filter(r => conectadas.has(r.clientId));
+  // uma repartição "conectada" só faz sentido corresponder a uma
+  // entrada já confirmada — descarta qualquer resquício "pendente"
+  // órfão (de testes/cadastros anteriores) que porventura ainda
+  // aponte para um Client ID já presente em "conectadas"
+  const candidatas = loadReparticoes().filter(r => conectadas.has(r.clientId) && r.status !== 'pendente');
+  // agrupa por Client ID — evita mostrar a mesma repartição duas vezes
+  // caso existam entradas locais duplicadas (ex.: resquício de um
+  // cadastro anterior com o Client ID digitado de forma levemente
+  // diferente); mantém a que estiver confirmada, se houver alguma
+  const porClientId = new Map();
+  candidatas.forEach(r => {
+    const atual = porClientId.get(r.clientId);
+    if(!atual || (atual.status === 'pendente' && r.status !== 'pendente')){
+      porClientId.set(r.clientId, r);
+    }
+  });
+  // segunda camada: agrupa também pelo nome (ignorando maiúsculas/
+  // espaços) — cobre o caso de duas entradas com Client ID diferente,
+  // mas que representam a mesma repartição com o nome escrito igual
+  const porNome = new Map();
+  Array.from(porClientId.values()).forEach(r => {
+    const chave = r.nome.trim().toLowerCase();
+    const atual = porNome.get(chave);
+    if(!atual || (atual.status === 'pendente' && r.status !== 'pendente')){
+      porNome.set(chave, r);
+    }
+  });
+  const list = Array.from(porNome.values());
 
   const sel = $('repSelect');
   const currentId = getSelectedReparticaoId();
