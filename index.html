@@ -1161,10 +1161,12 @@
               <option>Escrivão de Polícia</option>
               <option>Perito</option>
               <option>Delegado de Polícia</option>
+              <option>Promotor de Justiça</option>
+              <option>Advogado</option>
             </select>
           </div>
           <div class="field">
-            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Matrícula funcional</label>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;" id="regMatriculaLabel">Matrícula funcional</label>
             <input type="text" id="regMatricula" placeholder="Ex.: 12.345">
           </div>
           <div class="field" id="regEmailField">
@@ -1240,20 +1242,22 @@
       <div class="mat-line" id="sidebarMatricula"></div>
     </div>
     <hr class="sidebar-divider">
-    <button class="sidebar-btn" id="editProfileBtn">✏️ Editar cadastro</button>
+    <button class="sidebar-btn" id="editProfileBtn">✏️ Editar Cadastro / Conexões</button>
     <button class="sidebar-btn hidden-view" id="openHistoryBtn">🕘 Histórico de relatórios</button>
 
-    <div class="field" style="margin-top:12px;">
-      <label style="font-size:12.5px;">Selecione a repartição de destino:</label>
-      <select id="repSelect"></select>
-    </div>
-
-    <div class="drive-status-card" id="driveStatusCard">
-      <div class="drive-status-row">
-        <span id="driveStatusIcon">🔴</span>
-        <span id="driveStatusText">Desconectado do Google Drive</span>
+    <div class="hidden-view" id="repConnectionBlock">
+      <div class="field" style="margin-top:12px;">
+        <label style="font-size:12.5px;">Selecione a repartição de destino:</label>
+        <select id="repSelect"></select>
       </div>
-      <button class="sidebar-btn" id="driveConnectBtn" style="margin-top:8px;margin-bottom:0;">Conectar</button>
+
+      <div class="drive-status-card" id="driveStatusCard">
+        <div class="drive-status-row">
+          <span id="driveStatusIcon">🔴</span>
+          <span id="driveStatusText">Desconectado do Google Drive</span>
+        </div>
+        <button class="sidebar-btn" id="driveConnectBtn" style="margin-top:8px;margin-bottom:0;">Conectar</button>
+      </div>
     </div>
 
     <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gerenciar Repartições</button>
@@ -1956,17 +1960,18 @@ function getConfirmedReparticoes(){
 }
 
 function renderRepSelectDropdown(){
-  // seletor da sidebar mostra só repartições já confirmadas — a conexão
-  // inicial de uma pendente agora acontece direto no card dela, na
-  // página de Conexões (veja renderReparticoesPendentesList)
-  const list = getConfirmedReparticoes();
+  // seletor da sidebar mostra só repartições que o PRÓPRIO usuário
+  // logado já conectou de verdade — seja a de cadastro, seja qualquer
+  // outra adicionada depois pela aba "Conexões" do perfil
+  const conectadas = new Set(currentUser ? (currentUser.conectadas || []) : []);
+  const list = loadReparticoes().filter(r => conectadas.has(r.clientId));
 
   const sel = $('repSelect');
   const currentId = getSelectedReparticaoId();
   sel.innerHTML = '';
   if(list.length === 0){
     const opt = document.createElement('option');
-    opt.textContent = 'Nenhuma repartição cadastrada';
+    opt.textContent = 'Nenhuma repartição conectada ainda';
     opt.disabled = true; opt.selected = true;
     sel.appendChild(opt);
     return;
@@ -1982,6 +1987,25 @@ function renderRepSelectDropdown(){
     setSelectedReparticaoId(list[0].id);
     sel.value = list[0].id;
   }
+}
+
+// registra, no perfil local do usuário, que ele conectou de verdade
+// (com o próprio e-mail Google) a uma repartição específica — usado
+// pra decidir o que aparece no seletor da barra lateral
+function markReparticaoConectada(clientId){
+  if(!currentUser || !clientId) return;
+  const conectadas = new Set(currentUser.conectadas || []);
+  if(conectadas.has(clientId)) return;
+  conectadas.add(clientId);
+  currentUser.conectadas = Array.from(conectadas);
+  if(currentUserIndex !== null){
+    const list = loadServidores();
+    if(list[currentUserIndex]){
+      list[currentUserIndex].conectadas = currentUser.conectadas;
+      saveServidores(list);
+    }
+  }
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
 }
 $('repSelect').addEventListener('change', () => {
   setSelectedReparticaoId($('repSelect').value);
@@ -2463,6 +2487,7 @@ async function conectarReparticaoPendente(p, btnEl){
     setSelectedReparticaoId(localRep.id);
     setDriveConnectedFlag(true);
     updateDriveStatusUI(true);
+    markReparticaoConectada(p.clientId);
     renderRepSelectDropdown();
     renderReparticoesManageList();
 
@@ -2617,6 +2642,7 @@ $('driveConnectBtn').addEventListener('click', async () => {
     await getDriveAccessToken(rep.clientId);
     setDriveConnectedFlag(true);
     updateDriveStatusUI(true);
+    markReparticaoConectada(rep.clientId);
 
     // marca automaticamente o próprio cadastro como habilitado na central
     // (melhor esforço — se falhar, não atrapalha a conexão já feita).
@@ -3343,6 +3369,7 @@ async function conectarMinhaReparticaoPendente(r, btnEl){
     setSelectedReparticaoId(localRep.id);
     setDriveConnectedFlag(true);
     updateDriveStatusUI(true);
+    markReparticaoConectada(match.clientId);
     renderRepSelectDropdown();
 
     // marca a si mesmo como habilitado nessa repartição
@@ -3440,6 +3467,13 @@ $('addUserRepConfirmBtn').addEventListener('click', async () => {
   }
 });
 
+// campo "Matrícula funcional" vira "OAB/UF" quando o cargo é Advogado
+$('regCargo').addEventListener('change', () => {
+  const isAdvogado = $('regCargo').value === 'Advogado';
+  $('regMatriculaLabel').textContent = isAdvogado ? 'OAB/UF' : 'Matrícula funcional';
+  $('regMatricula').placeholder = isAdvogado ? 'Ex.: 123456/PB' : 'Ex.: 12.345';
+});
+
 $('regReparticao').addEventListener('change', () => {
   if(regStage === 'edit') return; // na edição, os campos já ficam sempre visíveis
   const val = $('regReparticao').value;
@@ -3484,6 +3518,8 @@ $('showRegisterBtn').addEventListener('click', () => {
   editingIndex = null;
   $('regNome').value = ''; $('regCargo').value=''; $('regMatricula').value='';
   $('regEmail').value = ''; $('regTelefone').value = ''; $('regCode').value = ''; $('regPin').value='';
+  $('regMatriculaLabel').textContent = 'Matrícula funcional';
+  $('regMatricula').placeholder = 'Ex.: 12.345';
   showRegisterPanel({ editMode:false });
 });
 $('backToLoginBtn').addEventListener('click', () => {
@@ -3637,7 +3673,7 @@ $('syncBtn').addEventListener('click', () => {
       email: pendingSyncEmail,
       telefone: pendingSyncProfile.telefone || '',
       reparticaoId: pendingSyncProfile.reparticaoId,
-      pin, photo: pendingSyncProfile.foto || null
+      pin, photo: pendingSyncProfile.foto || null, conectadas: []
     });
     saveServidores(list);
     loginAs(list.length - 1);
@@ -3805,7 +3841,7 @@ $('registerBtn').addEventListener('click', () => {
     // não importa em qual aparelho o usuário se cadastrou ou editou
     const repSelecionada = loadReparticoes().find(r => r.id === pendingRegReparticaoId);
     const reparticaoClientId = repSelecionada ? repSelecionada.clientId : pendingRegReparticaoId;
-    list.push({ nome, cargo, matricula, email: pendingRegEmail, telefone, reparticaoId: reparticaoClientId, pin, photo: null });
+    list.push({ nome, cargo, matricula, email: pendingRegEmail, telefone, reparticaoId: reparticaoClientId, pin, photo: null, conectadas: [] });
     saveServidores(list);
 
     // registra o cadastro na central da repartição (melhor esforço —
@@ -3899,6 +3935,13 @@ function refreshUserUI(){
   // gerenciamento de conexões: visível só para os dois logins administradores
   $('openConnectionsBtn').classList.toggle('hidden-view', !isConnectionsAdmin());
 
+  // enquanto o usuário não tiver nenhuma conexão efetiva com os
+  // serviços Google de alguma repartição, a sidebar mostra só
+  // "Editar Cadastro / Conexões" e "Sair" — o seletor de repartição e
+  // o card de conexão do Drive ficam ocultos até existir ao menos uma
+  const temAlgumaConexao = (currentUser.conectadas || []).length > 0;
+  $('repConnectionBlock').classList.toggle('hidden-view', !temAlgumaConexao);
+
   const avatarCircle = $('avatarCircle');
   const avatarInitial = $('avatarInitial');
   const existingImg = avatarCircle.querySelector('img');
@@ -3924,13 +3967,28 @@ function enterApp(){
   showView('home');
   refreshUserUI();
 
+  // migração única para contas criadas antes deste controle existir:
+  // sem isso, alguém que já tinha conectado várias repartições antes
+  // veria o seletor da sidebar vazio depois desta atualização
+  if(!currentUser.conectadas){
+    currentUser.conectadas = getConfirmedReparticoes().map(r => r.clientId);
+    if(currentUserIndex !== null){
+      const listSrv = loadServidores();
+      if(listSrv[currentUserIndex]){
+        listSrv[currentUserIndex].conectadas = currentUser.conectadas;
+        saveServidores(listSrv);
+      }
+    }
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+  }
+
   // garante que a repartição selecionada para envio seja a do próprio
   // usuário logado, para evitar mandar arquivos para o Drive de outra
   // repartição por engano (ex.: aparelho compartilhado, ou seletor
   // deixado em outra repartição por outro usuário)
   const list = loadReparticoes();
   const ownRep = currentUser.reparticaoId ? list.find(r => r.clientId === currentUser.reparticaoId) : null;
-  if(ownRep){
+  if(ownRep && (currentUser.conectadas || []).includes(ownRep.clientId)){
     if(getSelectedReparticaoId() !== ownRep.id){
       setSelectedReparticaoId(ownRep.id);
       gisTokenClient = null;
@@ -4064,6 +4122,9 @@ $('editProfileBtn').addEventListener('click', () => {
   $('regEmail').value = currentUser.email || '';
   $('regTelefone').value = currentUser.telefone || '';
   $('regPin').value = '';
+  const isAdvogado = currentUser.cargo === 'Advogado';
+  $('regMatriculaLabel').textContent = isAdvogado ? 'OAB/UF' : 'Matrícula funcional';
+  $('regMatricula').placeholder = isAdvogado ? 'Ex.: 123456/PB' : 'Ex.: 12.345';
   showView('login');
   showRegisterPanel({ editMode:true, reparticaoId: currentUser.reparticaoId });
 });

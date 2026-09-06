@@ -280,6 +280,40 @@ abaixo do nome de quem está preenchendo: "Conectado à repartição
 - **"Trocar usuário"** renomeado para **"Sair"** (mesma função de
   sempre).
 
+## Seletor da sidebar mostra só o que o usuário logado já conectou
+
+O seletor de repartição da barra lateral agora é **específico de cada
+usuário**, não mais um reflexo de tudo que já foi confirmado naquele
+aparelho. Antes, num aparelho compartilhado (ou já usado antes por
+outra pessoa para testes), qualquer usuário via **todas** as
+repartições já confirmadas ali — mesmo sem nunca ter se conectado a
+elas.
+
+Agora, cada usuário só vê, no seletor, as repartições que **ele
+mesmo** já conectou de verdade — seja a que se cadastrou originalmente
+(ao conectar pela primeira vez, pela aba "Conexões" do próprio
+perfil), seja qualquer outra adicionada depois, pelo mesmo caminho.
+
+**Enquanto o usuário não tiver nenhuma conexão efetiva**, a barra
+lateral mostra só dois botões: **"✏️ Editar Cadastro / Conexões"**
+(renomeado, já que é por lá que as conexões são gerenciadas) e
+**"↩ Sair"**. O seletor de repartição e o card de status do Drive só
+aparecem depois da primeira conexão bem-sucedida. Pra resolver isso, o
+caminho é sempre o mesmo: "Editar Cadastro / Conexões" → aba
+"Conexões" → tocar em "🔌 Conectar" na repartição desejada.
+
+**Contas já existentes, criadas antes desta atualização**, foram
+migradas automaticamente na primeira vez que fizerem login — nenhuma
+reconexão manual é necessária para elas.
+
+## Novos cargos e campo OAB/UF
+
+O cadastro de usuário agora inclui **"Promotor de Justiça"** e
+**"Advogado"** entre as opções de cargo. Ao selecionar "Advogado", o
+campo antes chamado "Matrícula funcional" passa a se chamar **"OAB/UF"**
+(com um exemplo de formato diferente no campo) — volta ao normal se o
+cargo for trocado para qualquer outro.
+
 ## Repartição selecionada acompanha automaticamente o login
 
 **Correção estrutural importante:** o vínculo entre um usuário e sua
