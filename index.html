@@ -3256,7 +3256,10 @@ async function renderUserReparticoesList(){
     } else {
       listEl.innerHTML = reparticoes.map((r, idx) => `
         <div class="rep-user-card">
-          <div class="rep-user-nome">${esc(r.reparticaoNome)}</div>
+          <div class="reparticao-card-top" style="margin-bottom:0;">
+            <div class="rep-user-nome">${esc(r.reparticaoNome)}</div>
+            <button type="button" class="copy-email-btn" data-remove-my-rep="${idx}" title="Remover esta conexão" aria-label="Remover esta conexão" style="font-size:15px;color:#B23B3B;">✕</button>
+          </div>
           <div class="rep-user-detail">${esc(r.cargo)} — matrícula ${esc(r.matricula)}</div>
           <span class="history-badge ${r.habilitado ? 'ok' : 'neutral'}">${r.habilitado ? '✅ Habilitado' : '🕒 Pendente'}</span>
           ${!r.habilitado ? `
@@ -3271,9 +3274,27 @@ async function renderUserReparticoesList(){
         const r = reparticoes[Number(btn.dataset.connectMyRep)];
         btn.addEventListener('click', () => conectarMinhaReparticaoPendente(r, btn));
       });
+      listEl.querySelectorAll('button[data-remove-my-rep]').forEach(btn => {
+        const r = reparticoes[Number(btn.dataset.removeMyRep)];
+        btn.addEventListener('click', () => removeMinhaConexaoReparticao(r));
+      });
     }
   } catch(err){
     statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
+async function removeMinhaConexaoReparticao(r){
+  if(!confirm(`Remover sua conexão com "${r.reparticaoNome}"? Isso não afeta relatórios já enviados por você.`)) return;
+  const statusEl = $('userReparticoesStatus');
+  statusEl.textContent = 'Removendo…';
+  statusEl.className = 'loc-status';
+  try {
+    await callAppsScript({ action: 'remove_user', rowIndex: r.rowIndex });
+    renderUserReparticoesList();
+  } catch(err){
+    statusEl.textContent = 'Não foi possível remover: ' + err.message;
     statusEl.className = 'loc-status err';
   }
 }

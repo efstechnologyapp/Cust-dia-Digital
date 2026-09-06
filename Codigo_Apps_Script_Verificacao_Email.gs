@@ -217,6 +217,7 @@ function doPost(e) {
         var r = rows[i];
         if (String(r[1]).toLowerCase() === email) {
           reparticoes.push({
+            rowIndex: i + 1,
             reparticaoId: String(r[4]),
             reparticaoNome: String(r[5]),
             cargo: String(r[2]),
