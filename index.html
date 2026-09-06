@@ -3217,6 +3217,11 @@ function showRegisterPanel({ editMode, reparticaoId }){
     $('deleteProfileBtn').classList.add('hidden-view');
     $('regReparticaoField').classList.remove('hidden-view');
     $('regTabsBar').classList.add('hidden-view');
+    // garante que a aba "Dados pessoais" esteja visível — sem isso, se
+    // a aba "Conexões" tivesse ficado selecionada numa edição anterior,
+    // um cadastro novo apareceria sem os campos do usuário
+    $('regTabPersonal').classList.remove('hidden-view');
+    $('regTabConexoes').classList.add('hidden-view');
   }
 }
 
