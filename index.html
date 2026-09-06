@@ -4702,7 +4702,7 @@ function saveReportToHistory(){
   const record = {
     id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
     matricula: currentUser.matricula,
-    reparticaoId: rep ? rep.id : '',
+    reparticaoId: rep ? rep.clientId : '',
     relatorioNum: meta.relatorioNum || '',
     responsavel: meta.responsavel || '',
     cargo: meta.cargo || '',
@@ -4738,7 +4738,10 @@ async function renderHistoryList(){
   const rep = getSelectedReparticao();
   const all = loadHistory();
   // mostra só os relatórios enviados à repartição atualmente conectada
-  const mine = currentUser && rep ? all.filter(r => r.matricula === currentUser.matricula && r.reparticaoId === rep.id) : [];
+  // aceita tanto o Client ID (novo, estável) quanto o ID local antigo
+  // (registros salvos antes desta correção) — compatibilidade com
+  // histórico já existente
+  const mine = currentUser && rep ? all.filter(r => r.matricula === currentUser.matricula && (r.reparticaoId === rep.clientId || r.reparticaoId === rep.id)) : [];
 
   // busca da central os relatórios que este usuário enviou de QUALQUER
   // aparelho para ESSA MESMA repartição, e mantém só os que ainda não
@@ -4749,7 +4752,7 @@ async function renderHistoryList(){
   if(currentUser && currentUser.email && rep){
     try {
       const data = await callAppsScript({ action: 'list_reports', email: currentUser.email });
-      centralOnly = (data.relatorios || []).filter(r => r.driveLink && !localDriveLinks.has(r.driveLink) && r.reparticaoId === rep.id);
+      centralOnly = (data.relatorios || []).filter(r => r.driveLink && !localDriveLinks.has(r.driveLink) && (r.reparticaoId === rep.clientId || r.reparticaoId === rep.id));
     } catch(e){ /* falha silenciosa: mostra ao menos o histórico local */ }
   }
 
@@ -4930,7 +4933,8 @@ async function concludeTask(){
           action: 'log_report',
           email: currentUser.email,
           nome: currentUser.nome,
-          reparticaoId: rep.id,
+          reparticaoId: rep.clientId,
+          reparticaoNome: rep.nome,
           relatorioNum: $('f_relatorio_num').value || '',
           arquivo: file.name,
           driveLink: result.webViewLink || ''
