@@ -198,6 +198,17 @@ Ou seja: uma conexão bem-sucedida é a prova de que a configuração no
 Google Cloud (Client ID) e a pasta do Drive estão de verdade
 funcionando — só aí a repartição vira uma opção confiável para todos.
 
+### Pendentes/habilitados de uma repartição criada pela tela Conexões
+
+Quando um administrador cadastra uma repartição nova diretamente pela
+tela "Conexões — Repartições" (em vez de pelo cadastro de um novo
+servidor), ele já entra automaticamente como **pendente** dela — do
+mesmo jeito que aconteceria se tivesse se cadastrado normalmente ali.
+Ao tocar em **"🔌 Conectar e confirmar"** (seja ele mesmo ou outra
+pessoa quem conectar), quem conectou passa a **habilitado** — visível
+no modal de edição da repartição, junto com os demais usuários
+cadastrados nela.
+
 **Se uma repartição antiga (cadastrada antes desse controle de status
 existir) aparecer em "Repartições cadastradas" sem nunca ter sido
 testada de verdade**, use o ícone **↩️** no card dela para marcá-la

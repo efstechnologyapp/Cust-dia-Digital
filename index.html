@@ -2145,10 +2145,19 @@ function sanitizeFolderId(raw){
   return v.split('?')[0].trim();
 }
 
+// limpa Client ID colado com "http://"/"https://" na frente por engano
+// (um Client ID de verdade nunca tem prefixo de URL, só termina em
+// ".apps.googleusercontent.com")
+function sanitizeClientId(raw){
+  let v = (raw || '').trim();
+  v = v.replace(/^https?:\/\//i, '');
+  return v.split('/')[0].trim();
+}
+
 $('saveReparticaoBtn').addEventListener('click', async () => {
   const nome = $('repNome').value.trim();
   const email = $('repEmail').value.trim();
-  const clientId = $('repClientId').value.trim();
+  const clientId = sanitizeClientId($('repClientId').value);
   const folderId = sanitizeFolderId($('repFolderId').value);
   const statusEl = $('reparticaoFormStatus');
   if(!nome || !email || !clientId || !folderId){
@@ -2171,6 +2180,21 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
       if(idx >= 0){ l2[idx].centralRowIndex = data.rowIndex; saveReparticoesList(l2); }
     }
   } catch(e){ /* segue mesmo assim — a repartição já está pendente localmente */ }
+
+  // quem está cadastrando (o administrador) já entra como pendente
+  // nessa repartição nova — assim, se conectar depois, é promovido a
+  // habilitado; se outra pessoa conectar primeiro, ele continua
+  // aparecendo como pendente até conectar também
+  if(currentUser && currentUser.email){
+    callAppsScript({
+      action: 'register_user',
+      nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
+      email: currentUser.email,
+      reparticaoId: newRep.id,
+      reparticaoNome: nome
+    }).catch(() => {});
+  }
+
   resetNewReparticaoForm();
   $('newReparticaoForm').classList.add('hidden-view');
   renderReparticoesManageList();
@@ -2181,7 +2205,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
 $('saveReparticaoEditBtn').addEventListener('click', () => {
   const nome = $('repEditNome').value.trim();
   const email = $('repEditEmail').value.trim();
-  const clientId = $('repEditClientId').value.trim();
+  const clientId = sanitizeClientId($('repEditClientId').value);
   const folderId = sanitizeFolderId($('repEditFolderId').value);
   const statusEl = $('reparticaoEditFormStatus');
   if(!nome || !email || !clientId || !folderId){
@@ -2345,6 +2369,12 @@ async function conectarReparticaoPendente(p, btnEl){
     updateDriveStatusUI(true);
     renderRepSelectDropdown();
     renderReparticoesManageList();
+
+    // marca quem conectou como habilitado nessa repartição (mesma lógica
+    // usada no botão "Conectar" do dia a dia, na barra lateral)
+    if(currentUser && currentUser.email){
+      callAppsScript({ action: 'auto_enable', email: currentUser.email, reparticaoId: localRep.id }).catch(() => {});
+    }
 
     if(p.rowIndex){
       // marca como confirmada na central (não apaga) — assim outros
@@ -3085,7 +3115,7 @@ $('regReparticao').addEventListener('change', () => {
 $('regNewRepSaveBtn').addEventListener('click', () => {
   const nome = $('regNewRepNome').value.trim();
   const email = $('regNewRepEmail').value.trim();
-  const clientId = $('regNewRepClientId').value.trim();
+  const clientId = sanitizeClientId($('regNewRepClientId').value);
   const folderId = sanitizeFolderId($('regNewRepFolderId').value);
   const statusEl = $('regNewRepStatus');
   if(!nome || !email || !clientId || !folderId){
