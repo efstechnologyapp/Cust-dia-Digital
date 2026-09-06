@@ -1331,6 +1331,10 @@
     <button class="btn-link" id="cancelEditRepBtn" style="width:100%;margin-bottom:8px;">Cancelar</button>
     <div class="loc-status" id="reparticaoEditFormStatus"></div>
 
+    <div class="hidden-view" id="repCadastradaPorBox" style="background:#F7F9FB;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:6px;font-size:12.5px;">
+      <b>Cadastrada por:</b> <span id="repCadastradaPorTexto"></span>
+    </div>
+
     <hr class="sidebar-divider">
     <div class="field-label-row">
       <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0;">Usuários da repartição</h4>
@@ -2044,6 +2048,22 @@ function startEditReparticao(id){
   $('reparticaoEditFormStatus').textContent = '';
   $('editRepOverlay').classList.add('open');
   renderRepUsersLists(rep.clientId);
+  loadRepCadastradaPorInfo(rep);
+}
+
+// busca, na central, quem cadastrou essa repartição (independente de já
+// estar confirmada) e exibe no modal, se essa informação existir
+async function loadRepCadastradaPorInfo(rep){
+  const box = $('repCadastradaPorBox');
+  box.classList.add('hidden-view');
+  try {
+    const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
+    const match = (data.pendentes || []).find(p => p.clientId === rep.clientId && p.folderId === rep.folderId && p.usuarioNome);
+    if(match){
+      $('repCadastradaPorTexto').textContent = `${match.usuarioNome}${match.usuarioCargo ? ' — ' + match.usuarioCargo : ''} (${match.usuarioEmail})`;
+      box.classList.remove('hidden-view');
+    }
+  } catch(e){ /* se falhar, só não mostra essa info — não é crítico */ }
 }
 function closeEditReparticaoModal(){
   editingReparticaoId = null;
@@ -2175,7 +2195,15 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   // repartição existe) — fica como "pendente" até alguém conectar de
   // verdade usando ela, o que a promove automaticamente a "cadastrada"
   try {
-    const data = await callAppsScript({ action: 'register_reparticao_pendente', nome, email, clientId, folderId });
+    const data = await callAppsScript({
+      action: 'register_reparticao_pendente', nome, email, clientId, folderId,
+      // registra também quem fez o cadastro (o administrador), para
+      // aparecer tanto no card de pendentes quanto no modal da repartição
+      usuarioNome: currentUser ? currentUser.nome : '',
+      usuarioCargo: currentUser ? currentUser.cargo : '',
+      usuarioMatricula: currentUser ? currentUser.matricula : '',
+      usuarioEmail: currentUser ? currentUser.email : ''
+    });
     if(data.rowIndex){
       const l2 = loadReparticoes();
       const idx = l2.findIndex(r => r.id === newRep.id);
@@ -2246,8 +2274,17 @@ async function renderReparticoesPendentesList(){
 
     const pendentes = todas.filter(p => p.status !== 'confirmada');
     // confirmadas em outro lugar, mas que este aparelho ainda não tem localmente
-    const disponiveis = todas.filter(p => p.status === 'confirmada' &&
+    // — agrupadas por Client ID + pasta, para não repetir a mesma
+    // repartição várias vezes só porque existem registros antigos
+    // duplicados na central (de testes/cadastros anteriores)
+    const disponiveisRaw = todas.filter(p => p.status === 'confirmada' &&
       !localList.some(r => r.clientId === p.clientId && r.folderId === p.folderId));
+    const disponiveisMap = new Map();
+    disponiveisRaw.forEach(p => {
+      const key = p.clientId + '|' + p.folderId;
+      if(!disponiveisMap.has(key)) disponiveisMap.set(key, p);
+    });
+    const disponiveis = Array.from(disponiveisMap.values());
 
     if(pendentes.length === 0 && disponiveis.length === 0){
       listEl.innerHTML = '<div class="rep-users-empty">Nenhuma repartição pendente.</div>';
@@ -2288,6 +2325,9 @@ async function renderReparticoesPendentesList(){
           <div class="reparticao-card">
             <div class="reparticao-card-top">
               <div class="reparticao-card-nome">${esc(p.nome)}</div>
+              <div class="reparticao-card-icons">
+                <button data-remove="${p.rowIndex}" title="Remover" aria-label="Remover">🗑️</button>
+              </div>
             </div>
             <div class="reparticao-card-detail">E-mail: ${esc(p.email)}</div>
             <div class="reparticao-card-detail">Client ID: ${esc(p.clientId)}</div>
