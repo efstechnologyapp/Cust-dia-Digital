@@ -2278,7 +2278,11 @@ async function renderReparticoesPendentesList(){
     // repartição várias vezes só porque existem registros antigos
     // duplicados na central (de testes/cadastros anteriores)
     const disponiveisRaw = todas.filter(p => p.status === 'confirmada' &&
-      !localList.some(r => r.clientId === p.clientId && r.folderId === p.folderId));
+      // só considera "já tenho localmente" se a cópia local já estiver
+      // confirmada de verdade — se ela existir mas ainda como pendente
+      // (ex.: este aparelho criou a repartição, mas quem confirmou a
+      // conexão foi outro aparelho), ainda precisa aparecer aqui
+      !localList.some(r => r.clientId === p.clientId && r.folderId === p.folderId && r.status !== 'pendente'));
     const disponiveisMap = new Map();
     disponiveisRaw.forEach(p => {
       const key = p.clientId + '|' + p.folderId;
@@ -2364,14 +2368,18 @@ async function renderReparticoesPendentesList(){
 function adicionarReparticaoConfirmadaLocalmente(p, btnEl){
   const statusEl = $('pendAddStatus-' + p.rowIndex);
   const list = loadReparticoes();
-  if(list.some(r => r.clientId === p.clientId && r.folderId === p.folderId)){
-    statusEl.textContent = 'Já está cadastrada neste aparelho.';
-    statusEl.className = 'loc-status';
-    renderReparticoesPendentesList();
-    return;
+  const idx = list.findIndex(r => r.clientId === p.clientId && r.folderId === p.folderId);
+  if(idx >= 0){
+    // já existe uma cópia local (por exemplo, este aparelho foi quem
+    // criou a repartição) — só falta promover o status dela pra
+    // confirmada, sem criar uma segunda entrada duplicada
+    list[idx].status = 'confirmada';
+    list[idx].nome = p.nome; list[idx].email = p.email;
+    saveReparticoesList(list);
+  } else {
+    list.push({ id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, status: 'confirmada', centralRowIndex: null });
+    saveReparticoesList(list);
   }
-  list.push({ id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, status: 'confirmada', centralRowIndex: null });
-  saveReparticoesList(list);
   renderRepSelectDropdown();
   renderReparticoesManageList();
   statusEl.textContent = '✓ Adicionada! Já aparece em "Repartições cadastradas".';
