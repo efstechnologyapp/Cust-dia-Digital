@@ -2772,11 +2772,29 @@ function openUserDetailModal(u){
   const statusLabel = { pendente: '🕒 Pendente', habilitado: '✅ Habilitado', excluido: '⛔ Excluído' };
   $('userDetailReparticoes').innerHTML = u.reparticoes.map(r => `
     <div class="rep-user-card">
-      <div class="rep-user-nome">${esc(r.reparticaoNome)}</div>
+      <div class="reparticao-card-top" style="margin-bottom:0;">
+        <div class="rep-user-nome">${esc(r.reparticaoNome || '(sem repartição associada)')}</div>
+        <button type="button" class="copy-email-btn" data-remove-user-rep="${r.rowIndex}" title="Remover este registro" aria-label="Remover este registro" style="font-size:15px;color:#B23B3B;">✕</button>
+      </div>
       <div class="rep-user-detail">${esc(r.cargo)} — matrícula ${esc(r.matricula)}</div>
       <div class="rep-user-detail">Status: ${statusLabel[r.status] || r.status} desde ${esc(r.desde)}</div>
     </div>
   `).join('') || '<div class="rep-users-empty">Nenhuma repartição.</div>';
+  $('userDetailReparticoes').querySelectorAll('button[data-remove-user-rep]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('Remover este registro específico? Use para limpar linhas incorretas ou órfãs, sem excluir o acesso da pessoa por completo.')) return;
+      try {
+        await callAppsScript({ action: 'remove_user', rowIndex: btn.dataset.removeUserRep });
+        // os índices das demais linhas mudam após remover uma — busca
+        // os dados atualizados da central antes de reabrir o modal
+        const data = await callAppsScript({ action: 'list_all_users' });
+        const atualizado = (data.usuarios || []).find(x => x.email === u.email);
+        if(atualizado) openUserDetailModal(atualizado);
+        else $('userDetailOverlay').classList.remove('open');
+        renderAllUsersList();
+      } catch(err){ alert('Não foi possível remover: ' + err.message); }
+    });
+  });
 
   $('userDetailAcessos').innerHTML = '<div class="loc-status">Carregando…</div>';
   $('userDetailRelatorios').innerHTML = '<div class="loc-status">Carregando…</div>';
@@ -4070,14 +4088,14 @@ $('registerBtn').addEventListener('click', () => {
     currentUserIndex = editingIndex;
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
 
-    // sincroniza as alterações com a central, para refletir em outros
-    // aparelhos também (melhor esforço — não bloqueia a edição local)
+    // sincroniza as alterações com a central — atualiza nome/cargo/
+    // matrícula/telefone em TODAS as repartições da pessoa de uma vez
+    // (dados pessoais não dependem de repartição específica; melhor
+    // esforço, não bloqueia a edição local)
     if(email){
       callAppsScript({
-        action: 'register_user',
-        nome, cargo, matricula, email, telefone,
-        reparticaoId: reparticaoClientIdEdit,
-        reparticaoNome: repEditSelecionada ? repEditSelecionada.nome : ''
+        action: 'update_user_profile',
+        nome, cargo, matricula, telefone, email
       }).catch(() => {});
     }
 

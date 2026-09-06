@@ -250,6 +250,25 @@ function doPost(e) {
       return respond({ ok: true });
     }
 
+    // atualiza nome/cargo/matrícula/telefone em TODAS as linhas desse
+    // e-mail — usado ao editar "Dados pessoais" no perfil, sem
+    // depender de nenhuma repartição específica e sem criar linha nova
+    if (action === 'update_user_profile') {
+      var email = (data.email || '').trim().toLowerCase();
+      if (!email) return respond({ ok: true });
+      var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][1]).toLowerCase() === email) {
+          if (data.nome) sheet.getRange(i + 1, 1).setValue(data.nome);
+          if (data.cargo) sheet.getRange(i + 1, 3).setValue(data.cargo);
+          if (data.matricula) sheet.getRange(i + 1, 4).setValue(data.matricula);
+          if (data.telefone) sheet.getRange(i + 1, 11).setValue(data.telefone);
+        }
+      }
+      return respond({ ok: true });
+    }
+
     if (action === 'auto_enable') {
       var email = (data.email || '').trim().toLowerCase();
       var reparticaoId = String(data.reparticaoId || '');
@@ -425,6 +444,7 @@ function doPost(e) {
         var status = excluido ? 'excluido' : (!!r[6] ? 'habilitado' : 'pendente');
         var desde = excluido ? (r[12] ? formatDate_(r[12]) : '') : (!!r[6] ? (r[7] ? formatDate_(r[7]) : '') : (r[8] ? formatDate_(r[8]) : ''));
         u.reparticoes.push({
+          rowIndex: i + 1,
           reparticaoNome: String(r[5]), cargo: String(r[2]), matricula: String(r[3]),
           status: status, desde: desde
         });
