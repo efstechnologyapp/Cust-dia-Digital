@@ -2815,10 +2815,6 @@ function updateDriveStatusUI(connected){
   $('driveConnectBtn').className = connected ? 'sidebar-btn danger' : 'sidebar-btn';
   updateHomeStartButtonState(connected);
 
-  // "Histórico de relatórios" só aparece quando há conexão ativa com
-  // uma repartição — o histórico mostrado é sempre relativo a ela
-  $('openHistoryBtn').classList.toggle('hidden-view', !connected);
-
   // status pequeno no cabeçalho da home ("Conectado à repartição X ●")
   const connStatusEl = $('sessionConnStatus');
   if(connected){
@@ -4209,6 +4205,11 @@ function refreshUserUI(){
   // o card de conexão do Drive ficam ocultos até existir ao menos uma
   const temAlgumaConexao = (currentUser.conectadas || []).length > 0;
   $('repConnectionBlock').classList.toggle('hidden-view', !temAlgumaConexao);
+
+  // "Histórico de relatórios" aparece sempre que o usuário já tiver
+  // pelo menos uma repartição conectada de verdade (não depende de a
+  // sessão atual estar com o token do Google ativo neste momento)
+  $('openHistoryBtn').classList.toggle('hidden-view', !temAlgumaConexao);
 
   const avatarCircle = $('avatarCircle');
   const avatarInitial = $('avatarInitial');

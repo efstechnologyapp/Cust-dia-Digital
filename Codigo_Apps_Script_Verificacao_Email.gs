@@ -235,15 +235,16 @@ function doPost(e) {
     // a foto de perfil), sem mexer nos demais campos
     if (action === 'update_photo') {
       var email = (data.email || '').trim().toLowerCase();
-      var reparticaoId = String(data.reparticaoId || '');
       var foto = data.foto || '';
       if (!email) return respond({ ok: true });
       var sheet = getOrCreateUsersSheet();
       var rows = sheet.getDataRange().getValues();
+      // a foto é um dado pessoal, não específico de uma repartição —
+      // atualiza em TODAS as linhas desse e-mail, não só na da
+      // repartição em que o usuário estava conectado no momento
       for (var i = 1; i < rows.length; i++) {
-        if (String(rows[i][1]).toLowerCase() === email && String(rows[i][4]) === reparticaoId) {
+        if (String(rows[i][1]).toLowerCase() === email) {
           sheet.getRange(i + 1, 10).setValue(foto);
-          break;
         }
       }
       return respond({ ok: true });
