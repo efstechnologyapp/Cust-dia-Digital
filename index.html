@@ -4029,6 +4029,61 @@ function enterApp(){
       })
       .catch(() => {});
   }
+
+  // busca, na central, quais repartições este usuário já está
+  // habilitado de verdade — e adiciona automaticamente como "conectada"
+  // neste aparelho as que ainda não estiverem aqui (sem exigir nova
+  // autenticação Google: ele já provou ser legítimo em outro aparelho)
+  if(currentUser.email){
+    (async () => {
+      try {
+        const data = await callAppsScript({ action: 'list_user_reparticoes', email: currentUser.email });
+        const habilitadas = (data.reparticoes || []).filter(r => r.habilitado);
+        if(habilitadas.length === 0) return;
+
+        const conectadasAtuais = new Set(currentUser.conectadas || []);
+        const faltamLocal = habilitadas.filter(r => !loadReparticoes().some(rp => rp.clientId === r.reparticaoId));
+        let pendentesCentral = null;
+        if(faltamLocal.length > 0){
+          const pend = await callAppsScript({ action: 'list_reparticoes_pendentes' });
+          pendentesCentral = pend.pendentes || [];
+        }
+
+        let mudouLocal = false;
+        let mudouConectadas = false;
+        const list = loadReparticoes();
+        habilitadas.forEach(r => {
+          if(!conectadasAtuais.has(r.reparticaoId)){
+            conectadasAtuais.add(r.reparticaoId);
+            mudouConectadas = true;
+          }
+          if(!list.some(rp => rp.clientId === r.reparticaoId)){
+            const match = (pendentesCentral || []).find(p => p.clientId === r.reparticaoId);
+            if(match){
+              list.push({ id: 'rep-' + Date.now() + '-' + Math.random().toString(36).slice(2,6), nome: match.nome, email: match.email, clientId: match.clientId, folderId: match.folderId, status: 'confirmada', centralRowIndex: null });
+              mudouLocal = true;
+            }
+          }
+        });
+        if(mudouLocal) saveReparticoesList(list);
+        if(mudouConectadas){
+          currentUser.conectadas = Array.from(conectadasAtuais);
+          if(currentUserIndex !== null){
+            const listSrv = loadServidores();
+            if(listSrv[currentUserIndex]){
+              listSrv[currentUserIndex].conectadas = currentUser.conectadas;
+              saveServidores(listSrv);
+            }
+          }
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+        }
+        if(mudouLocal || mudouConectadas){
+          refreshUserUI();
+          renderRepSelectDropdown();
+        }
+      } catch(e){ /* falha silenciosa — o usuário pode conectar manualmente pela aba Conexões */ }
+    })();
+  }
 }
 
 function doLogout(){

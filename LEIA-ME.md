@@ -306,6 +306,17 @@ caminho é sempre o mesmo: "Editar Cadastro / Conexões" → aba
 migradas automaticamente na primeira vez que fizerem login — nenhuma
 reconexão manual é necessária para elas.
 
+**Sincronizando o mesmo usuário em outro aparelho novo**: como
+"conectadas" é salvo localmente, um aparelho novo (via "📲 Já tenho
+cadastro") não saberia, de cara, quais repartições esse usuário já
+usa em outros lugares. Por isso, a cada login, o app também busca na
+central quais repartições esse e-mail já está **habilitado** de
+verdade, e adiciona automaticamente essas ao aparelho novo — sem
+exigir uma nova autenticação Google (ele já provou ser legítimo antes,
+em outro aparelho). A conexão de verdade com o Google, pra
+enviar/baixar arquivos, continua sendo feita normalmente pelo botão
+"Conectar" da sidebar, a cada aparelho.
+
 ## Novos cargos e campo OAB/UF
 
 O cadastro de usuário agora inclui **"Promotor de Justiça"** e
