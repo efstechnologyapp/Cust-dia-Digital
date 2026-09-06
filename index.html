@@ -2136,11 +2136,20 @@ function deleteReparticao(id){
   renderRepSelectDropdown();
 }
 
+// limpa ID da pasta do Drive colado com sobras da URL (ex.: parâmetros
+// de idioma "?hl=pt-br", ou a URL inteira em vez de só o ID)
+function sanitizeFolderId(raw){
+  let v = (raw || '').trim();
+  const m = v.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  if(m) return m[1];
+  return v.split('?')[0].trim();
+}
+
 $('saveReparticaoBtn').addEventListener('click', async () => {
   const nome = $('repNome').value.trim();
   const email = $('repEmail').value.trim();
   const clientId = $('repClientId').value.trim();
-  const folderId = $('repFolderId').value.trim();
+  const folderId = sanitizeFolderId($('repFolderId').value);
   const statusEl = $('reparticaoFormStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -2173,7 +2182,7 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
   const nome = $('repEditNome').value.trim();
   const email = $('repEditEmail').value.trim();
   const clientId = $('repEditClientId').value.trim();
-  const folderId = $('repEditFolderId').value.trim();
+  const folderId = sanitizeFolderId($('repEditFolderId').value);
   const statusEl = $('reparticaoEditFormStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -2206,44 +2215,102 @@ async function renderReparticoesPendentesList(){
   try {
     const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
     statusEl.textContent = '';
-    if(!data.pendentes || data.pendentes.length === 0){
+    const todas = data.pendentes || [];
+    const localList = loadReparticoes();
+
+    const pendentes = todas.filter(p => p.status !== 'confirmada');
+    // confirmadas em outro lugar, mas que este aparelho ainda não tem localmente
+    const disponiveis = todas.filter(p => p.status === 'confirmada' &&
+      !localList.some(r => r.clientId === p.clientId && r.folderId === p.folderId));
+
+    if(pendentes.length === 0 && disponiveis.length === 0){
       listEl.innerHTML = '<div class="rep-users-empty">Nenhuma repartição pendente.</div>';
       return;
     }
-    listEl.innerHTML = data.pendentes.map(p => `
-      <div class="reparticao-card">
-        <div class="reparticao-card-top">
-          <div class="reparticao-card-nome">${esc(p.nome)}</div>
-          <div class="reparticao-card-icons">
-            <button data-remove="${p.rowIndex}" title="Remover" aria-label="Remover">🗑️</button>
+
+    let html = '';
+    pendentes.forEach(p => {
+      html += `
+        <div class="reparticao-card">
+          <div class="reparticao-card-top">
+            <div class="reparticao-card-nome">${esc(p.nome)}</div>
+            <div class="reparticao-card-icons">
+              <button data-remove="${p.rowIndex}" title="Remover" aria-label="Remover">🗑️</button>
+            </div>
           </div>
+          <div class="reparticao-card-detail">E-mail: ${esc(p.email)}</div>
+          <div class="reparticao-card-detail">Client ID: ${esc(p.clientId)}</div>
+          <div class="reparticao-card-detail">Pasta: ${esc(p.folderId)}</div>
+          <div class="reparticao-card-detail">Cadastrada em: ${esc(p.dataCadastro)}</div>
+          ${p.usuarioNome ? `
+            <div class="rep-users-section-title" style="margin:10px 0 4px;">Cadastrada pelo usuário</div>
+            <div class="rep-user-card" style="margin-bottom:0;">
+              <div class="rep-user-nome">${esc(p.usuarioNome)} (${esc(p.usuarioEmail)})</div>
+              <div class="rep-user-detail">${esc(p.usuarioCargo)} — matrícula ${esc(p.usuarioMatricula)}</div>
+            </div>
+          ` : ''}
+          <button type="button" class="btn-primary" data-connect="${p.rowIndex}" style="margin-top:10px;">🔌 Conectar e confirmar</button>
+          <div class="loc-status" id="pendConnStatus-${p.rowIndex}"></div>
         </div>
-        <div class="reparticao-card-detail">E-mail: ${esc(p.email)}</div>
-        <div class="reparticao-card-detail">Client ID: ${esc(p.clientId)}</div>
-        <div class="reparticao-card-detail">Pasta: ${esc(p.folderId)}</div>
-        <div class="reparticao-card-detail">Cadastrada em: ${esc(p.dataCadastro)}</div>
-        ${p.usuarioNome ? `
-          <div class="rep-users-section-title" style="margin:10px 0 4px;">Cadastrada pelo usuário</div>
-          <div class="rep-user-card" style="margin-bottom:0;">
-            <div class="rep-user-nome">${esc(p.usuarioNome)} (${esc(p.usuarioEmail)})</div>
-            <div class="rep-user-detail">${esc(p.usuarioCargo)} — matrícula ${esc(p.usuarioMatricula)}</div>
+      `;
+    });
+
+    if(disponiveis.length > 0){
+      html += `<div class="rep-users-section-title" style="margin:14px 0 4px;">✅ Já confirmadas em outro aparelho — adicionar aqui</div>`;
+      disponiveis.forEach(p => {
+        html += `
+          <div class="reparticao-card">
+            <div class="reparticao-card-top">
+              <div class="reparticao-card-nome">${esc(p.nome)}</div>
+            </div>
+            <div class="reparticao-card-detail">E-mail: ${esc(p.email)}</div>
+            <div class="reparticao-card-detail">Client ID: ${esc(p.clientId)}</div>
+            <div class="reparticao-card-detail">Pasta: ${esc(p.folderId)}</div>
+            <button type="button" class="btn-primary" data-add="${p.rowIndex}" style="margin-top:10px;">+ Adicionar a este aparelho</button>
+            <div class="loc-status" id="pendAddStatus-${p.rowIndex}"></div>
           </div>
-        ` : ''}
-        <button type="button" class="btn-primary" data-connect="${p.rowIndex}" style="margin-top:10px;">🔌 Conectar e confirmar</button>
-        <div class="loc-status" id="pendConnStatus-${p.rowIndex}"></div>
-      </div>
-    `).join('');
+        `;
+      });
+    }
+    listEl.innerHTML = html;
+
     listEl.querySelectorAll('button[data-remove]').forEach(btn => {
       btn.addEventListener('click', () => removeReparticaoPendente(btn.dataset.remove));
     });
     listEl.querySelectorAll('button[data-connect]').forEach(btn => {
-      const p = data.pendentes.find(x => String(x.rowIndex) === btn.dataset.connect);
+      const p = pendentes.find(x => String(x.rowIndex) === btn.dataset.connect);
       btn.addEventListener('click', () => conectarReparticaoPendente(p, btn));
+    });
+    listEl.querySelectorAll('button[data-add]').forEach(btn => {
+      const p = disponiveis.find(x => String(x.rowIndex) === btn.dataset.add);
+      btn.addEventListener('click', () => adicionarReparticaoConfirmadaLocalmente(p, btn));
     });
   } catch(err){
     statusEl.textContent = 'Não foi possível carregar: ' + err.message;
     statusEl.className = 'loc-status err';
   }
+}
+
+// adiciona ao aparelho uma repartição já confirmada em outro lugar —
+// não exige reconectar, pois a configuração (Client ID + pasta) já foi
+// validada; a conexão de verdade (OAuth) acontece normalmente pela
+// sidebar, na primeira vez que alguém usá-la neste aparelho
+function adicionarReparticaoConfirmadaLocalmente(p, btnEl){
+  const statusEl = $('pendAddStatus-' + p.rowIndex);
+  const list = loadReparticoes();
+  if(list.some(r => r.clientId === p.clientId && r.folderId === p.folderId)){
+    statusEl.textContent = 'Já está cadastrada neste aparelho.';
+    statusEl.className = 'loc-status';
+    renderReparticoesPendentesList();
+    return;
+  }
+  list.push({ id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, status: 'confirmada', centralRowIndex: null });
+  saveReparticoesList(list);
+  renderRepSelectDropdown();
+  renderReparticoesManageList();
+  statusEl.textContent = '✓ Adicionada! Já aparece em "Repartições cadastradas".';
+  statusEl.className = 'loc-status ok';
+  setTimeout(() => { renderReparticoesPendentesList(); }, 1200);
 }
 
 async function conectarReparticaoPendente(p, btnEl){
@@ -2280,8 +2347,11 @@ async function conectarReparticaoPendente(p, btnEl){
     renderReparticoesManageList();
 
     if(p.rowIndex){
-      try { await callAppsScript({ action: 'remove_reparticao_pendente', rowIndex: p.rowIndex }); }
-      catch(e){ /* já está confirmada localmente mesmo que a remoção central falhe */ }
+      // marca como confirmada na central (não apaga) — assim outros
+      // aparelhos continuam vendo que ela já foi validada, e podem só
+      // adicioná-la, sem precisar reconfirmar a conexão de novo
+      try { await callAppsScript({ action: 'confirm_reparticao_central', rowIndex: p.rowIndex }); }
+      catch(e){ /* já está confirmada localmente mesmo que isso falhe */ }
     }
     statusEl.textContent = '✓ Conectado! Movendo para "Repartições cadastradas"…';
     statusEl.className = 'loc-status ok';
@@ -3016,7 +3086,7 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
   const nome = $('regNewRepNome').value.trim();
   const email = $('regNewRepEmail').value.trim();
   const clientId = $('regNewRepClientId').value.trim();
-  const folderId = $('regNewRepFolderId').value.trim();
+  const folderId = sanitizeFolderId($('regNewRepFolderId').value);
   const statusEl = $('regNewRepStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -3741,7 +3811,7 @@ function buildReport(){
       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" class="report-header-logo" alt="">
       <span class="report-header-name">Custódia Digital</span>
     </div>
-    <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E VERIFICAÇÃO DE INTEGRIDADE</h1>
+    <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E INTEGRIDADE DE ARQUIVOS DIGITAIS</h1>
 
     <h2>1. Identificação Geral</h2>
     <table class="rtable">

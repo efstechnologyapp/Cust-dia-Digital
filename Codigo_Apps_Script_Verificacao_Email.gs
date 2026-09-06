@@ -275,7 +275,8 @@ function doPost(e) {
         data.usuarioCargo || '',
         data.usuarioMatricula || '',
         data.usuarioEmail || '',
-        new Date()
+        new Date(),
+        'pendente'
       ]);
       return respond({ ok: true, rowIndex: sheet.getLastRow() });
     }
@@ -296,11 +297,25 @@ function doPost(e) {
           usuarioCargo: String(r[5]),
           usuarioMatricula: String(r[6]),
           usuarioEmail: String(r[7]),
-          dataCadastro: r[8] ? formatDate_(r[8]) : ''
+          dataCadastro: r[8] ? formatDate_(r[8]) : '',
+          status: r[9] ? String(r[9]) : 'pendente'
         });
       }
       pendentes.reverse();
       return respond({ ok: true, pendentes: pendentes });
+    }
+
+    // marca como confirmada (em vez de apagar) — assim outros aparelhos
+    // continuam vendo que essa repartição já foi validada em algum lugar,
+    // e podem só adicioná-la localmente, sem precisar reconfirmar
+    if (action === 'confirm_reparticao_central') {
+      var rowIndex = Number(data.rowIndex);
+      if (!rowIndex || rowIndex < 2) {
+        return respond({ ok: false, error: 'Registro inválido.' });
+      }
+      var sheet = getOrCreateReparticoesPendentesSheet();
+      sheet.getRange(rowIndex, 10).setValue('confirmada');
+      return respond({ ok: true });
     }
 
     if (action === 'remove_reparticao_pendente') {
@@ -384,7 +399,12 @@ function getOrCreateReparticoesPendentesSheet() {
   var sheet = ss.getSheetByName('ReparticoesPendentes');
   if (!sheet) {
     sheet = ss.insertSheet('ReparticoesPendentes');
-    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro']);
+    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status']);
+    return sheet;
+  }
+  // garante a coluna de status mesmo em planilhas criadas antes desta atualização
+  if (sheet.getRange(1, 10).getValue() !== 'Status') {
+    sheet.getRange(1, 10).setValue('Status');
   }
   return sheet;
 }

@@ -185,13 +185,14 @@ lateral (esse seletor mostra só as já confirmadas).
 tela "Conexões — Repartições": cada card em "Repartições pendentes de
 cadastro" tem um botão **"🔌 Conectar e confirmar"**. Ao tocar nele,
 o app tenta o login no Google usando o Client ID daquela repartição
-específica. Se o login funcionar de verdade:
+específica. Se o login funcionar de verdade, no aparelho de quem
+conectou:
 - A repartição passa a aparecer em "Repartições cadastradas" e no
   seletor da barra lateral, disponível para todo mundo nesse aparelho
   escolher dali pra frente;
-- Ela some da lista central de "Repartições pendentes de cadastro"
-  automaticamente;
-- Ela já fica selecionada/conectada no app, pronta pra uso imediato.
+- Ela já fica selecionada/conectada no app, pronta pra uso imediato;
+- Na central, ela passa de "pendente" para "confirmada" — mas **sem
+  desaparecer** (veja a seção seguinte, sobre outros aparelhos).
 
 Ou seja: uma conexão bem-sucedida é a prova de que a configuração no
 Google Cloud (Client ID) e a pasta do Drive estão de verdade
@@ -203,12 +204,22 @@ testada de verdade**, use o ícone **↩️** no card dela para marcá-la
 como pendente novamente — assim ela volta a exigir confirmação real
 antes de contar como cadastrada.
 
-**Nota:** essa confirmação acontece **localmente, no aparelho de quem
-testou a conexão** — se a mesma repartição foi criada em outro
-aparelho, ela só passa a aparecer como "cadastrada" nesse OUTRO
-aparelho também quando alguém, nele, também tocar em "🔌 Conectar e
-confirmar" com sucesso (o card de pendente continua visível, vindo da
-central, até que isso aconteça em cada aparelho que precisar usá-la).
+### Usando uma repartição já confirmada em outro aparelho
+
+Como "Repartições cadastradas" é uma lista local de cada aparelho, uma
+repartição confirmada no celular, por exemplo, não aparece sozinha
+como cadastrada no PC. Mas isso não significa que ela "sumiu" — na
+tela de Conexões, dentro de "Repartições pendentes de cadastro",
+aparece uma seção **"✅ Já confirmadas em outro aparelho"**, listando
+essas repartições com um botão **"+ Adicionar a este aparelho"**.
+
+Diferente do fluxo de uma repartição ainda pendente, esse botão **não
+pede uma nova conexão OAuth** — já que a configuração (Client ID +
+pasta) já foi validada em outro lugar. Ele só copia os dados pra esse
+aparelho, deixando a repartição pronta no seletor da barra lateral. A
+conexão de verdade (login do Google) continua acontecendo
+normalmente, pela primeira vez que alguém tocar em "Conectar" nesse
+aparelho especificamente — como já era de costume.
 
 ## Atualização grande: relatório em PDF, tela de Conexões, permissões e sidebar
 
