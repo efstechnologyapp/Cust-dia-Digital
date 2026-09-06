@@ -2043,7 +2043,7 @@ function startEditReparticao(id){
   $('repEditFolderId').value = rep.folderId;
   $('reparticaoEditFormStatus').textContent = '';
   $('editRepOverlay').classList.add('open');
-  renderRepUsersLists(id);
+  renderRepUsersLists(rep.clientId);
 }
 function closeEditReparticaoModal(){
   editingReparticaoId = null;
@@ -2124,7 +2124,9 @@ async function enableRepUser(rowIndex, reparticaoId){
 }
 
 $('refreshRepUsersBtn').addEventListener('click', () => {
-  if(editingReparticaoId) renderRepUsersLists(editingReparticaoId);
+  if(!editingReparticaoId) return;
+  const rep = loadReparticoes().find(r => r.id === editingReparticaoId);
+  if(rep) renderRepUsersLists(rep.clientId);
 });
 
 function deleteReparticao(id){
@@ -2190,7 +2192,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
       action: 'register_user',
       nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
       email: currentUser.email,
-      reparticaoId: newRep.id,
+      reparticaoId: newRep.clientId,
       reparticaoNome: nome
     }).catch(() => {});
   }
@@ -2370,10 +2372,19 @@ async function conectarReparticaoPendente(p, btnEl){
     renderRepSelectDropdown();
     renderReparticoesManageList();
 
-    // marca quem conectou como habilitado nessa repartição (mesma lógica
-    // usada no botão "Conectar" do dia a dia, na barra lateral)
+    // marca quem conectou como habilitado nessa repartição — usa
+    // register_user com habilitado:true, que funciona tanto se a pessoa
+    // já tinha um registro pendente (promove) quanto se nunca tinha se
+    // registrado nessa repartição antes (cria já habilitado)
     if(currentUser && currentUser.email){
-      callAppsScript({ action: 'auto_enable', email: currentUser.email, reparticaoId: localRep.id }).catch(() => {});
+      callAppsScript({
+        action: 'register_user',
+        nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
+        email: currentUser.email,
+        reparticaoId: localRep.clientId,
+        reparticaoNome: localRep.nome,
+        habilitado: true
+      }).catch(() => {});
     }
 
     if(p.rowIndex){
@@ -2514,9 +2525,19 @@ $('driveConnectBtn').addEventListener('click', async () => {
     updateDriveStatusUI(true);
 
     // marca automaticamente o próprio cadastro como habilitado na central
-    // (melhor esforço — se falhar, não atrapalha a conexão já feita)
+    // (melhor esforço — se falhar, não atrapalha a conexão já feita).
+    // usa register_user com habilitado:true, que funciona tanto se a
+    // pessoa já tinha um registro pendente (promove) quanto se nunca
+    // tinha se registrado nessa repartição antes (cria já habilitado)
     if(currentUser && currentUser.email){
-      callAppsScript({ action: 'auto_enable', email: currentUser.email, reparticaoId: rep.id }).catch(() => {});
+      callAppsScript({
+        action: 'register_user',
+        nome: currentUser.nome, cargo: currentUser.cargo, matricula: currentUser.matricula,
+        email: currentUser.email,
+        reparticaoId: rep.clientId,
+        reparticaoNome: rep.nome,
+        habilitado: true
+      }).catch(() => {});
     }
 
     // uma conexão bem-sucedida confirma que a repartição está de
@@ -3033,12 +3054,13 @@ function showLoginError(msg){
 }
 function clearLoginError(){ $('loginErrorBox').classList.remove('show'); }
 
-function populateRegReparticaoSelect(selectedId){
+function populateRegReparticaoSelect(selectedClientId){
   const confirmed = getConfirmedReparticoes();
-  // se a repartição atualmente associada ao usuário (modo edição) ainda
-  // estiver pendente, ela precisa continuar aparecendo como opção
+  // "selectedClientId" identifica a repartição pelo Client ID (estável
+  // entre aparelhos) — aqui traduzimos para o ID local correspondente,
+  // que é o que o <select> realmente usa como valor de cada opção
   const all = loadReparticoes();
-  const selectedRep = selectedId ? all.find(r => r.id === selectedId) : null;
+  const selectedRep = selectedClientId ? all.find(r => r.clientId === selectedClientId) : null;
   const list = confirmed.slice();
   if(selectedRep && !list.some(r => r.id === selectedRep.id)) list.push(selectedRep);
 
@@ -3060,8 +3082,8 @@ function populateRegReparticaoSelect(selectedId){
   newOpt.textContent = '+ Cadastrar repartição';
   sel.appendChild(newOpt);
 
-  if(selectedId && list.some(r => r.id === selectedId)){
-    sel.value = selectedId;
+  if(selectedRep){
+    sel.value = selectedRep.id;
   } else {
     placeholder.selected = true;
   }
@@ -3419,7 +3441,11 @@ $('registerBtn').addEventListener('click', () => {
     }
     const list = loadServidores();
     const existing = list[editingIndex];
-    const updated = { ...existing, nome, cargo, matricula, email, telefone, reparticaoId: reparticaoIdField || existing.reparticaoId, pin: pin || existing.pin };
+    // resolve o ID local do seletor para o Client ID (estável entre
+    // aparelhos) antes de guardar no perfil do usuário
+    const repEditSelecionada = reparticaoIdField ? loadReparticoes().find(r => r.id === reparticaoIdField) : null;
+    const reparticaoClientIdEdit = repEditSelecionada ? repEditSelecionada.clientId : existing.reparticaoId;
+    const updated = { ...existing, nome, cargo, matricula, email, telefone, reparticaoId: reparticaoClientIdEdit, pin: pin || existing.pin };
     list[editingIndex] = updated;
     saveServidores(list);
     currentUser = updated;
@@ -3441,18 +3467,22 @@ $('registerBtn').addEventListener('click', () => {
       return;
     }
     const list = loadServidores();
-    list.push({ nome, cargo, matricula, email: pendingRegEmail, telefone, reparticaoId: pendingRegReparticaoId, pin, photo: null });
+    // guarda o Client ID da repartição (estável entre aparelhos) em vez do
+    // ID local — assim a central sempre identifica a mesma repartição,
+    // não importa em qual aparelho o usuário se cadastrou ou editou
+    const repSelecionada = loadReparticoes().find(r => r.id === pendingRegReparticaoId);
+    const reparticaoClientId = repSelecionada ? repSelecionada.clientId : pendingRegReparticaoId;
+    list.push({ nome, cargo, matricula, email: pendingRegEmail, telefone, reparticaoId: reparticaoClientId, pin, photo: null });
     saveServidores(list);
 
     // registra o cadastro na central da repartição (melhor esforço —
     // não bloqueia o cadastro local se a rede falhar)
-    const rep = loadReparticoes().find(r => r.id === pendingRegReparticaoId);
     callAppsScript({
       action: 'register_user',
       nome, cargo, matricula,
       email: pendingRegEmail,
-      reparticaoId: pendingRegReparticaoId,
-      reparticaoNome: rep ? rep.nome : ''
+      reparticaoId: reparticaoClientId,
+      reparticaoNome: repSelecionada ? repSelecionada.nome : ''
     }).catch(() => { /* cadastro local já concluído; a sincronização pode ser tentada depois */ });
 
     // se este cadastro também criou uma repartição nova, avisa a central
@@ -3566,9 +3596,10 @@ function enterApp(){
   // repartição por engano (ex.: aparelho compartilhado, ou seletor
   // deixado em outra repartição por outro usuário)
   const list = loadReparticoes();
-  if(currentUser.reparticaoId && list.some(r => r.id === currentUser.reparticaoId)){
-    if(getSelectedReparticaoId() !== currentUser.reparticaoId){
-      setSelectedReparticaoId(currentUser.reparticaoId);
+  const ownRep = currentUser.reparticaoId ? list.find(r => r.clientId === currentUser.reparticaoId) : null;
+  if(ownRep){
+    if(getSelectedReparticaoId() !== ownRep.id){
+      setSelectedReparticaoId(ownRep.id);
       gisTokenClient = null;
       setDriveConnectedFlag(false);
     }

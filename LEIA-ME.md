@@ -282,6 +282,19 @@ abaixo do nome de quem está preenchendo: "Conectado à repartição
 
 ## Repartição selecionada acompanha automaticamente o login
 
+**Correção estrutural importante:** o vínculo entre um usuário e sua
+repartição (e os registros de pendente/habilitado na central) agora
+usa o **Client ID** da repartição como identificador, em vez do ID
+local gerado em cada aparelho. Antes dessa correção, uma mesma
+repartição podia ganhar IDs locais diferentes em cada aparelho (por
+exemplo, ao ser excluída e recriada, ou adicionada de forma
+independente em cada dispositivo) — e como a central usava esse ID
+local pra saber "quem está pendente/habilitado em qual repartição",
+isso causava usuários "sumirem" das listas ao trocar de aparelho,
+mesmo tendo se conectado com sucesso. Usando o Client ID (que é sempre
+o mesmo, não importa o aparelho ou quando a repartição foi cadastrada
+localmente), esse problema fica resolvido de forma definitiva.
+
 Cada usuário guarda, no próprio cadastro, a repartição a que pertence
 (escolhida no momento do cadastro). A partir desta atualização, sempre
 que alguém faz login, o app **corrige automaticamente** o seletor de
