@@ -144,6 +144,7 @@ function doPost(e) {
       for (var i = 1; i < rows.length; i++) {
         var r = rows[i];
         if (String(r[4]) !== reparticaoId) continue;
+        if (r[11]) continue; // excluído — não aparece mais nessa lista
         var user = {
           rowIndex: i + 1,
           nome: String(r[0]),
@@ -277,7 +278,8 @@ function doPost(e) {
         data.relatorioNum || '',
         data.arquivo || '',
         data.driveLink || '',
-        new Date()
+        new Date(),
+        data.reparticaoNome || ''
       ]);
       return respond({ ok: true });
     }
@@ -296,7 +298,8 @@ function doPost(e) {
           arquivo: String(r[4]),
           driveLink: String(r[5]),
           dataEnvio: r[6] ? formatDate_(r[6]) : '',
-          reparticaoId: String(r[2])
+          reparticaoId: String(r[2]),
+          reparticaoNome: r[7] ? String(r[7]) : ''
         });
       }
       relatorios.reverse(); // mais recentes primeiro
@@ -368,6 +371,84 @@ function doPost(e) {
       return respond({ ok: true });
     }
 
+    // ---------- histórico de acessos ao app ----------
+    if (action === 'log_access') {
+      var email = (data.email || '').trim().toLowerCase();
+      if (!email) return respond({ ok: true });
+      var sheet = getOrCreateAcessosSheet();
+      sheet.appendRow([email, new Date()]);
+      return respond({ ok: true });
+    }
+
+    if (action === 'list_user_access') {
+      var email = (data.email || '').trim().toLowerCase();
+      if (!email) return respond({ ok: true, acessos: [] });
+      var sheet = getOrCreateAcessosSheet();
+      var rows = sheet.getDataRange().getValues();
+      var acessos = [];
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).toLowerCase() === email) {
+          acessos.push(rows[i][1] ? formatDate_(rows[i][1]) : '');
+        }
+      }
+      acessos.reverse();
+      return respond({ ok: true, acessos: acessos.slice(0, 10) });
+    }
+
+    // ---------- lista agregada de TODOS os usuários (aba "Usuários cadastrados") ----------
+    if (action === 'list_all_users') {
+      var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+      var porEmail = {};
+      var ordem = [];
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        var email = String(r[1]).toLowerCase();
+        if (!email) continue;
+        if (!porEmail[email]) {
+          porEmail[email] = {
+            nome: String(r[0]), email: email, foto: r[9] ? String(r[9]) : '',
+            telefone: r[10] ? String(r[10]) : '',
+            dataCadastro: r[8] ? formatDate_(r[8]) : '',
+            excluidoGeral: false,
+            reparticoes: []
+          };
+          ordem.push(email);
+        }
+        var u = porEmail[email];
+        // mantém o nome/foto mais recentes (última linha encontrada para o e-mail)
+        u.nome = String(r[0]);
+        if (r[9]) u.foto = String(r[9]);
+        var excluido = !!r[11];
+        if (excluido) u.excluidoGeral = true;
+        var status = excluido ? 'excluido' : (!!r[6] ? 'habilitado' : 'pendente');
+        var desde = excluido ? (r[12] ? formatDate_(r[12]) : '') : (!!r[6] ? (r[7] ? formatDate_(r[7]) : '') : (r[8] ? formatDate_(r[8]) : ''));
+        u.reparticoes.push({
+          reparticaoNome: String(r[5]), cargo: String(r[2]), matricula: String(r[3]),
+          status: status, desde: desde
+        });
+      }
+      var usuarios = ordem.map(function(email){ return porEmail[email]; });
+      return respond({ ok: true, usuarios: usuarios });
+    }
+
+    // marca TODAS as linhas desse e-mail como excluídas (revoga o acesso
+    // por completo, mas preserva o histórico — não apaga as linhas)
+    if (action === 'disable_user_everywhere') {
+      var email = (data.email || '').trim().toLowerCase();
+      if (!email) return respond({ ok: false, error: 'E-mail não informado.' });
+      var sheet = getOrCreateUsersSheet();
+      var rows = sheet.getDataRange().getValues();
+      var agora = new Date();
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][1]).toLowerCase() === email) {
+          sheet.getRange(i + 1, 12).setValue(true);
+          sheet.getRange(i + 1, 13).setValue(agora);
+        }
+      }
+      return respond({ ok: true });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
@@ -389,17 +470,42 @@ function getOrCreateUsersSheet() {
     props.setProperty('USERS_SHEET_ID', ss.getId());
     var sheet = ss.getSheets()[0];
     sheet.setName('Usuarios');
-    sheet.appendRow(['Nome', 'Email', 'Cargo', 'Matricula', 'ReparticaoId', 'ReparticaoNome', 'Habilitado', 'HabilitadoEm', 'DataCadastro', 'FotoBase64', 'Telefone']);
+    sheet.appendRow(['Nome', 'Email', 'Cargo', 'Matricula', 'ReparticaoId', 'ReparticaoNome', 'Habilitado', 'HabilitadoEm', 'DataCadastro', 'FotoBase64', 'Telefone', 'Excluido', 'ExcluidoEm']);
     return sheet;
   }
 
   var sheet = ss.getSheetByName('Usuarios') || ss.getSheets()[0];
-  // garante as colunas de foto/telefone mesmo em planilhas criadas antes desta atualização
+  // garante as colunas mesmo em planilhas criadas antes desta atualização
   if (sheet.getRange(1, 10).getValue() !== 'FotoBase64') {
     sheet.getRange(1, 10).setValue('FotoBase64');
   }
   if (sheet.getRange(1, 11).getValue() !== 'Telefone') {
     sheet.getRange(1, 11).setValue('Telefone');
+  }
+  if (sheet.getRange(1, 12).getValue() !== 'Excluido') {
+    sheet.getRange(1, 12).setValue('Excluido');
+  }
+  if (sheet.getRange(1, 13).getValue() !== 'ExcluidoEm') {
+    sheet.getRange(1, 13).setValue('ExcluidoEm');
+  }
+  return sheet;
+}
+
+function getOrCreateAcessosSheet() {
+  var props = PropertiesService.getScriptProperties();
+  var ssId = props.getProperty('USERS_SHEET_ID');
+  var ss = null;
+  if (ssId) {
+    try { ss = SpreadsheetApp.openById(ssId); } catch (e) { ss = null; }
+  }
+  if (!ss) {
+    getOrCreateUsersSheet();
+    ss = SpreadsheetApp.openById(props.getProperty('USERS_SHEET_ID'));
+  }
+  var sheet = ss.getSheetByName('Acessos');
+  if (!sheet) {
+    sheet = ss.insertSheet('Acessos');
+    sheet.appendRow(['Email', 'DataHora']);
   }
   return sheet;
 }
@@ -421,7 +527,11 @@ function getOrCreateReportsSheet() {
   var sheet = ss.getSheetByName('Relatorios');
   if (!sheet) {
     sheet = ss.insertSheet('Relatorios');
-    sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio']);
+    sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio', 'ReparticaoNome']);
+    return sheet;
+  }
+  if (sheet.getRange(1, 8).getValue() !== 'ReparticaoNome') {
+    sheet.getRange(1, 8).setValue('ReparticaoNome');
   }
   return sheet;
 }

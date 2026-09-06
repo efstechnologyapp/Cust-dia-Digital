@@ -463,6 +463,73 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Manuais de cadastro de repartição
+
+Duas formas de consultar o passo a passo de como obter, no Google
+Cloud e no Drive, tudo que o app pede para cadastrar uma repartição
+nova:
+
+- **Na tela "Conexões — Repartições"** (acesso administrativo): link
+  **"📖 Ver manual..."** logo abaixo de "Cadastrar nova repartição" —
+  abre uma barra lateral com o passo a passo completo, organizado por
+  sistema (Google Cloud Console / Google Drive / outras dicas e erros
+  comuns).
+- **Na tela de login**, ao escolher "+ Cadastrar repartição": link
+  **"📄 Ver manual em PDF..."** — abre um arquivo PDF com o mesmo
+  conteúdo, pra quem estiver cadastrando sem acesso à tela
+  administrativa.
+
+**Nota honesta:** nenhum dos dois manuais tem capturas de tela reais
+da interface do Google — só texto, bem organizado por etapa. A
+interface do Google Cloud muda de vez em quando, e não há como gerar
+imagens autênticas da tela de terceiros de forma confiável. Se quiser,
+dá pra montar uma versão com prints de verdade a partir de capturas de
+tela que você mesmo tire.
+
+## Nomenclatura dos arquivos enviados ao Drive
+
+Tanto o arquivo evidência (Seção 9) quanto o relatório completo agora
+são enviados ao Drive com um prefixo de duas letras — as iniciais do
+primeiro e do último nome de quem está enviando. Exemplo: "Fillipe
+Amorim Firmo da Silva" enviando um arquivo chamado `chat.txt` vira
+`FS - chat.txt`; o relatório completo vira algo como
+`FS - Relatorio_NUMERO_timestamp.pdf`.
+
+## Histórico de relatórios: link também pro arquivo evidência
+
+Além do link "🔗 Abrir relatório no Drive" (o PDF completo), o
+histórico local agora também mostra "🔗 Abrir arquivo digital no
+Drive", quando o arquivo evidência da Seção 9 foi enviado com sucesso
+antes de concluir a tarefa. Os dois links são independentes — cada um
+aponta pro arquivo certo no Drive da repartição.
+
+## Nova aba "Usuários cadastrados" (tela de Conexões)
+
+A tela "Conexões — Repartições" agora tem duas abas: **"Conexões do
+Sistema"** (tudo que já existia, sem mudanças) e **"Usuários
+cadastrados"** — uma visão de todos os usuários já cadastrados no
+sistema, em qualquer repartição, com seus respectivos status.
+
+Cada card mostra: foto, nome completo, cargo/e-mail e data de
+cadastro, além de um ícone 🗑️ para excluir o acesso desse usuário ao
+app por completo (em todas as repartições de uma vez).
+
+Tocar num card abre um modal com:
+- **Dados pessoais completos** (nome, e-mail, telefone, data de
+  cadastro).
+- **Repartições**, com o status de cada uma (🕒 Pendente / ✅
+  Habilitado / ⛔ Excluído) e a data desde quando esse status vale.
+- **Histórico de acesso ao app** — as últimas 10 vezes que esse
+  usuário fez login, em qualquer aparelho.
+- **Histórico de relatórios enviados** — os últimos 10 relatórios,
+  com data, repartição e link direto pro arquivo no Drive.
+
+**Sobre a exclusão:** ela é "suave" — o cadastro não é apagado de
+verdade, só marcado como excluído (preservando o histórico para
+consulta futura). A pessoa excluída deixa de conseguir usar o sistema
+em qualquer repartição, mas o registro de que ela existiu, e desde
+quando foi excluída, continua disponível no modal.
+
 ## Repartição e habilitação de novos usuários
 
 Desde esta atualização, o cadastro de um novo servidor pede também a

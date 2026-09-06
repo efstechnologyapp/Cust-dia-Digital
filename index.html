@@ -540,6 +540,36 @@
     margin-bottom: 8px;
     font-size: 12.5px;
   }
+  .all-user-card{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+  .all-user-card .all-user-avatar{
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:15px;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .all-user-card .all-user-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .all-user-card .all-user-info{ flex:1; min-width:0; }
+  .all-user-card .all-user-nome{ font-weight:700; font-size:14.5px; color:var(--navy-dark); }
+  .all-user-card .all-user-cargo-email{ font-size:12.5px; color:var(--ink); margin-top:1px; }
+  .all-user-card .all-user-small{ font-size:11px; color:var(--muted); margin-top:3px; }
+  .all-user-card .all-user-delete{
+    border:none; background:none; color:#B23B3B; font-size:16px;
+    padding:2px; flex-shrink:0;
+  }
   .rep-user-card .rep-user-nome{ font-weight:700; color: var(--ink); }
   .rep-user-card .rep-user-detail{ color: var(--muted); margin-top: 2px; }
   .rep-user-card .rep-user-habilitado-em{ color: var(--ok-ink); margin-top: 2px; font-size:11.5px; }
@@ -638,6 +668,7 @@
   .history-badge.ok{ background: var(--ok-bg); color: var(--ok-ink); }
   .history-badge.warn{ background: var(--warn-bg); color: var(--warn-ink); }
   .history-badge.neutral{ background:#F1F3F6; color: var(--muted); }
+  .history-badge.err{ background:#FBE4E4; color:#B23B3B; }
   .history-card-actions{
     display:flex;
     gap: 8px;
@@ -1119,7 +1150,8 @@
       </div>
 
       <div class="hidden-view" id="regNewReparticaoForm" style="background:#F7F9FB;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:14px;">
-        <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0 0 10px;">Cadastrar nova repartição</h4>
+        <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0 0 4px;">Cadastrar nova repartição</h4>
+        <a href="Manual_Cadastro_Reparticao.pdf" target="_blank" rel="noopener" style="font-size:12px;display:inline-block;margin-bottom:10px;">📄 Ver manual em PDF: como obter os dados da repartição no Google</a>
         <div class="field">
           <label style="font-size:12px;">Nome da repartição</label>
           <input type="text" id="regNewRepNome" placeholder="Ex.: 14ª Delegacia de Polícia">
@@ -1273,6 +1305,12 @@
   <div class="history-wrap">
     <h2 class="history-title">Conexões do Sistema</h2>
 
+    <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line);">
+      <button type="button" class="reg-tab-btn active" id="connTabBtnSistema" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--navy-dark);border-bottom:2px solid var(--navy-dark);cursor:pointer;">Conexões do Sistema</button>
+      <button type="button" class="reg-tab-btn" id="connTabBtnUsuarios" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Usuários cadastrados</button>
+    </div>
+
+    <div id="connTabSistema">
     <section class="card" style="margin-bottom:18px;">
       <h2 style="margin-top:0;">Conexões de E-mail</h2>
       <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;color:var(--muted);padding:0;">⚙️ Configurar verificação de e-mail</button>
@@ -1295,6 +1333,7 @@
         <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;">Cadastrar nova repartição</h3>
         <button type="button" class="btn-inline-share" id="toggleNewRepBtn" aria-label="Adicionar repartição" title="Adicionar repartição">+</button>
       </div>
+      <button type="button" class="btn-link" id="openManualBtn" style="font-size:12px;margin:2px 0 4px;padding:0;">📖 Ver manual: como obter os dados da repartição no Google</button>
 
       <div class="hidden-view" id="newReparticaoForm" style="margin-top:12px;">
         <div class="field">
@@ -1330,10 +1369,85 @@
       <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:4px 0 12px;">Repartições cadastradas</h3>
       <div id="reparticoesList"></div>
     </section>
+    </div>
+
+    <div class="hidden-view" id="connTabUsuarios">
+      <p class="history-sub">Todos os usuários já cadastrados no sistema, em qualquer repartição — pendentes ou não de conexão efetiva com o Google.</p>
+      <div class="loc-status" id="allUsersStatus"></div>
+      <div id="allUsersList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: detalhes do usuário (aba "Usuários cadastrados") ===== -->
+<div class="sidebar-overlay" id="userDetailOverlay">
+  <div class="sidebar-panel edit-rep-panel">
+    <button class="sidebar-close" id="closeUserDetailBtn">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div class="all-user-avatar" id="userDetailAvatar" style="width:52px;height:52px;font-size:18px;"></div>
+      <div>
+        <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0;" id="userDetailNome"></h3>
+        <div style="font-size:12px;color:var(--muted);" id="userDetailEmail"></div>
+      </div>
+    </div>
+
+    <div class="rep-users-section-title">📋 Dados pessoais</div>
+    <div class="rep-user-card" id="userDetailPessoais"></div>
+
+    <div class="rep-users-section-title">🏛️ Repartições</div>
+    <div id="userDetailReparticoes"></div>
+
+    <div class="rep-users-section-title">🕘 Histórico de acesso ao app</div>
+    <div id="userDetailAcessos"></div>
+
+    <div class="rep-users-section-title">📤 Histórico de relatórios enviados</div>
+    <div id="userDetailRelatorios"></div>
+
+    <button class="sidebar-btn danger" id="userDetailDeleteBtn" style="margin-top:14px;">🗑️ Excluir acesso deste usuário ao app</button>
   </div>
 </div>
 
 <!-- ===== MODAL: editar repartição ===== -->
+<div class="sidebar-overlay" id="manualOverlay">
+  <div class="sidebar-panel" style="width:92%;max-width:420px;">
+    <button class="sidebar-close" id="closeManualBtn">✕</button>
+    <h3 style="font-family:var(--serif);font-size:17px;color:var(--navy-dark);margin:0 0 4px;">Manual: cadastrando uma repartição</h3>
+    <p class="history-sub" style="margin-bottom:14px;">Passo a passo para conseguir, no Google, tudo que o app pede para cadastrar uma repartição nova.</p>
+
+    <h4 style="font-family:var(--serif);color:var(--navy-dark);margin:14px 0 6px;">🔷 Google Cloud Console</h4>
+    <p class="history-sub"><b>a) Acesse com o Gmail da repartição</b><br>
+    Vá em <a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a> e faça login com a conta Google que vai administrar essa repartição (não precisa ser a mesma do EFS Technology). Crie um projeto novo, com um nome identificável (ex.: "Custódia Digital - Nome da Repartição").</p>
+    <p class="history-sub"><b>b) Ative a API do Google Drive</b><br>
+    Na busca do topo, digite "Google Drive API" → abra o resultado → toque em "Ativar".</p>
+    <p class="history-sub"><b>c) Configure a tela de consentimento OAuth</b><br>
+    Busque "tela de consentimento OAuth" → escolha "Externo" → preencha nome do app, e-mail de suporte e contato do desenvolvedor → salve avançando até o fim.</p>
+    <p class="history-sub"><b>d) Obtenha o Client ID</b><br>
+    Busque "Credenciais" → "+ Criar credenciais" → "ID do cliente OAuth" → tipo "Aplicativo da Web" → em "Origens JavaScript autorizadas", cole exatamente:<br>
+    <span class="mono" style="font-size:11.5px;">https://efstechnologyapp.github.io</span><br>
+    → Criar. Copie o Client ID gerado (usando o botão de copiar, não selecionando o texto manualmente).</p>
+    <p class="history-sub"><b>e) Adicione os usuários de teste</b><br>
+    Ainda na "tela de consentimento OAuth" (ou em "Público-alvo") → seção "Usuários de teste" → adicione o e-mail de cada servidor que vai operar o sistema (o próprio e-mail Google pessoal de cada um, não o e-mail institucional da repartição).</p>
+
+    <h4 style="font-family:var(--serif);color:var(--navy-dark);margin:14px 0 6px;">🔷 Google Drive</h4>
+    <p class="history-sub"><b>f) Crie a pasta de destino</b><br>
+    No Google Drive dessa mesma conta, crie uma pasta nova. Nomeie-a, por padrão, como:<br>
+    <span class="mono" style="font-size:11.5px;">Custódia Digital - Nome da Repartição</span></p>
+    <p class="history-sub"><b>g) Obtenha o ID da pasta</b><br>
+    Abra a pasta e copie o trecho da URL depois de <span class="mono" style="font-size:11.5px;">/folders/</span> — esse é o ID (cuidado para não incluir parâmetros extras tipo "?hl=pt-br" que às vezes vêm colados).</p>
+    <p class="history-sub"><b>h) Compartilhe a pasta com os operadores</b><br>
+    Botão direito na pasta → Compartilhar → adicione o e-mail de cada servidor que vai usar o sistema, com permissão de <b>Editor</b> (os mesmos e-mails do passo "e").</p>
+
+    <h4 style="font-family:var(--serif);color:var(--navy-dark);margin:14px 0 6px;">🔷 Outras informações importantes</h4>
+    <p class="history-sub">
+    • O domínio autorizado (passo "d") é <b>sempre</b> o mesmo, não importa a repartição: <span class="mono" style="font-size:11.5px;">https://efstechnologyapp.github.io</span><br>
+    • O modo de teste permite até 100 usuários por projeto — suficiente para a maioria das repartições.<br>
+    • Depois de cadastrar a repartição no app, ela nasce como "pendente" — só vira "cadastrada" quando alguém realmente conectar com sucesso (aba "Editar Cadastro / Conexões" do próprio perfil).<br>
+    • Se aparecer erro de "OAuth client was not found", confira se o Client ID foi colado sem espaços extras e sem "http://"/"https://" na frente.<br>
+    • Se aparecer erro de "API has not been used/disabled", volta no passo "b" — é sinal de que a API do Drive não foi ativada nesse projeto.
+    </p>
+  </div>
+</div>
+
 <div class="sidebar-overlay" id="editRepOverlay">
   <div class="sidebar-panel edit-rep-panel">
     <button class="sidebar-close" id="closeEditRepBtn">✕</button>
@@ -2354,6 +2468,9 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
   closeEditReparticaoModal();
 });
 $('closeEditRepBtn').addEventListener('click', closeEditReparticaoModal);
+
+$('openManualBtn').addEventListener('click', () => { $('manualOverlay').classList.add('open'); });
+$('closeManualBtn').addEventListener('click', () => { $('manualOverlay').classList.remove('open'); });
 $('cancelEditRepBtn').addEventListener('click', closeEditReparticaoModal);
 $('editRepOverlay').addEventListener('click', (e) => { if(e.target.id === 'editRepOverlay') closeEditReparticaoModal(); });
 
@@ -2570,9 +2687,117 @@ $('openConnectionsBtn').addEventListener('click', () => {
   resetNewReparticaoForm();
   renderReparticoesManageList();
   renderReparticoesPendentesList();
+  switchConnTab('sistema');
   showView('connections');
 });
 $('connectionsBackBtn').addEventListener('click', () => { showView('home'); });
+
+// ---------- abas da tela Conexões: "Conexões do Sistema" / "Usuários cadastrados" ----------
+function switchConnTab(tab){
+  const isSistema = tab === 'sistema';
+  $('connTabSistema').classList.toggle('hidden-view', !isSistema);
+  $('connTabUsuarios').classList.toggle('hidden-view', isSistema);
+  $('connTabBtnSistema').style.borderBottomColor = isSistema ? 'var(--navy-dark)' : 'transparent';
+  $('connTabBtnSistema').style.color = isSistema ? 'var(--navy-dark)' : 'var(--muted)';
+  $('connTabBtnUsuarios').style.borderBottomColor = !isSistema ? 'var(--navy-dark)' : 'transparent';
+  $('connTabBtnUsuarios').style.color = !isSistema ? 'var(--navy-dark)' : 'var(--muted)';
+  if(!isSistema) renderAllUsersList();
+}
+$('connTabBtnSistema').addEventListener('click', () => switchConnTab('sistema'));
+$('connTabBtnUsuarios').addEventListener('click', () => switchConnTab('usuarios'));
+
+async function renderAllUsersList(){
+  const statusEl = $('allUsersStatus');
+  const listEl = $('allUsersList');
+  listEl.innerHTML = '';
+  statusEl.textContent = 'Carregando…';
+  statusEl.className = 'loc-status';
+  try {
+    const data = await callAppsScript({ action: 'list_all_users' });
+    statusEl.textContent = '';
+    const usuarios = data.usuarios || [];
+    if(usuarios.length === 0){
+      listEl.innerHTML = '<div class="rep-users-empty">Nenhum usuário cadastrado ainda.</div>';
+      return;
+    }
+    listEl.innerHTML = usuarios.map((u, idx) => `
+      <div class="all-user-card" data-idx="${idx}">
+        <div class="all-user-avatar">${u.foto ? `<img src="${esc(u.foto)}" alt="">` : esc(initials(u.nome))}</div>
+        <div class="all-user-info">
+          <div class="all-user-nome">${esc(u.nome)}${u.excluidoGeral ? ' <span class="history-badge err" style="font-size:10px;">EXCLUÍDO</span>' : ''}</div>
+          <div class="all-user-cargo-email">${esc((u.reparticoes[0] && u.reparticoes[0].cargo) || '')} — ${esc(u.email)}</div>
+          <div class="all-user-small">Cadastrado em ${esc(u.dataCadastro)} · ${u.reparticoes.length} repartição(ões)</div>
+        </div>
+        <button type="button" class="all-user-delete" data-delete-idx="${idx}" title="Excluir acesso" aria-label="Excluir acesso">🗑️</button>
+      </div>
+    `).join('');
+    listEl.querySelectorAll('.all-user-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if(e.target.closest('[data-delete-idx]')) return;
+        openUserDetailModal(usuarios[Number(card.dataset.idx)]);
+      });
+    });
+    listEl.querySelectorAll('button[data-delete-idx]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteUserEverywhere(usuarios[Number(btn.dataset.deleteIdx)]);
+      });
+    });
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+
+async function deleteUserEverywhere(u){
+  if(!confirm(`Excluir o acesso de "${u.nome}" ao app? Ele deixa de conseguir usar o sistema em qualquer repartição — mas o histórico continua registrado.`)) return;
+  try {
+    await callAppsScript({ action: 'disable_user_everywhere', email: u.email });
+    renderAllUsersList();
+  } catch(err){
+    alert('Não foi possível excluir: ' + err.message);
+  }
+}
+
+function openUserDetailModal(u){
+  $('userDetailAvatar').innerHTML = u.foto ? `<img src="${esc(u.foto)}" alt="">` : esc(initials(u.nome));
+  $('userDetailNome').textContent = u.nome;
+  $('userDetailEmail').textContent = u.email;
+  $('userDetailPessoais').innerHTML = `
+    <div><b>Nome:</b> ${esc(u.nome)}</div>
+    <div><b>E-mail:</b> ${esc(u.email)}</div>
+    <div><b>Telefone:</b> ${esc(u.telefone || '—')}</div>
+    <div><b>Cadastrado em:</b> ${esc(u.dataCadastro)}</div>
+  `;
+  const statusLabel = { pendente: '🕒 Pendente', habilitado: '✅ Habilitado', excluido: '⛔ Excluído' };
+  $('userDetailReparticoes').innerHTML = u.reparticoes.map(r => `
+    <div class="rep-user-card">
+      <div class="rep-user-nome">${esc(r.reparticaoNome)}</div>
+      <div class="rep-user-detail">${esc(r.cargo)} — matrícula ${esc(r.matricula)}</div>
+      <div class="rep-user-detail">Status: ${statusLabel[r.status] || r.status} desde ${esc(r.desde)}</div>
+    </div>
+  `).join('') || '<div class="rep-users-empty">Nenhuma repartição.</div>';
+
+  $('userDetailAcessos').innerHTML = '<div class="loc-status">Carregando…</div>';
+  $('userDetailRelatorios').innerHTML = '<div class="loc-status">Carregando…</div>';
+  $('userDetailDeleteBtn').onclick = () => deleteUserEverywhere(u);
+  $('userDetailOverlay').classList.add('open');
+
+  callAppsScript({ action: 'list_user_access', email: u.email }).then(data => {
+    const acessos = data.acessos || [];
+    $('userDetailAcessos').innerHTML = acessos.length
+      ? acessos.map(a => `<div class="rep-user-detail">${esc(a)}</div>`).join('')
+      : '<div class="rep-users-empty">Nenhum acesso registrado ainda.</div>';
+  }).catch(() => { $('userDetailAcessos').innerHTML = '<div class="rep-users-empty">Não foi possível carregar.</div>'; });
+
+  callAppsScript({ action: 'list_reports', email: u.email }).then(data => {
+    const relatorios = (data.relatorios || []).slice(0, 10);
+    $('userDetailRelatorios').innerHTML = relatorios.length
+      ? relatorios.map(r => `<div class="rep-user-detail">${esc(r.dataEnvio)} — ${esc(r.reparticaoNome || r.reparticaoId)}${r.driveLink ? ` — <a href="${esc(r.driveLink)}" target="_blank" rel="noopener">abrir</a>` : ''}</div>`).join('')
+      : '<div class="rep-users-empty">Nenhum relatório enviado ainda.</div>';
+  }).catch(() => { $('userDetailRelatorios').innerHTML = '<div class="rep-users-empty">Não foi possível carregar.</div>'; });
+}
+$('closeUserDetailBtn').addEventListener('click', () => { $('userDetailOverlay').classList.remove('open'); });
 
 // ---------- Google Drive: autenticação (OAuth), conectar/desconectar e envio ----------
 let gisTokenClient = null;
@@ -2770,21 +2995,34 @@ function appendToTextarea(textareaEl, sentence){
 
 const attachedFiles = { orig: null, cop: null };
 
+// prefixa o arquivo com as iniciais dos dois primeiros nomes de quem
+// está enviando, ex.: "Fillipe Amorim Firmo da Silva" -> "FA - nome.ext"
+function renameFileWithInitials(file){
+  if(!currentUser) return file;
+  const prefix = initials(currentUser.nome) + ' - ';
+  if(file.name.startsWith(prefix)) return file;
+  return new File([file], prefix + file.name, { type: file.type });
+}
+
+let lastEvidenceDriveLink = null; // link do Drive do arquivo evidência (Seção 9), consumido ao concluir a tarefa
+
 async function handleCustodyShare(){
-  const file = attachedFiles.cop;
+  const fileOriginal = attachedFiles.cop;
   const statusEl = $('shareRepStatus');
   const textareaEl = $('f_custodia_copia');
-  if(!file){
+  if(!fileOriginal){
     statusEl.textContent = 'Anexe o arquivo copiado na Seção 6 antes de enviar.';
     statusEl.className = 'loc-status err';
     return;
   }
+  const file = renameFileWithInitials(fileOriginal);
   const rep = getSelectedReparticao();
   const btn = $('shareRepBtn');
   btn.disabled = true;
   try {
     if(rep && rep.clientId && rep.folderId){
       const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
+      lastEvidenceDriveLink = result.webViewLink || null;
       const folderName = await getDriveFolderName(rep.folderId, rep.clientId);
       const sentence = buildCustodySentence(file.name, `da ${rep.nome}`, folderName || rep.folderId);
       appendToTextarea(textareaEl, sentence);
@@ -3934,6 +4172,9 @@ function loginAs(index){
   currentUser = list[index];
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
   sessionStorage.setItem(SESSION_KEY + '_idx', String(index));
+  if(currentUser.email){
+    callAppsScript({ action: 'log_access', email: currentUser.email }).catch(() => {});
+  }
   enterApp();
 }
 
@@ -4468,8 +4709,10 @@ function saveReportToHistory(){
     hashStatus: meta.hashStatus || 'neutral',
     html: $('reportPaper').innerHTML,
     enviadoDrive: false,
-    driveLink: ''
+    driveLink: '',
+    arquivoDigitalDriveLink: lastEvidenceDriveLink || ''
   };
+  lastEvidenceDriveLink = null; // consumido — não vaza para o próximo relatório
   const list = loadHistory();
   list.unshift(record);
   saveHistoryList(list.slice(0, 200)); // limite de segurança para não crescer sem controle
@@ -4522,7 +4765,10 @@ async function renderHistoryList(){
       ? `<span class="history-badge ok">☁️ Enviado ao Drive</span>`
       : `<span class="history-badge neutral">☁️ Não enviado ao Drive</span>`;
     const driveLinkHtml = record.driveLink
-      ? `<div><a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>`
+      ? `<div><a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>`
+      : '';
+    const evidenceLinkHtml = record.arquivoDigitalDriveLink
+      ? `<div><a href="${esc(record.arquivoDigitalDriveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir arquivo digital no Drive</a></div>`
       : '';
 
     const card = document.createElement('div');
@@ -4538,6 +4784,7 @@ async function renderHistoryList(){
         ${driveBadge}
       </div>
       ${driveLinkHtml}
+      ${evidenceLinkHtml}
       <div class="history-card-actions">
         <button data-action="open">Abrir</button>
         <button data-action="delete" class="danger">Excluir</button>
@@ -4628,7 +4875,8 @@ function resetFormFields(){
 
 async function generateReportFile(){
   const reportNum = ($('f_relatorio_num').value || 'sem_numero').trim().replace(/[^\w\-]+/g, '_');
-  const baseName = `Relatorio_${reportNum}_${Date.now()}`;
+  const iniciais = currentUser ? initials(currentUser.nome) : 'XX';
+  const baseName = `${iniciais} - Relatorio_${reportNum}_${Date.now()}`;
   if(window.html2pdf){
     try {
       const worker = html2pdf().set({

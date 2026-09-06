@@ -1,9 +1,10 @@
-const CACHE_NAME = "custodia-digital-v64";
+const CACHE_NAME = "custodia-digital-v65";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./Manual_Cadastro_Reparticao.pdf"
 ];
 
 self.addEventListener("install", (event) => {
