@@ -2302,7 +2302,10 @@ async function renderRepEquipamentosList(reparticaoId){
     }
     listEl.innerHTML = equipamentos.map(eq => `
       <div class="rep-user-card">
-        <div class="rep-user-nome">${esc(eq.nome)}</div>
+        <div class="reparticao-card-top" style="margin-bottom:0;">
+          <div class="rep-user-nome">${esc(eq.nome)}</div>
+          <button type="button" class="copy-email-btn" data-remove-equip="${eq.rowIndex}" title="Remover equipamento" aria-label="Remover equipamento" style="font-size:15px;color:#B23B3B;">✕</button>
+        </div>
         ${eq.serie ? `<div class="rep-user-detail">ID do Dispositivo: ${esc(eq.serie)}</div>` : ''}
         ${eq.uuid ? `<div class="rep-user-detail">ID do Produto: ${esc(eq.uuid)}</div>` : ''}
         ${eq.so ? `<div class="rep-user-detail">Sistema operacional - Edição e Versão: ${esc(eq.so)}</div>` : ''}
@@ -2310,6 +2313,15 @@ async function renderRepEquipamentosList(reparticaoId){
         <div class="rep-user-detail">Cadastrado por ${esc(eq.cadastradoPor || '—')}, em ${esc(eq.dataCadastro)}</div>
       </div>
     `).join('');
+    listEl.querySelectorAll('button[data-remove-equip]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('Remover este equipamento? Ele deixa de aparecer no seletor da Seção 5 para todos os usuários desta repartição.')) return;
+        try {
+          await callAppsScript({ action: 'remove_equipamento', rowIndex: btn.dataset.removeEquip });
+          renderRepEquipamentosList(reparticaoId);
+        } catch(err){ alert('Não foi possível remover: ' + err.message); }
+      });
+    });
   } catch(err){
     statusEl.textContent = 'Não foi possível carregar: ' + err.message;
     statusEl.className = 'loc-status err';

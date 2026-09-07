@@ -508,6 +508,16 @@ function doPost(e) {
       return respond({ ok: true, equipamentos: equipamentos });
     }
 
+    if (action === 'remove_equipamento') {
+      var rowIndex = Number(data.rowIndex);
+      if (!rowIndex || rowIndex < 2) {
+        return respond({ ok: false, error: 'Registro inválido.' });
+      }
+      var sheet = getOrCreateEquipamentosSheet();
+      sheet.deleteRow(rowIndex);
+      return respond({ ok: true });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
