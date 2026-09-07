@@ -1604,10 +1604,16 @@
       <div class="file-attach-row" style="margin-top:8px;">
         <input type="file" id="f_imei_ocr_input" accept="image/*" style="display:none;">
         <button type="button" class="btn-attach" id="f_imei_ocr_btn">📷 Ler IMEI de uma foto</button>
+        <button type="button" class="btn-attach" id="f_imei_save_btn">💾 Salvar IMEI digitado</button>
       </div>
       <div class="loc-status" id="f_imei_ocr_status"></div>
       <div id="f_imei_ocr_candidates"></div>
-      <div class="hint"><b>Como localizar:</b> disque *#06# (botão acima) ou anexe um print da tela com o IMEI — o app tenta ler o número automaticamente por OCR, mas sempre exibe o valor encontrado para você confirmar antes de preencher (requer internet só para essa leitura; a leitura pode errar dígitos, então confira sempre).</div>
+      <div class="hint"><b>Como localizar:</b> disque *#06# (botão acima) ou anexe um print da tela com o IMEI — o app tenta ler o número automaticamente por OCR, mas sempre exibe o valor encontrado para você confirmar antes de preencher (requer internet só para essa leitura; a leitura pode errar dígitos, então confira sempre). Se preferir digitar direto, use o botão "Salvar IMEI digitado" para confirmar o valor.</div>
+    </div>
+    <div class="field">
+      <label>Outro IMEI do mesmo aparelho (se houver)</label>
+      <input type="text" id="f_imei2" placeholder="Ex.: 35 926116 148270 6">
+      <div class="hint"><b>Como localizar:</b> aparelhos com dois chips (dual-SIM) costumam ter dois números de IMEI — disque *#06# e confira se aparece mais de um. Deixe em branco se o aparelho tiver só um.</div>
     </div>
   </section>
 
@@ -1631,7 +1637,7 @@
     <div class="field">
       <label>Caminho no dispositivo</label>
       <input type="text" class="mono" id="f_orig_caminho" placeholder="/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Databases/...">
-      <div class="hint"><b>Como localizar:</b> gerenciador de arquivos > Armazenamento interno > Android > media > com.whatsapp > WhatsApp > Databases.</div>
+      <div class="hint"><b>Como localizar:</b> gerenciador de arquivos > Armazenamento interno > Android > media > com.whatsapp > WhatsApp > Databases. Se a extração for feita por ferramenta rodando no PC (com o celular conectado), o caminho também pode ser obtido segurando Shift e clicando com o botão direito do mouse sobre o arquivo, depois clicando com o botão esquerdo na opção "Copiar como caminho".</div>
     </div>
     <div class="row2">
       <div class="field">
@@ -1690,9 +1696,19 @@
   <section class="card">
     <h2><span class="num">5</span>Identificação do Computador de Destino</h2>
     <div class="field">
-      <label>Equipamento</label>
-      <input type="text" id="f_pc_equipamento" placeholder="Ex.: Notebook Dell Latitude 5440, patrimônio nº ...">
-      <div class="hint"><b>Como localizar:</b> etiqueta física do equipamento (modelo e nº de patrimônio).</div>
+      <label>Nome da máquina, software e versão</label>
+      <input type="text" id="f_pc_equipamento" placeholder="Ex.: Notebook Dell Latitude 5440 — Cellebrite UFED 4PC, versão 7.x">
+      <div class="hint"><b>Como localizar:</b> etiqueta física do equipamento (modelo e nº de patrimônio) e a tela "Sobre" do software utilizado.</div>
+    </div>
+    <div class="field">
+      <label>Número de série</label>
+      <input type="text" id="f_pc_serie" placeholder="Ex.: 7XJK2R3">
+      <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic bios get serialnumber</span>, ou etiqueta física do equipamento.</div>
+    </div>
+    <div class="field">
+      <label>UUID do sistema</label>
+      <input type="text" id="f_pc_uuid" placeholder="Ex.: 4C4C4544-0034-3210-8030-B4C04F503432">
+      <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic csproduct get uuid</span>.</div>
     </div>
     <div class="field">
       <label>Sistema operacional</label>
@@ -1702,10 +1718,6 @@
     <div class="field">
       <label>Usuário logado no sistema</label>
       <input type="text" id="f_pc_usuario" placeholder="Ex.: joao.santos (perfil institucional)">
-    </div>
-    <div class="field">
-      <label>Pasta de destino da cópia</label>
-      <input type="text" class="mono" id="f_pc_pasta" placeholder="Ex.: C:\Extracao_WhatsApp\Processo_0000123-45\">
     </div>
   </section>
 
@@ -1729,7 +1741,7 @@
     <div class="field">
       <label>Caminho completo no PC</label>
       <input type="text" class="mono" id="f_cop_caminho" placeholder="C:\Extracao_WhatsApp\Processo_0000123-45\msgstore.db.crypt14">
-      <div class="hint"><b>Como localizar:</b> Shift + botão direito sobre o arquivo > "Copiar como caminho".</div>
+      <div class="hint"><b>Como localizar:</b> segure Shift e clique com o botão direito do mouse sobre o arquivo, depois clique com o botão esquerdo na opção "Copiar como caminho". Se a opção já aparecer sem precisar de Shift (comum em versões mais novas do Windows), pode usar direto.</div>
     </div>
     <div class="field">
       <label>Tamanho do arquivo copiado</label>
@@ -1811,7 +1823,8 @@
     </div>
   </section>
 
-  <div class="actions">
+  <div class="actions hidden-view">
+    <button type="button" class="btn-link" id="backToLastSectionBtn" style="margin-bottom:10px;">← Voltar à última seção</button>
     <button class="btn-generate" id="generateBtn">Gerar relatório (PDF)</button>
   </div>
 </div>
@@ -1819,6 +1832,7 @@
 <!-- ================= REPORT VIEW ================= -->
 <div id="reportView">
   <div class="report-toolbar">
+    <button id="backToFormEditBtn">✏️ Retificar formulário</button>
     <button id="backBtn">← Voltar para edição</button>
     <button class="print-btn" id="printBtn">Salvar/Imprimir PDF</button>
   </div>
@@ -3227,6 +3241,27 @@ const imeiOcrInput = $('f_imei_ocr_input');
 const imeiOcrStatus = $('f_imei_ocr_status');
 const imeiOcrCandidatesBox = $('f_imei_ocr_candidates');
 
+// botão para quem prefere digitar o IMEI direto, sem usar a leitura por foto
+$('f_imei_save_btn').addEventListener('click', () => {
+  const val1 = $('f_imei').value.replace(/\D/g, '');
+  const val2 = $('f_imei2').value.replace(/\D/g, '');
+  if(!val1 && !val2){
+    imeiOcrStatus.textContent = 'Digite ao menos um número de IMEI antes de salvar.';
+    imeiOcrStatus.className = 'loc-status err';
+    return;
+  }
+  const avisos = [];
+  if(val1 && (val1.length < 14 || val1.length > 16)) avisos.push('o primeiro IMEI');
+  if(val2 && (val2.length < 14 || val2.length > 16)) avisos.push('o segundo IMEI');
+  if(avisos.length){
+    imeiOcrStatus.textContent = `Atenção: ${avisos.join(' e ')} tem uma quantidade incomum de dígitos (o padrão é 15). Confira antes de prosseguir — mesmo assim, o valor já foi mantido no campo.`;
+    imeiOcrStatus.className = 'loc-status err';
+    return;
+  }
+  imeiOcrStatus.textContent = '✓ IMEI salvo no formulário.';
+  imeiOcrStatus.className = 'loc-status ok';
+});
+
 imeiOcrBtn.addEventListener('click', () => imeiOcrInput.click());
 imeiOcrInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
@@ -4471,7 +4506,13 @@ $('editProfileBtn').addEventListener('click', () => {
   showRegisterPanel({ editMode:true, reparticaoId: currentUser.reparticaoId });
 });
 
-$('startFormBtn').addEventListener('click', () => { updateCustodiaOriginalReparticaoLabel(); showView('form'); });
+$('startFormBtn').addEventListener('click', () => {
+  updateCustodiaOriginalReparticaoLabel();
+  showView('form');
+  initFormSectionStepper();
+  goToFormSection(0);
+});
+$('backToLastSectionBtn').addEventListener('click', () => goToFormSection(formSections.length - 1));
 
 // restaura sessão ativa, se houver
 (function initSession(){
@@ -4496,11 +4537,59 @@ for(let i=0;i<10;i++){
   progressBar.appendChild(seg);
 }
 
+// ---------- formulário em seções únicas (uma por vez) ----------
+let formSections = [];
+let currentFormSectionIdx = 0;
+
+function initFormSectionStepper(){
+  if(formSections.length) return; // só monta uma vez
+  const sections = Array.from(document.querySelectorAll('#formView > section.card:not(.hidden-view)'));
+  sections.forEach((sec, idx) => {
+    formSections.push(sec);
+    const btnWrap = document.createElement('div');
+    btnWrap.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-top:16px;';
+    if(idx > 0){
+      const backBtn = document.createElement('button');
+      backBtn.type = 'button';
+      backBtn.className = 'btn-link';
+      backBtn.textContent = '← Seção anterior';
+      backBtn.addEventListener('click', () => goToFormSection(idx - 1));
+      btnWrap.appendChild(backBtn);
+    } else {
+      btnWrap.appendChild(document.createElement('span'));
+    }
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'btn-generate';
+    nextBtn.style.cssText = 'width:auto;padding:10px 22px;margin:0;';
+    nextBtn.textContent = idx === sections.length - 1 ? 'Ir para revisão final →' : 'Próxima seção →';
+    nextBtn.addEventListener('click', () => goToFormSection(idx + 1));
+    btnWrap.appendChild(nextBtn);
+    sec.appendChild(btnWrap);
+  });
+}
+
+function goToFormSection(idx){
+  currentFormSectionIdx = idx;
+  const showingActions = idx >= formSections.length;
+  formSections.forEach((sec, i) => { sec.classList.toggle('hidden-view', i !== idx || showingActions); });
+  const actionsEl = document.querySelector('#formView .actions');
+  if(actionsEl) actionsEl.classList.toggle('hidden-view', !showingActions);
+
+  // barra de progresso: marca as seções já percorridas
+  const segs = progressBar.querySelectorAll('.seg');
+  const marcarAte = showingActions ? segs.length : idx + 1;
+  segs.forEach((seg, i) => seg.classList.toggle('done', i < marcarAte));
+
+  $('formView').scrollIntoView({ behavior: 'instant', block: 'start' });
+}
+
 // ---------- anexos ----------
-const defaultAnexos = [
-  "Captura de tela do comando executado no aparelho, com hash, nome do arquivo e horário do sistema visíveis.",
-  "Captura de tela do comando executado no PC, com hash, caminho do arquivo e horário do sistema visíveis.",
-  "Cópia do arquivo extraído, armazenada em mídia apartada, sob controle de custódia."
+const defaultAnexos = ['', '', ''];
+const defaultAnexoHints = [
+  'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no APARELHO, mostrando claramente o hash, o nome do arquivo extraído e o horário do sistema.',
+  'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no PC, mostrando claramente o hash, o caminho do arquivo copiado e o horário do sistema.',
+  'Descreva a cópia do arquivo extraído armazenada em mídia apartada, sob controle de custódia (ex.: pen drive lacrado, HD externo, CD/DVD gravado).'
 ];
 const anexosList = $('anexosList');
 
@@ -4512,19 +4601,27 @@ function renderAnexos(){
     const input = document.createElement('input');
     input.type = 'text';
     input.value = val;
+    input.placeholder = 'Descreva este anexo';
     input.dataset.idx = idx;
     input.addEventListener('input', e => defaultAnexos[idx] = e.target.value);
     const rm = document.createElement('button');
     rm.type = 'button';
     rm.textContent = 'Remover';
-    rm.addEventListener('click', () => { defaultAnexos.splice(idx,1); renderAnexos(); });
+    rm.addEventListener('click', () => { defaultAnexos.splice(idx,1); defaultAnexoHints.splice(idx,1); renderAnexos(); });
     row.appendChild(input);
     row.appendChild(rm);
     anexosList.appendChild(row);
+    if(defaultAnexoHints[idx]){
+      const hint = document.createElement('div');
+      hint.className = 'hint';
+      hint.style.marginTop = '2px';
+      hint.textContent = defaultAnexoHints[idx];
+      anexosList.appendChild(hint);
+    }
   });
 }
 renderAnexos();
-$('addAnexoBtn').addEventListener('click', () => { defaultAnexos.push(''); renderAnexos(); });
+$('addAnexoBtn').addEventListener('click', () => { defaultAnexos.push(''); defaultAnexoHints.push(''); renderAnexos(); });
 
 // ---------- hash live compare ----------
 function normHash(v){ return (v||'').trim().toLowerCase().replace(/\s+/g,''); }
@@ -4628,6 +4725,7 @@ function buildReport(){
       ${row('Aparelho', v('f_aparelho'))}
       ${row('Sistema operacional', v('f_so_celular'))}
       ${row('IMEI', v('f_imei'))}
+      ${row('Outro IMEI (se houver)', v('f_imei2'))}
       ${row('Número da linha associada', v('f_linha'))}
       ${row('Usuário/proprietário informado', v('f_proprietario'))}
     </table>
@@ -4653,10 +4751,11 @@ function buildReport(){
 
     <h2>5. Identificação do Computador de Destino</h2>
     <table class="rtable">
-      ${row('Equipamento', v('f_pc_equipamento'))}
+      ${row('Nome da máquina, software e versão', v('f_pc_equipamento'))}
+      ${row('Número de série', v('f_pc_serie'))}
+      ${row('UUID do sistema', v('f_pc_uuid'))}
       ${row('Sistema operacional', v('f_pc_so'))}
       ${row('Usuário logado no sistema', v('f_pc_usuario'))}
-      ${row('Pasta de destino da cópia', v('f_pc_pasta'), true)}
     </table>
 
     <h2>6. Arquivo Copiado (Cópia no PC)</h2>
@@ -4844,6 +4943,7 @@ function openHistoryRecord(id){
   cameFromHistory = true;
   $('backBtn').textContent = '← Voltar ao histórico';
   $('backBtn').dataset.mode = 'history';
+  $('backToFormEditBtn').classList.add('hidden-view'); // relatório antigo — não há formulário atual correspondente para retificar
   showView('report');
 }
 function deleteHistoryRecord(id){
@@ -4875,10 +4975,12 @@ function resetFormFields(){
   $('hashCompareBox').textContent = 'Informe os dois hashes acima para comparar automaticamente.';
 
   defaultAnexos.length = 0;
-  defaultAnexos.push(
-    "Captura de tela do comando executado no aparelho, com hash, nome do arquivo e horário do sistema visíveis.",
-    "Captura de tela do comando executado no PC, com hash, caminho do arquivo e horário do sistema visíveis.",
-    "Cópia do arquivo extraído, armazenada em mídia apartada, sob controle de custódia."
+  defaultAnexos.push('', '', '');
+  defaultAnexoHints.length = 0;
+  defaultAnexoHints.push(
+    'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no APARELHO, mostrando claramente o hash, o nome do arquivo extraído e o horário do sistema.',
+    'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no PC, mostrando claramente o hash, o caminho do arquivo copiado e o horário do sistema.',
+    'Descreva a cópia do arquivo extraído armazenada em mídia apartada, sob controle de custódia (ex.: pen drive lacrado, HD externo, CD/DVD gravado).'
   );
   renderAnexos();
 
@@ -4978,7 +5080,16 @@ $('generateBtn').addEventListener('click', () => {
   cameFromHistory = false;
   $('backBtn').textContent = '✅ Concluir Tarefa';
   $('backBtn').dataset.mode = 'conclude';
+  $('backToFormEditBtn').classList.remove('hidden-view');
   showView('report');
+});
+$('backToFormEditBtn').addEventListener('click', () => {
+  // volta de verdade para o formulário, sem concluir nem enviar nada —
+  // os dados preenchidos continuam lá, prontos para retificação
+  showView('form');
+  if(formSections.length){
+    goToFormSection(formSections.length); // mostra a área de ações (Gerar relatório), pronta para gerar de novo após corrigir
+  }
 });
 $('backBtn').addEventListener('click', () => {
   if($('backBtn').dataset.mode === 'history'){

@@ -463,6 +463,36 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Formulário: seções únicas, campos novos e retificação
+
+**Navegação por seção única:** o formulário deixou de mostrar todas as
+seções de uma vez em rolagem contínua — agora cada seção aparece
+sozinha na tela. O botão **"Próxima seção →"** (canto inferior de cada
+seção) avança; **"← Seção anterior"** volta. A barra de progresso no
+topo reflete o avanço. Ao chegar na última seção, o botão vira "Ir
+para revisão final →", que leva à tela com "Gerar relatório (PDF)".
+
+**Campos alterados:**
+- **Seção 2**: novo campo "Outro IMEI do mesmo aparelho" (dual-chip) e
+  botão "💾 Salvar IMEI digitado", para quem prefere digitar em vez de
+  usar a leitura por foto.
+- **Seção 5**: "Equipamento" renomeado para "Nome da máquina, software
+  e versão"; novos campos "Número de série" e "UUID do sistema";
+  campo "Pasta de destino da cópia" removido.
+- **Seção 8**: as descrições padrão dos 3 anexos (antes pré-
+  preenchidas dentro dos campos, sujeitas a serem apagadas sem querer)
+  agora aparecem como legenda abaixo de cada campo — os campos nascem
+  vazios, prontos para a descrição específica de cada relatório.
+
+**Retificar antes de enviar:** o relatório gerado agora tem um botão
+**"✏️ Retificar formulário"**, ao lado do "✅ Concluir Tarefa" (que
+continua funcionando exatamente como antes — envia ao Drive e volta
+para a Home). "Retificar formulário" volta para o formulário sem
+concluir nem enviar nada, com todos os dados já preenchidos
+preservados, pronto para correções antes de gerar o relatório de novo.
+Esse botão não aparece ao visualizar um relatório antigo do histórico
+(não haveria um formulário atual correspondente para retificar).
+
 ## Manuais de cadastro de repartição
 
 Duas formas de consultar o passo a passo de como obter, no Google
