@@ -463,6 +463,57 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Cadastro de equipamentos (Seção 5) por repartição
+
+A Seção 5 do formulário ("Identificação do Computador de Destino")
+deixou de começar direto num formulário — agora mostra primeiro um
+seletor **"Equipamento"**, com os PCs já cadastrados **nesta
+repartição especificamente** (um equipamento cadastrado numa
+repartição não aparece para quem estiver conectado a outra).
+
+- Selecionando um equipamento já cadastrado, os campos (nome da
+  máquina, número de série, UUID, sistema operacional, número de
+  tombamento) aparecem preenchidos automaticamente, em modo somente
+  leitura — refletindo fielmente o que está registrado.
+- Selecionando **"+ Cadastrar equipamento"**, os mesmos campos
+  aparecem vazios e editáveis, com um botão **"💾 Salvar equipamento
+  nesta repartição"**. Depois de salvar, o equipamento já fica
+  disponível no seletor, inclusive para outros usuários da mesma
+  repartição.
+- O campo "Usuário logado no sistema" foi removido (desnecessário).
+
+**No modal "Editar repartição"** (tela de Conexões), apareceu uma
+nova seção **"💻 Equipamentos cadastrados"**, com um card por
+equipamento — mostrando nome, série, UUID, sistema operacional,
+tombamento, e quem cadastrou (nome e data/hora) — mesma lógica de
+coleta já usada para os cards de usuários.
+
+## Nome da pasta no Drive (em vez do ID cru na frase de custódia)
+
+Ao enviar o arquivo evidência (Seção 9, "☁️ Enviar ao Drive da
+repartição"), a frase gerada automaticamente ("Arquivo X, salvo no
+Google Drive..., na pasta...") tentava buscar o nome de verdade da
+pasta direto no Google Drive — mas essa busca falha quase sempre, já
+que a permissão que o app pede (`drive.file`) só alcança arquivos que
+o próprio app criou, não a pasta em si (criada manualmente por fora).
+Por isso, a frase acabava mostrando o ID cru da pasta como reserva.
+
+**Correção:** agora existe um campo **"Nome dessa pasta no Drive"**
+no cadastro de cada repartição (tanto na criação quanto na edição, em
+qualquer uma das telas onde isso acontece) — preenchido uma vez,
+manualmente, e usado direto na frase, sem depender de nenhuma consulta
+ao Google. Repartições já cadastradas antes desta atualização podem
+ter esse nome preenchido a qualquer momento, editando a repartição.
+
+## Seção 8 (Anexos): ícone de clipe para anexar o arquivo
+
+Cada linha da lista de anexos agora tem um ícone 📎 ao lado do campo
+de descrição — ao tocar, abre o seletor de arquivos do aparelho para
+anexar o arquivo referente àquela descrição. O nome do arquivo
+anexado aparece logo abaixo, com opção de remover. Esse anexo fica
+salvo apenas localmente, como registro para a pessoa preenchendo o
+relatório — não é enviado automaticamente a lugar nenhum.
+
 ## Formulário: seções únicas, campos novos e retificação
 
 **Navegação por seção única:** o formulário deixou de mostrar todas as
@@ -476,9 +527,15 @@ para revisão final →", que leva à tela com "Gerar relatório (PDF)".
 - **Seção 2**: novo campo "Outro IMEI do mesmo aparelho" (dual-chip) e
   botão "💾 Salvar IMEI digitado", para quem prefere digitar em vez de
   usar a leitura por foto.
+- **Seção 4**: campos "Início da transferência" e "Término da
+  transferência" removidos.
 - **Seção 5**: "Equipamento" renomeado para "Nome da máquina, software
   e versão"; novos campos "Número de série" e "UUID do sistema";
   campo "Pasta de destino da cópia" removido.
+- **Seção 6**: novo campo "Data e hora da criação/transferência do
+  arquivo", logo após "Tamanho do arquivo copiado" — preenchido
+  automaticamente com a data de criação/modificação do arquivo
+  anexado nessa seção.
 - **Seção 8**: as descrições padrão dos 3 anexos (antes pré-
   preenchidas dentro dos campos, sujeitas a serem apagadas sem querer)
   agora aparecem como legenda abaixo de cada campo — os campos nascem

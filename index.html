@@ -1168,6 +1168,10 @@
           <label style="font-size:12px;">ID da pasta compartilhada no Drive</label>
           <input type="text" id="regNewRepFolderId" placeholder="Ex.: 1A2b3C4d5E...">
         </div>
+        <div class="field">
+          <label style="font-size:12px;">Nome dessa pasta no Drive</label>
+          <input type="text" id="regNewRepFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
+        </div>
         <button class="btn-primary" id="regNewRepSaveBtn" style="margin-bottom:6px;">Salvar repartição</button>
         <div class="loc-status" id="regNewRepStatus"></div>
       </div>
@@ -1352,6 +1356,10 @@
           <label>ID da pasta compartilhada no Drive</label>
           <input type="text" id="repFolderId" placeholder="Ex.: 1A2b3C4d5E...">
         </div>
+        <div class="field">
+          <label>Nome dessa pasta no Drive</label>
+          <input type="text" id="repFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
+        </div>
         <button class="btn-primary" id="saveReparticaoBtn" style="margin-bottom:8px;">Salvar repartição</button>
         <div class="loc-status" id="reparticaoFormStatus"></div>
       </div>
@@ -1468,6 +1476,10 @@
       <label>ID da pasta compartilhada no Drive</label>
       <input type="text" id="repEditFolderId" placeholder="Ex.: 1A2b3C4d5E...">
     </div>
+    <div class="field">
+      <label>Nome dessa pasta no Drive</label>
+      <input type="text" id="repEditFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
+    </div>
     <button class="btn-primary" id="saveReparticaoEditBtn" style="margin-bottom:8px;">Salvar alterações</button>
     <button class="btn-link" id="cancelEditRepBtn" style="width:100%;margin-bottom:8px;">Cancelar</button>
     <div class="loc-status" id="reparticaoEditFormStatus"></div>
@@ -1488,6 +1500,14 @@
 
     <div class="rep-users-section-title">✅ Habilitados</div>
     <div id="repUsersHabilitados"></div>
+
+    <hr class="sidebar-divider">
+    <div class="field-label-row">
+      <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0;">💻 Equipamentos cadastrados</h4>
+      <button type="button" class="btn-inline-share" id="refreshRepEquipamentosBtn" title="Atualizar lista">🔄</button>
+    </div>
+    <div class="loc-status" id="repEquipamentosStatus"></div>
+    <div id="repEquipamentosList"></div>
   </div>
 </div>
 
@@ -1680,44 +1700,46 @@
       <label>Método de transferência</label>
       <input type="text" id="f_metodo_transf" placeholder="Ex.: Cabo USB — modo MTP (Transferência de arquivos)">
     </div>
-    <div class="row2">
-      <div class="field">
-        <label>Início da transferência</label>
-        <input type="text" class="mono" id="f_transf_inicio" placeholder="hh:mm:ss" readonly data-wp="time-sec">
-      </div>
-      <div class="field">
-        <label>Término da transferência</label>
-        <input type="text" class="mono" id="f_transf_fim" placeholder="hh:mm:ss" readonly data-wp="time-sec">
-      </div>
-    </div>
   </section>
 
   <!-- SECTION 5 -->
   <section class="card">
     <h2><span class="num">5</span>Identificação do Computador de Destino</h2>
     <div class="field">
-      <label>Nome da máquina, software e versão</label>
-      <input type="text" id="f_pc_equipamento" placeholder="Ex.: Notebook Dell Latitude 5440 — Cellebrite UFED 4PC, versão 7.x">
-      <div class="hint"><b>Como localizar:</b> etiqueta física do equipamento (modelo e nº de patrimônio) e a tela "Sobre" do software utilizado.</div>
+      <label>Equipamento</label>
+      <select id="f_pc_equip_select">
+        <option value="">Selecione o equipamento…</option>
+      </select>
+      <div class="hint"><b>Dica:</b> a lista mostra os equipamentos já cadastrados nesta repartição. Se o equipamento usado agora não estiver na lista, escolha "+ Cadastrar equipamento" logo abaixo.</div>
     </div>
-    <div class="field">
-      <label>Número de série</label>
-      <input type="text" id="f_pc_serie" placeholder="Ex.: 7XJK2R3">
-      <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic bios get serialnumber</span>, ou etiqueta física do equipamento.</div>
-    </div>
-    <div class="field">
-      <label>UUID do sistema</label>
-      <input type="text" id="f_pc_uuid" placeholder="Ex.: 4C4C4544-0034-3210-8030-B4C04F503432">
-      <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic csproduct get uuid</span>.</div>
-    </div>
-    <div class="field">
-      <label>Sistema operacional</label>
-      <input type="text" id="f_pc_so" placeholder="Ex.: Windows 11 Pro, versão 23H2">
-      <div class="hint"><b>Como localizar:</b> Iniciar > Configurações > Sistema > Sobre.</div>
-    </div>
-    <div class="field">
-      <label>Usuário logado no sistema</label>
-      <input type="text" id="f_pc_usuario" placeholder="Ex.: joao.santos (perfil institucional)">
+    <div class="hidden-view" id="f_pc_camposContainer">
+      <div class="field">
+        <label>Nome da máquina, software e versão</label>
+        <input type="text" id="f_pc_equipamento" placeholder="Ex.: Notebook Dell Latitude 5440 — Cellebrite UFED 4PC, versão 7.x">
+        <div class="hint"><b>Como localizar:</b> etiqueta física do equipamento (modelo e nº de patrimônio) e a tela "Sobre" do software utilizado.</div>
+      </div>
+      <div class="field">
+        <label>Número de série</label>
+        <input type="text" id="f_pc_serie" placeholder="Ex.: 7XJK2R3">
+        <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic bios get serialnumber</span>, ou etiqueta física do equipamento.</div>
+      </div>
+      <div class="field">
+        <label>UUID do sistema</label>
+        <input type="text" id="f_pc_uuid" placeholder="Ex.: 4C4C4544-0034-3210-8030-B4C04F503432">
+        <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic csproduct get uuid</span>.</div>
+      </div>
+      <div class="field">
+        <label>Sistema operacional</label>
+        <input type="text" id="f_pc_so" placeholder="Ex.: Windows 11 Pro, versão 23H2">
+        <div class="hint"><b>Como localizar:</b> Iniciar > Configurações > Sistema > Sobre.</div>
+      </div>
+      <div class="field">
+        <label>Número de tombamento</label>
+        <input type="text" id="f_pc_tombamento" placeholder="Ex.: 2026.001234">
+        <div class="hint"><b>Como localizar:</b> etiqueta física de patrimônio do equipamento.</div>
+      </div>
+      <button type="button" class="btn-attach hidden-view" id="f_pc_equip_save_btn">💾 Salvar equipamento nesta repartição</button>
+      <div class="loc-status" id="f_pc_equip_status"></div>
     </div>
   </section>
 
@@ -1746,6 +1768,11 @@
     <div class="field">
       <label>Tamanho do arquivo copiado</label>
       <input type="text" id="f_cop_tamanho" placeholder="Ex.: 184.372.916 bytes">
+    </div>
+    <div class="field">
+      <label>Data e hora da criação/transferência do arquivo</label>
+      <input type="text" class="mono" id="f_cop_data_criacao" placeholder="dd/mm/aaaa hh:mm:ss">
+      <div class="hint"><b>Como localizar:</b> preenchido automaticamente com a data de criação/modificação do arquivo anexado acima — confira se corresponde ao horário real da transferência.</div>
     </div>
     <div class="field">
       <label>Ferramenta usada para gerar o hash no PC</label>
@@ -2229,6 +2256,7 @@ function resetNewReparticaoForm(){
   $('repEmail').value = '';
   $('repClientId').value = '';
   $('repFolderId').value = '';
+  $('repFolderNome').value = '';
   $('reparticaoFormStatus').textContent = '';
 }
 
@@ -2247,11 +2275,52 @@ function startEditReparticao(id){
   $('repEditEmail').value = rep.email || '';
   $('repEditClientId').value = rep.clientId;
   $('repEditFolderId').value = rep.folderId;
+  $('repEditFolderNome').value = rep.folderNome || '';
   $('reparticaoEditFormStatus').textContent = '';
   $('editRepOverlay').classList.add('open');
   renderRepUsersLists(rep.clientId);
+  renderRepEquipamentosList(rep.clientId);
   loadRepCadastradaPorInfo(rep);
 }
+
+// mostra os equipamentos (PCs) cadastrados nesta repartição — mesma
+// lógica de coleta usada para os cards de usuários: vinculado ao
+// Client ID, invisível para quem estiver em outra repartição
+async function renderRepEquipamentosList(reparticaoId){
+  const statusEl = $('repEquipamentosStatus');
+  const listEl = $('repEquipamentosList');
+  listEl.innerHTML = '';
+  statusEl.textContent = 'Carregando…';
+  statusEl.className = 'loc-status';
+  try {
+    const data = await callAppsScript({ action: 'list_equipamentos', reparticaoId });
+    statusEl.textContent = '';
+    const equipamentos = data.equipamentos || [];
+    if(equipamentos.length === 0){
+      listEl.innerHTML = '<div class="rep-users-empty">Nenhum equipamento cadastrado ainda.</div>';
+      return;
+    }
+    listEl.innerHTML = equipamentos.map(eq => `
+      <div class="rep-user-card">
+        <div class="rep-user-nome">${esc(eq.nome)}</div>
+        ${eq.serie ? `<div class="rep-user-detail">Nº de série: ${esc(eq.serie)}</div>` : ''}
+        ${eq.uuid ? `<div class="rep-user-detail">UUID: ${esc(eq.uuid)}</div>` : ''}
+        ${eq.so ? `<div class="rep-user-detail">Sistema operacional: ${esc(eq.so)}</div>` : ''}
+        ${eq.tombamento ? `<div class="rep-user-detail">Nº de tombamento: ${esc(eq.tombamento)}</div>` : ''}
+        <div class="rep-user-detail">Cadastrado por ${esc(eq.cadastradoPor || '—')}, em ${esc(eq.dataCadastro)}</div>
+      </div>
+    `).join('');
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+$('refreshRepEquipamentosBtn').addEventListener('click', () => {
+  if(editingReparticaoId){
+    const rep = loadReparticoes().find(r => r.id === editingReparticaoId);
+    if(rep) renderRepEquipamentosList(rep.clientId);
+  }
+});
 
 // busca, na central, quem cadastrou essa repartição (independente de já
 // estar confirmada) e exibe no modal, se essa informação existir
@@ -2406,13 +2475,14 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   const email = $('repEmail').value.trim();
   const clientId = sanitizeClientId($('repClientId').value);
   const folderId = sanitizeFolderId($('repFolderId').value);
+  const folderNome = $('repFolderNome').value.trim();
   const statusEl = $('reparticaoFormStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
     statusEl.className = 'loc-status err';
     return;
   }
-  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, status: 'pendente', centralRowIndex: null };
+  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, folderNome, status: 'pendente', centralRowIndex: null };
   const list = loadReparticoes();
   list.push(newRep);
   saveReparticoesList(list);
@@ -2462,6 +2532,7 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
   const email = $('repEditEmail').value.trim();
   const clientId = sanitizeClientId($('repEditClientId').value);
   const folderId = sanitizeFolderId($('repEditFolderId').value);
+  const folderNome = $('repEditFolderNome').value.trim();
   const statusEl = $('reparticaoEditFormStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -2471,7 +2542,7 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
   const list = loadReparticoes();
   const idx = list.findIndex(r => r.id === editingReparticaoId);
   if(idx >= 0){
-    list[idx] = { ...list[idx], nome, email, clientId, folderId };
+    list[idx] = { ...list[idx], nome, email, clientId, folderId, folderNome };
     saveReparticoesList(list);
     gisTokenClient = null;
     setDriveConnectedFlag(false);
@@ -3051,7 +3122,10 @@ async function handleCustodyShare(){
     if(rep && rep.clientId && rep.folderId){
       const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
       lastEvidenceDriveLink = result.webViewLink || null;
-      const folderName = await getDriveFolderName(rep.folderId, rep.clientId);
+      // prioriza o nome salvo no cadastro da repartição — a consulta ao
+      // Drive quase sempre falha aqui, já que o escopo de permissão do
+      // app não alcança metadados de pastas que ele não criou
+      const folderName = rep.folderNome || await getDriveFolderName(rep.folderId, rep.clientId);
       const sentence = buildCustodySentence(file.name, `da ${rep.nome}`, folderName || rep.folderId);
       appendToTextarea(textareaEl, sentence);
       statusEl.textContent = '✓ ' + sentence;
@@ -3107,6 +3181,7 @@ function setupFileAttach({ btnId, inputId, nameId, statusId, hashFieldId, nomeFi
       statusEl.className = 'loc-status err';
       if(nomeFieldId) $(nomeFieldId).value = file.name;
       if(tamanhoFieldId) $(tamanhoFieldId).value = formatBytes(file.size);
+      if(modificacaoFieldId && file.lastModified) $(modificacaoFieldId).value = formatDateTimeFromMs(file.lastModified);
       return;
     }
 
@@ -3143,7 +3218,7 @@ setupFileAttach({
 setupFileAttach({
   btnId: 'f_cop_file_btn', inputId: 'f_cop_file_input', nameId: 'f_cop_file_name', statusId: 'f_cop_file_status',
   hashFieldId: 'f_hash_copia', nomeFieldId: 'f_cop_nome', tamanhoFieldId: 'f_cop_tamanho',
-  horaHashFieldId: 'f_hora_hash_copia', attachKey: 'cop'
+  modificacaoFieldId: 'f_cop_data_criacao', horaHashFieldId: 'f_hora_hash_copia', attachKey: 'cop'
 });
 updateDriveStatusUI(isDriveConnectedFlag());
 
@@ -3808,6 +3883,7 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
   const email = $('regNewRepEmail').value.trim();
   const clientId = sanitizeClientId($('regNewRepClientId').value);
   const folderId = sanitizeFolderId($('regNewRepFolderId').value);
+  const folderNome = $('regNewRepFolderNome').value.trim();
   const statusEl = $('regNewRepStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -3815,12 +3891,12 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
     return;
   }
   const list = loadReparticoes();
-  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, status: 'pendente', centralRowIndex: null };
+  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, folderNome, status: 'pendente', centralRowIndex: null };
   list.push(newRep);
   saveReparticoesList(list);
   // guardado para, ao concluir o cadastro do usuário, avisar a central
   // com os dados da repartição + de quem a cadastrou
-  pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId };
+  pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId, folderNome };
   populateRegReparticaoSelect(newRep.clientId);
   $('regReparticao').value = newRep.id;
   $('regNewReparticaoForm').classList.add('hidden-view');
@@ -4506,11 +4582,105 @@ $('editProfileBtn').addEventListener('click', () => {
   showRegisterPanel({ editMode:true, reparticaoId: currentUser.reparticaoId });
 });
 
+// ---------- Seção 5: seletor de equipamentos cadastrados na repartição ----------
+let equipamentosCache = [];
+const pcCamposFields = ['f_pc_equipamento', 'f_pc_serie', 'f_pc_uuid', 'f_pc_so', 'f_pc_tombamento'];
+
+async function loadEquipamentosDropdown(){
+  const sel = $('f_pc_equip_select');
+  const rep = getSelectedReparticao();
+  sel.innerHTML = '<option value="">Selecione o equipamento…</option>';
+  $('f_pc_camposContainer').classList.add('hidden-view');
+  if(!rep || !rep.clientId) return;
+  try {
+    const data = await callAppsScript({ action: 'list_equipamentos', reparticaoId: rep.clientId });
+    equipamentosCache = data.equipamentos || [];
+  } catch(e){ equipamentosCache = []; }
+  equipamentosCache.forEach((eq, idx) => {
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = eq.tombamento ? `${eq.nome} (tombamento ${eq.tombamento})` : eq.nome;
+    sel.appendChild(opt);
+  });
+  const novoOpt = document.createElement('option');
+  novoOpt.value = '__new__';
+  novoOpt.textContent = '+ Cadastrar equipamento';
+  sel.appendChild(novoOpt);
+}
+
+function setPcCamposReadonly(readonly){
+  pcCamposFields.forEach(id => { $(id).readOnly = readonly; });
+  $('f_pc_equip_save_btn').classList.toggle('hidden-view', readonly);
+}
+
+$('f_pc_equip_select').addEventListener('change', () => {
+  const val = $('f_pc_equip_select').value;
+  $('f_pc_equip_status').textContent = '';
+  if(val === ''){
+    $('f_pc_camposContainer').classList.add('hidden-view');
+    return;
+  }
+  $('f_pc_camposContainer').classList.remove('hidden-view');
+  if(val === '__new__'){
+    pcCamposFields.forEach(id => { $(id).value = ''; });
+    setPcCamposReadonly(false);
+    return;
+  }
+  const eq = equipamentosCache[Number(val)];
+  if(!eq) return;
+  $('f_pc_equipamento').value = eq.nome;
+  $('f_pc_serie').value = eq.serie;
+  $('f_pc_uuid').value = eq.uuid;
+  $('f_pc_so').value = eq.so;
+  $('f_pc_tombamento').value = eq.tombamento;
+  setPcCamposReadonly(true);
+});
+
+$('f_pc_equip_save_btn').addEventListener('click', async () => {
+  const rep = getSelectedReparticao();
+  const statusEl = $('f_pc_equip_status');
+  if(!rep || !rep.clientId){
+    statusEl.textContent = 'Nenhuma repartição conectada — não é possível salvar o equipamento.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const nome = $('f_pc_equipamento').value.trim();
+  if(!nome){
+    statusEl.textContent = 'Preencha ao menos o nome da máquina antes de salvar.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const payload = {
+    action: 'register_equipamento',
+    reparticaoId: rep.clientId,
+    nome, serie: $('f_pc_serie').value.trim(), uuid: $('f_pc_uuid').value.trim(),
+    so: $('f_pc_so').value.trim(), tombamento: $('f_pc_tombamento').value.trim(),
+    cadastradoPor: currentUser ? currentUser.nome : ''
+  };
+  statusEl.textContent = 'Salvando…';
+  statusEl.className = 'loc-status';
+  try {
+    await callAppsScript(payload);
+    await loadEquipamentosDropdown();
+    const novoIdx = equipamentosCache.findIndex(eq => eq.nome === nome && eq.serie === payload.serie && eq.uuid === payload.uuid);
+    if(novoIdx >= 0){
+      $('f_pc_equip_select').value = String(novoIdx);
+      setPcCamposReadonly(true);
+    }
+    statusEl.textContent = '✓ Equipamento salvo — já disponível para seleção nesta repartição.';
+    statusEl.className = 'loc-status ok';
+  } catch(err){
+    statusEl.textContent = 'Não foi possível salvar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+});
+
 $('startFormBtn').addEventListener('click', () => {
   updateCustodiaOriginalReparticaoLabel();
   showView('form');
   initFormSectionStepper();
   goToFormSection(0);
+  loadEquipamentosDropdown();
 });
 $('backToLastSectionBtn').addEventListener('click', () => goToFormSection(formSections.length - 1));
 
@@ -4591,6 +4761,7 @@ const defaultAnexoHints = [
   'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no PC, mostrando claramente o hash, o caminho do arquivo copiado e o horário do sistema.',
   'Descreva a cópia do arquivo extraído armazenada em mídia apartada, sob controle de custódia (ex.: pen drive lacrado, HD externo, CD/DVD gravado).'
 ];
+const anexoFiles = [null, null, null]; // arquivo anexado (opcional) para cada linha, na mesma ordem
 const anexosList = $('anexosList');
 
 function renderAnexos(){
@@ -4604,13 +4775,35 @@ function renderAnexos(){
     input.placeholder = 'Descreva este anexo';
     input.dataset.idx = idx;
     input.addEventListener('input', e => defaultAnexos[idx] = e.target.value);
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.style.display = 'none';
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      anexoFiles[idx] = file;
+      renderAnexos();
+    });
+
+    const clipBtn = document.createElement('button');
+    clipBtn.type = 'button';
+    clipBtn.title = 'Anexar o arquivo descrito';
+    clipBtn.setAttribute('aria-label', 'Anexar o arquivo descrito');
+    clipBtn.textContent = '📎';
+    clipBtn.addEventListener('click', () => fileInput.click());
+
     const rm = document.createElement('button');
     rm.type = 'button';
     rm.textContent = 'Remover';
-    rm.addEventListener('click', () => { defaultAnexos.splice(idx,1); defaultAnexoHints.splice(idx,1); renderAnexos(); });
+    rm.addEventListener('click', () => { defaultAnexos.splice(idx,1); defaultAnexoHints.splice(idx,1); anexoFiles.splice(idx,1); renderAnexos(); });
+
     row.appendChild(input);
+    row.appendChild(clipBtn);
+    row.appendChild(fileInput);
     row.appendChild(rm);
     anexosList.appendChild(row);
+
     if(defaultAnexoHints[idx]){
       const hint = document.createElement('div');
       hint.className = 'hint';
@@ -4618,10 +4811,23 @@ function renderAnexos(){
       hint.textContent = defaultAnexoHints[idx];
       anexosList.appendChild(hint);
     }
+    if(anexoFiles[idx]){
+      const fileTag = document.createElement('div');
+      fileTag.className = 'loc-status ok';
+      fileTag.style.marginTop = '2px';
+      fileTag.textContent = `📎 ${anexoFiles[idx].name} `;
+      const rmFile = document.createElement('button');
+      rmFile.type = 'button';
+      rmFile.textContent = 'remover arquivo';
+      rmFile.style.cssText = 'border:none;background:none;color:var(--warn-ink);font-size:11.5px;text-decoration:underline;cursor:pointer;padding:0;margin-left:6px;';
+      rmFile.addEventListener('click', () => { anexoFiles[idx] = null; renderAnexos(); });
+      fileTag.appendChild(rmFile);
+      anexosList.appendChild(fileTag);
+    }
   });
 }
 renderAnexos();
-$('addAnexoBtn').addEventListener('click', () => { defaultAnexos.push(''); defaultAnexoHints.push(''); renderAnexos(); });
+$('addAnexoBtn').addEventListener('click', () => { defaultAnexos.push(''); defaultAnexoHints.push(''); anexoFiles.push(null); renderAnexos(); });
 
 // ---------- hash live compare ----------
 function normHash(v){ return (v||'').trim().toLowerCase().replace(/\s+/g,''); }
@@ -4745,8 +4951,6 @@ function buildReport(){
     <p class="body-text">${esc(v('f_proc_descricao'))}</p>
     <table class="rtable">
       ${row('Método de transferência', v('f_metodo_transf'))}
-      ${row('Início da transferência', v('f_transf_inicio'))}
-      ${row('Término da transferência', v('f_transf_fim'))}
     </table>
 
     <h2>5. Identificação do Computador de Destino</h2>
@@ -4755,7 +4959,7 @@ function buildReport(){
       ${row('Número de série', v('f_pc_serie'))}
       ${row('UUID do sistema', v('f_pc_uuid'))}
       ${row('Sistema operacional', v('f_pc_so'))}
-      ${row('Usuário logado no sistema', v('f_pc_usuario'))}
+      ${row('Número de tombamento', v('f_pc_tombamento'))}
     </table>
 
     <h2>6. Arquivo Copiado (Cópia no PC)</h2>
@@ -4763,6 +4967,7 @@ function buildReport(){
       ${row('Nome do arquivo', v('f_cop_nome'), true)}
       ${row('Caminho completo no PC', v('f_cop_caminho'), true)}
       ${row('Tamanho do arquivo copiado', v('f_cop_tamanho'))}
+      ${row('Data e hora da criação/transferência do arquivo', v('f_cop_data_criacao'), true)}
       ${row('Ferramenta usada para gerar o hash', v('f_cop_ferramenta'))}
       ${row('Hash SHA-256 (CÓPIA)', v('f_hash_copia'), true)}
       ${row('Hora exata do cálculo do hash', v('f_hora_hash_copia'))}
@@ -4974,6 +5179,11 @@ function resetFormFields(){
   $('hashCompareBox').className = 'hash-check neutral';
   $('hashCompareBox').textContent = 'Informe os dois hashes acima para comparar automaticamente.';
 
+  $('f_pc_equip_select').value = '';
+  $('f_pc_camposContainer').classList.add('hidden-view');
+  $('f_pc_equip_status').textContent = '';
+  setPcCamposReadonly(false);
+
   defaultAnexos.length = 0;
   defaultAnexos.push('', '', '');
   defaultAnexoHints.length = 0;
@@ -4982,6 +5192,8 @@ function resetFormFields(){
     'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no PC, mostrando claramente o hash, o caminho do arquivo copiado e o horário do sistema.',
     'Descreva a cópia do arquivo extraído armazenada em mídia apartada, sob controle de custódia (ex.: pen drive lacrado, HD externo, CD/DVD gravado).'
   );
+  anexoFiles.length = 0;
+  anexoFiles.push(null, null, null);
   renderAnexos();
 
   $('f_proc_descricao').value = 'A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.';

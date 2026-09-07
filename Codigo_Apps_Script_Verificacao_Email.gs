@@ -470,6 +470,44 @@ function doPost(e) {
       return respond({ ok: true });
     }
 
+    // ---------- equipamentos (PCs) cadastrados por repartição ----------
+    // vinculados ao Client ID da repartição — só aparecem para quem
+    // estiver conectado à mesma repartição em que foram cadastrados
+    if (action === 'register_equipamento') {
+      var reparticaoId = data.reparticaoId || '';
+      if (!reparticaoId) return respond({ ok: false, error: 'Repartição não informada.' });
+      var sheet = getOrCreateEquipamentosSheet();
+      sheet.appendRow([
+        reparticaoId,
+        data.nome || '',
+        data.serie || '',
+        data.uuid || '',
+        data.so || '',
+        data.tombamento || '',
+        data.cadastradoPor || '',
+        new Date()
+      ]);
+      return respond({ ok: true });
+    }
+
+    if (action === 'list_equipamentos') {
+      var reparticaoId = data.reparticaoId || '';
+      if (!reparticaoId) return respond({ ok: true, equipamentos: [] });
+      var sheet = getOrCreateEquipamentosSheet();
+      var rows = sheet.getDataRange().getValues();
+      var equipamentos = [];
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        if (String(r[0]) !== reparticaoId) continue;
+        equipamentos.push({
+          rowIndex: i + 1,
+          nome: String(r[1]), serie: String(r[2]), uuid: String(r[3]), so: String(r[4]),
+          tombamento: String(r[5]), cadastradoPor: String(r[6]), dataCadastro: r[7] ? formatDate_(r[7]) : ''
+        });
+      }
+      return respond({ ok: true, equipamentos: equipamentos });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
@@ -527,6 +565,25 @@ function getOrCreateAcessosSheet() {
   if (!sheet) {
     sheet = ss.insertSheet('Acessos');
     sheet.appendRow(['Email', 'DataHora']);
+  }
+  return sheet;
+}
+
+function getOrCreateEquipamentosSheet() {
+  var props = PropertiesService.getScriptProperties();
+  var ssId = props.getProperty('USERS_SHEET_ID');
+  var ss = null;
+  if (ssId) {
+    try { ss = SpreadsheetApp.openById(ssId); } catch (e) { ss = null; }
+  }
+  if (!ss) {
+    getOrCreateUsersSheet();
+    ss = SpreadsheetApp.openById(props.getProperty('USERS_SHEET_ID'));
+  }
+  var sheet = ss.getSheetByName('Equipamentos');
+  if (!sheet) {
+    sheet = ss.insertSheet('Equipamentos');
+    sheet.appendRow(['ReparticaoId', 'Nome', 'Serie', 'Uuid', 'SistemaOperacional', 'Tombamento', 'CadastradoPor', 'DataCadastro']);
   }
   return sheet;
 }
