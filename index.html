@@ -1714,24 +1714,24 @@
     </div>
     <div class="hidden-view" id="f_pc_camposContainer">
       <div class="field">
-        <label>Nome da máquina, software e versão</label>
+        <label>Nome do Dispositivo</label>
         <input type="text" id="f_pc_equipamento" placeholder="Ex.: Notebook Dell Latitude 5440 — Cellebrite UFED 4PC, versão 7.x">
-        <div class="hint"><b>Como localizar:</b> etiqueta física do equipamento (modelo e nº de patrimônio) e a tela "Sobre" do software utilizado.</div>
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
       </div>
       <div class="field">
-        <label>Número de série</label>
+        <label>ID do Dispositivo</label>
         <input type="text" id="f_pc_serie" placeholder="Ex.: 7XJK2R3">
-        <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic bios get serialnumber</span>, ou etiqueta física do equipamento.</div>
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
       </div>
       <div class="field">
-        <label>UUID do sistema</label>
+        <label>ID do Produto</label>
         <input type="text" id="f_pc_uuid" placeholder="Ex.: 4C4C4544-0034-3210-8030-B4C04F503432">
-        <div class="hint"><b>Como localizar:</b> Windows: Prompt de Comando > <span class="mono">wmic csproduct get uuid</span>.</div>
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
       </div>
       <div class="field">
-        <label>Sistema operacional</label>
+        <label>Sistema operacional - Edição e Versão</label>
         <input type="text" id="f_pc_so" placeholder="Ex.: Windows 11 Pro, versão 23H2">
-        <div class="hint"><b>Como localizar:</b> Iniciar > Configurações > Sistema > Sobre.</div>
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
       </div>
       <div class="field">
         <label>Número de tombamento</label>
@@ -2303,9 +2303,9 @@ async function renderRepEquipamentosList(reparticaoId){
     listEl.innerHTML = equipamentos.map(eq => `
       <div class="rep-user-card">
         <div class="rep-user-nome">${esc(eq.nome)}</div>
-        ${eq.serie ? `<div class="rep-user-detail">Nº de série: ${esc(eq.serie)}</div>` : ''}
-        ${eq.uuid ? `<div class="rep-user-detail">UUID: ${esc(eq.uuid)}</div>` : ''}
-        ${eq.so ? `<div class="rep-user-detail">Sistema operacional: ${esc(eq.so)}</div>` : ''}
+        ${eq.serie ? `<div class="rep-user-detail">ID do Dispositivo: ${esc(eq.serie)}</div>` : ''}
+        ${eq.uuid ? `<div class="rep-user-detail">ID do Produto: ${esc(eq.uuid)}</div>` : ''}
+        ${eq.so ? `<div class="rep-user-detail">Sistema operacional - Edição e Versão: ${esc(eq.so)}</div>` : ''}
         ${eq.tombamento ? `<div class="rep-user-detail">Nº de tombamento: ${esc(eq.tombamento)}</div>` : ''}
         <div class="rep-user-detail">Cadastrado por ${esc(eq.cadastradoPor || '—')}, em ${esc(eq.dataCadastro)}</div>
       </div>
@@ -4955,10 +4955,10 @@ function buildReport(){
 
     <h2>5. Identificação do Computador de Destino</h2>
     <table class="rtable">
-      ${row('Nome da máquina, software e versão', v('f_pc_equipamento'))}
-      ${row('Número de série', v('f_pc_serie'))}
-      ${row('UUID do sistema', v('f_pc_uuid'))}
-      ${row('Sistema operacional', v('f_pc_so'))}
+      ${row('Nome do Dispositivo', v('f_pc_equipamento'))}
+      ${row('ID do Dispositivo', v('f_pc_serie'))}
+      ${row('ID do Produto', v('f_pc_uuid'))}
+      ${row('Sistema operacional - Edição e Versão', v('f_pc_so'))}
       ${row('Número de tombamento', v('f_pc_tombamento'))}
     </table>
 
