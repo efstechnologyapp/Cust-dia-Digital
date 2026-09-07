@@ -463,6 +463,39 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Seção 2: múltiplos tipos de fonte de extração
+
+A Seção 2 (agora "Identificação da Fonte de Extração") deixou de
+assumir que a origem é sempre um celular. No topo, um seletor **"Tipo
+de dispositivo de origem"** define quais campos aparecem:
+
+- **📱 Celular / 📲 Tablet**: os campos de sempre (aparelho, sistema
+  operacional, linha, IMEI — incluindo os dois IMEIs e o botão de
+  salvar manual).
+- **💾 HD/SSD externo ou pen drive**: marca/modelo, número de série,
+  capacidade, sistema de arquivos, formato de conexão.
+- **🖥️ Outro computador**: campos de digitação livre (Nome do
+  Dispositivo, ID do Dispositivo, ID do Produto, Sistema operacional,
+  tombamento) — **não** usa o cadastro/reaproveitamento da Seção 5,
+  de propósito: o computador de destino (Seção 5) é da própria
+  repartição e é reutilizado repetidamente em vários relatórios; já um
+  computador como fonte de extração normalmente pertence a terceiros
+  e aparece pontualmente, sem sentido em cadastrá-lo para reuso.
+- **☁️ Servidor em nuvem**: provedor, conta/e-mail associado, método
+  de acesso.
+- **📡 Roteador / Modem**: marca/modelo, endereço IP, endereço MAC,
+  provedor de internet (ISP).
+- **Outro**: descrição livre.
+
+"Usuário/proprietário informado" continua sempre visível, para
+qualquer tipo. O relatório final mostra só os campos do tipo
+escolhido, com o título da seção indicando qual foi ("2. Identificação
+da Fonte de Extração — HD/SSD externo ou pen drive", por exemplo).
+
+A legenda do campo "Caminho no dispositivo" (Seção 3) também foi
+ajustada, cobrindo instruções específicas por tipo de fonte (Android,
+HD/PC, nuvem), além da alternativa via Shift + clique direito no PC.
+
 ## Cadastro de equipamentos (Seção 5) por repartição
 
 A Seção 5 do formulário ("Identificação do Computador de Destino")

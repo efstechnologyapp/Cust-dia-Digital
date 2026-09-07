@@ -1594,46 +1594,162 @@
 
   <!-- SECTION 2 -->
   <section class="card">
-    <h2><span class="num">2</span>Identificação do Dispositivo de Origem</h2>
+    <h2><span class="num">2</span>Identificação da Fonte de Extração</h2>
+    <div class="field">
+      <label>Tipo de dispositivo de origem</label>
+      <select id="f_origem_tipo">
+        <option value="" disabled selected>Selecione o tipo…</option>
+        <option value="celular">📱 Celular</option>
+        <option value="tablet">📲 Tablet</option>
+        <option value="storage">💾 HD/SSD externo ou pen drive</option>
+        <option value="pc">🖥️ Outro computador</option>
+        <option value="cloud">☁️ Servidor em nuvem</option>
+        <option value="router">📡 Roteador / Modem</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
     <div class="field">
       <label>Usuário/proprietário informado</label>
       <input type="text" id="f_proprietario" placeholder="Nome completo">
-      <div class="hint"><b>Como localizar:</b> não é extraído do aparelho — declarar verbalmente pelo detentor, com conferência de documento de identificação.</div>
+      <div class="hint"><b>Como localizar:</b> não é extraído do dispositivo — declarar verbalmente pelo detentor, com conferência de documento de identificação.</div>
     </div>
-    <div class="field">
-      <label>Número da linha associada</label>
-      <input type="text" id="f_linha" placeholder="Ex.: (83) 9 9876-5432">
-      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Status do SIM. iOS: Ajustes > Telefone > "Meu Número". Se não constar, confirmar com o usuário.</div>
-    </div>
-    <div class="field">
-      <label>Aparelho</label>
-      <input type="text" id="f_aparelho" placeholder="Ex.: Samsung Galaxy A54 5G">
-      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Nome do modelo. iOS: Ajustes > Geral > Sobre > Nome do modelo.</div>
-    </div>
-    <div class="field">
-      <label>Sistema operacional</label>
-      <input type="text" id="f_so_celular" placeholder="Ex.: Android 14, One UI 6.1">
-      <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Versão do Android. iOS: Ajustes > Geral > Sobre > Versão do iOS.</div>
-    </div>
-    <div class="field">
-      <div class="field-label-row">
-        <label>IMEI</label>
-        <a href="tel:*%2306%23" class="btn-inline-share">📞 Abrir discador (*#06#)</a>
+
+    <!-- Grupo: Celular / Tablet -->
+    <div class="hidden-view" id="origem_grupo_celular">
+      <div class="field">
+        <label>Número da linha associada</label>
+        <input type="text" id="f_linha" placeholder="Ex.: (83) 9 9876-5432">
+        <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Status do SIM. iOS: Ajustes > Telefone > "Meu Número". Se não constar, confirmar com o usuário. Deixe em branco se o dispositivo não tiver chip.</div>
       </div>
-      <input type="text" id="f_imei" placeholder="Ex.: 35 926116 148270 5">
-      <div class="file-attach-row" style="margin-top:8px;">
-        <input type="file" id="f_imei_ocr_input" accept="image/*" style="display:none;">
-        <button type="button" class="btn-attach" id="f_imei_ocr_btn">📷 Ler IMEI de uma foto</button>
-        <button type="button" class="btn-attach" id="f_imei_save_btn">💾 Salvar IMEI digitado</button>
+      <div class="field">
+        <label>Aparelho</label>
+        <input type="text" id="f_aparelho" placeholder="Ex.: Samsung Galaxy A54 5G">
+        <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Nome do modelo. iOS: Ajustes > Geral > Sobre > Nome do modelo.</div>
       </div>
-      <div class="loc-status" id="f_imei_ocr_status"></div>
-      <div id="f_imei_ocr_candidates"></div>
-      <div class="hint"><b>Como localizar:</b> disque *#06# (botão acima) ou anexe um print da tela com o IMEI — o app tenta ler o número automaticamente por OCR, mas sempre exibe o valor encontrado para você confirmar antes de preencher (requer internet só para essa leitura; a leitura pode errar dígitos, então confira sempre). Se preferir digitar direto, use o botão "Salvar IMEI digitado" para confirmar o valor.</div>
+      <div class="field">
+        <label>Sistema operacional</label>
+        <input type="text" id="f_so_celular" placeholder="Ex.: Android 14, One UI 6.1">
+        <div class="hint"><b>Como localizar:</b> Android: Config. > Sobre o telefone > Versão do Android. iOS: Ajustes > Geral > Sobre > Versão do iOS.</div>
+      </div>
+      <div class="field">
+        <div class="field-label-row">
+          <label>IMEI</label>
+          <a href="tel:*%2306%23" class="btn-inline-share">📞 Abrir discador (*#06#)</a>
+        </div>
+        <input type="text" id="f_imei" placeholder="Ex.: 35 926116 148270 5">
+        <div class="file-attach-row" style="margin-top:8px;">
+          <input type="file" id="f_imei_ocr_input" accept="image/*" style="display:none;">
+          <button type="button" class="btn-attach" id="f_imei_ocr_btn">📷 Ler IMEI de uma foto</button>
+          <button type="button" class="btn-attach" id="f_imei_save_btn">💾 Salvar IMEI digitado</button>
+        </div>
+        <div class="loc-status" id="f_imei_ocr_status"></div>
+        <div id="f_imei_ocr_candidates"></div>
+        <div class="hint"><b>Como localizar:</b> disque *#06# (botão acima) ou anexe um print da tela com o IMEI — o app tenta ler o número automaticamente por OCR, mas sempre exibe o valor encontrado para você confirmar antes de preencher (requer internet só para essa leitura; a leitura pode errar dígitos, então confira sempre). Se preferir digitar direto, use o botão "Salvar IMEI digitado" para confirmar o valor. Deixe em branco se o dispositivo não tiver chip.</div>
+      </div>
+      <div class="field">
+        <label>Outro IMEI do mesmo aparelho (se houver)</label>
+        <input type="text" id="f_imei2" placeholder="Ex.: 35 926116 148270 6">
+        <div class="hint"><b>Como localizar:</b> aparelhos com dois chips (dual-SIM) costumam ter dois números de IMEI — disque *#06# e confira se aparece mais de um. Deixe em branco se o dispositivo tiver só um chip ou nenhum.</div>
+      </div>
     </div>
-    <div class="field">
-      <label>Outro IMEI do mesmo aparelho (se houver)</label>
-      <input type="text" id="f_imei2" placeholder="Ex.: 35 926116 148270 6">
-      <div class="hint"><b>Como localizar:</b> aparelhos com dois chips (dual-SIM) costumam ter dois números de IMEI — disque *#06# e confira se aparece mais de um. Deixe em branco se o aparelho tiver só um.</div>
+
+    <!-- Grupo: HD/SSD externo ou pen drive -->
+    <div class="hidden-view" id="origem_grupo_storage">
+      <div class="field">
+        <label>Marca/modelo</label>
+        <input type="text" id="f_storage_modelo" placeholder="Ex.: SanDisk Extreme Portable SSD 1TB">
+      </div>
+      <div class="field">
+        <label>Número de série</label>
+        <input type="text" id="f_storage_serie" placeholder="Ex.: 2131A0912345">
+        <div class="hint"><b>Como localizar:</b> etiqueta física do dispositivo, ou Painel de Controle > Sistema e Segurança > Sistema (Windows) com o dispositivo conectado.</div>
+      </div>
+      <div class="field">
+        <label>Capacidade de armazenamento</label>
+        <input type="text" id="f_storage_capacidade" placeholder="Ex.: 1 TB">
+      </div>
+      <div class="field">
+        <label>Sistema de arquivos</label>
+        <input type="text" id="f_storage_fs" placeholder="Ex.: NTFS, exFAT, APFS, FAT32">
+        <div class="hint"><b>Como localizar:</b> Windows: botão direito no drive > Propriedades > Sistema de arquivos.</div>
+      </div>
+      <div class="field">
+        <label>Formato de conexão</label>
+        <input type="text" id="f_storage_conexao" placeholder="Ex.: USB-C 3.2, USB-A 2.0">
+      </div>
+    </div>
+
+    <!-- Grupo: Outro computador (reaproveita o cadastro de equipamentos da repartição) -->
+    <div class="hidden-view" id="origem_grupo_pc">
+      <div class="field">
+        <label>Nome do Dispositivo</label>
+        <input type="text" id="f_origSrc_equipamento" placeholder="Ex.: Notebook Dell Latitude 5440">
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
+      </div>
+      <div class="field">
+        <label>ID do Dispositivo</label>
+        <input type="text" id="f_origSrc_serie" placeholder="Ex.: 7XJK2R3">
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
+      </div>
+      <div class="field">
+        <label>ID do Produto</label>
+        <input type="text" id="f_origSrc_uuid" placeholder="Ex.: 4C4C4544-0034-3210-8030-B4C04F503432">
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
+      </div>
+      <div class="field">
+        <label>Sistema operacional - Edição e Versão</label>
+        <input type="text" id="f_origSrc_so" placeholder="Ex.: Windows 11 Pro, versão 23H2">
+        <div class="hint"><b>Como localizar:</b> Painel de Controle > Sistema e Segurança > Sistema; ou tecle Windows+R, digite "msinfo32" e Enter.</div>
+      </div>
+      <div class="field">
+        <label>Número de tombamento</label>
+        <input type="text" id="f_origSrc_tombamento" placeholder="Ex.: 2026.001234 (se aplicável — pode não haver, tratando-se de equipamento de terceiro)">
+      </div>
+    </div>
+
+    <!-- Grupo: Servidor em nuvem -->
+    <div class="hidden-view" id="origem_grupo_cloud">
+      <div class="field">
+        <label>Provedor</label>
+        <input type="text" id="f_cloud_provedor" placeholder="Ex.: Google Drive, iCloud, OneDrive, Dropbox">
+      </div>
+      <div class="field">
+        <label>Conta/e-mail associado</label>
+        <input type="text" id="f_cloud_conta" placeholder="Ex.: usuario@gmail.com">
+      </div>
+      <div class="field">
+        <label>Método de acesso</label>
+        <input type="text" id="f_cloud_metodo" placeholder="Ex.: login direto na conta, API do provedor, backup baixado previamente">
+      </div>
+    </div>
+
+    <!-- Grupo: Roteador / Modem -->
+    <div class="hidden-view" id="origem_grupo_router">
+      <div class="field">
+        <label>Marca/modelo</label>
+        <input type="text" id="f_router_modelo" placeholder="Ex.: TP-Link Archer C6">
+      </div>
+      <div class="field">
+        <label>Endereço IP</label>
+        <input type="text" id="f_router_ip" class="mono" placeholder="Ex.: 192.168.0.1">
+      </div>
+      <div class="field">
+        <label>Endereço MAC</label>
+        <input type="text" id="f_router_mac" class="mono" placeholder="Ex.: AA:BB:CC:DD:EE:FF">
+        <div class="hint"><b>Como localizar:</b> etiqueta física do equipamento, ou painel de administração do próprio roteador/modem.</div>
+      </div>
+      <div class="field">
+        <label>Provedor de internet (ISP)</label>
+        <input type="text" id="f_router_isp" placeholder="Ex.: Vivo, Claro, Oi">
+      </div>
+    </div>
+
+    <!-- Grupo: Outro -->
+    <div class="hidden-view" id="origem_grupo_outro">
+      <div class="field">
+        <label>Descrição do dispositivo/fonte</label>
+        <textarea id="f_outro_descricao" placeholder="Descreva o dispositivo ou fonte de onde o arquivo foi extraído"></textarea>
+      </div>
     </div>
   </section>
 
@@ -1656,8 +1772,12 @@
     </div>
     <div class="field">
       <label>Caminho no dispositivo</label>
-      <input type="text" class="mono" id="f_orig_caminho" placeholder="/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Databases/...">
-      <div class="hint"><b>Como localizar:</b> gerenciador de arquivos > Armazenamento interno > Android > media > com.whatsapp > WhatsApp > Databases. Se a extração for feita por ferramenta rodando no PC (com o celular conectado), o caminho também pode ser obtido segurando Shift e clicando com o botão direito do mouse sobre o arquivo, depois clicando com o botão esquerdo na opção "Copiar como caminho".</div>
+      <input type="text" class="mono" id="f_orig_caminho" placeholder="Ex.: /storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Databases/...">
+      <div class="hint"><b>Como localizar, conforme o tipo de fonte (Seção 2):</b><br>
+      • <b>Celular/Tablet (Android):</b> gerenciador de arquivos > Armazenamento interno > Android > media > com.whatsapp > WhatsApp > Databases.<br>
+      • <b>HD/SSD externo, pen drive ou outro computador:</b> navegue até a pasta/arquivo pelo gerenciador de arquivos do sistema.<br>
+      • <b>Servidor em nuvem:</b> caminho da pasta/arquivo dentro do provedor (ex.: "Meu Drive/Backups/...").<br>
+      • Se a extração for feita por ferramenta rodando no PC (com o dispositivo conectado), o caminho também pode ser obtido segurando Shift e clicando com o botão direito do mouse sobre o arquivo, depois clicando com o botão esquerdo na opção "Copiar como caminho".</div>
     </div>
     <div class="row2">
       <div class="field">
@@ -4595,104 +4715,139 @@ $('editProfileBtn').addEventListener('click', () => {
 });
 
 // ---------- Seção 5: seletor de equipamentos cadastrados na repartição ----------
-let equipamentosCache = [];
-const pcCamposFields = ['f_pc_equipamento', 'f_pc_serie', 'f_pc_uuid', 'f_pc_so', 'f_pc_tombamento'];
+// fábrica reutilizável: cria um seletor de equipamento vinculado à
+// repartição — usada tanto na Seção 2 ("Outro computador" como fonte
+// de extração) quanto na Seção 5 (computador de destino), ambas
+// compartilhando o mesmo cadastro de equipamentos por repartição
+// mantém todos os seletores criados, para que salvar um equipamento em
+// qualquer um deles atualize a lista nos demais também (compartilham o
+// mesmo cadastro por repartição)
+const allEquipSelectors = [];
 
-async function loadEquipamentosDropdown(){
-  const sel = $('f_pc_equip_select');
-  const rep = getSelectedReparticao();
-  sel.innerHTML = '<option value="">Selecione o equipamento…</option>';
-  $('f_pc_camposContainer').classList.add('hidden-view');
-  if(!rep || !rep.clientId) return;
-  try {
-    const data = await callAppsScript({ action: 'list_equipamentos', reparticaoId: rep.clientId });
-    equipamentosCache = data.equipamentos || [];
-  } catch(e){ equipamentosCache = []; }
-  equipamentosCache.forEach((eq, idx) => {
-    const opt = document.createElement('option');
-    opt.value = String(idx);
-    opt.textContent = eq.tombamento ? `${eq.nome} (tombamento ${eq.tombamento})` : eq.nome;
-    sel.appendChild(opt);
-  });
-  const novoOpt = document.createElement('option');
-  novoOpt.value = '__new__';
-  novoOpt.textContent = '+ Cadastrar equipamento';
-  sel.appendChild(novoOpt);
-}
-
-function setPcCamposReadonly(readonly){
-  pcCamposFields.forEach(id => { $(id).readOnly = readonly; });
-  $('f_pc_equip_save_btn').classList.toggle('hidden-view', readonly);
-}
-
-$('f_pc_equip_select').addEventListener('change', () => {
-  const val = $('f_pc_equip_select').value;
-  $('f_pc_equip_status').textContent = '';
-  if(val === ''){
-    $('f_pc_camposContainer').classList.add('hidden-view');
-    return;
+function createEquipSelector(cfg){
+  let cache = [];
+  async function loadDropdown(){
+    const sel = $(cfg.selectId);
+    const rep = getSelectedReparticao();
+    sel.innerHTML = '<option value="">Selecione o equipamento…</option>';
+    $(cfg.containerId).classList.add('hidden-view');
+    if(!rep || !rep.clientId) return;
+    try {
+      const data = await callAppsScript({ action: 'list_equipamentos', reparticaoId: rep.clientId });
+      cache = data.equipamentos || [];
+    } catch(e){ cache = []; }
+    cache.forEach((eq, idx) => {
+      const opt = document.createElement('option');
+      opt.value = String(idx);
+      opt.textContent = eq.tombamento ? `${eq.nome} (tombamento ${eq.tombamento})` : eq.nome;
+      sel.appendChild(opt);
+    });
+    const novoOpt = document.createElement('option');
+    novoOpt.value = '__new__';
+    novoOpt.textContent = '+ Cadastrar equipamento';
+    sel.appendChild(novoOpt);
   }
-  $('f_pc_camposContainer').classList.remove('hidden-view');
-  if(val === '__new__'){
-    pcCamposFields.forEach(id => { $(id).value = ''; });
-    setPcCamposReadonly(false);
-    return;
+  function setReadonly(readonly){
+    Object.values(cfg.fields).forEach(id => { $(id).readOnly = readonly; });
+    $(cfg.saveBtnId).classList.toggle('hidden-view', readonly);
   }
-  const eq = equipamentosCache[Number(val)];
-  if(!eq) return;
-  $('f_pc_equipamento').value = eq.nome;
-  $('f_pc_serie').value = eq.serie;
-  $('f_pc_uuid').value = eq.uuid;
-  $('f_pc_so').value = eq.so;
-  $('f_pc_tombamento').value = eq.tombamento;
-  setPcCamposReadonly(true);
-});
-
-$('f_pc_equip_save_btn').addEventListener('click', async () => {
-  const rep = getSelectedReparticao();
-  const statusEl = $('f_pc_equip_status');
-  if(!rep || !rep.clientId){
-    statusEl.textContent = 'Nenhuma repartição conectada — não é possível salvar o equipamento.';
-    statusEl.className = 'loc-status err';
-    return;
-  }
-  const nome = $('f_pc_equipamento').value.trim();
-  if(!nome){
-    statusEl.textContent = 'Preencha ao menos o nome da máquina antes de salvar.';
-    statusEl.className = 'loc-status err';
-    return;
-  }
-  const payload = {
-    action: 'register_equipamento',
-    reparticaoId: rep.clientId,
-    nome, serie: $('f_pc_serie').value.trim(), uuid: $('f_pc_uuid').value.trim(),
-    so: $('f_pc_so').value.trim(), tombamento: $('f_pc_tombamento').value.trim(),
-    cadastradoPor: currentUser ? currentUser.nome : ''
-  };
-  statusEl.textContent = 'Salvando…';
-  statusEl.className = 'loc-status';
-  try {
-    await callAppsScript(payload);
-    await loadEquipamentosDropdown();
-    const novoIdx = equipamentosCache.findIndex(eq => eq.nome === nome && eq.serie === payload.serie && eq.uuid === payload.uuid);
-    if(novoIdx >= 0){
-      $('f_pc_equip_select').value = String(novoIdx);
-      setPcCamposReadonly(true);
+  $(cfg.selectId).addEventListener('change', () => {
+    const val = $(cfg.selectId).value;
+    $(cfg.statusId).textContent = '';
+    if(val === ''){ $(cfg.containerId).classList.add('hidden-view'); return; }
+    $(cfg.containerId).classList.remove('hidden-view');
+    if(val === '__new__'){
+      Object.values(cfg.fields).forEach(id => { $(id).value = ''; });
+      setReadonly(false);
+      return;
     }
-    statusEl.textContent = '✓ Equipamento salvo — já disponível para seleção nesta repartição.';
-    statusEl.className = 'loc-status ok';
-  } catch(err){
-    statusEl.textContent = 'Não foi possível salvar: ' + err.message;
-    statusEl.className = 'loc-status err';
-  }
+    const eq = cache[Number(val)];
+    if(!eq) return;
+    $(cfg.fields.nome).value = eq.nome;
+    $(cfg.fields.serie).value = eq.serie;
+    $(cfg.fields.uuid).value = eq.uuid;
+    $(cfg.fields.so).value = eq.so;
+    $(cfg.fields.tombamento).value = eq.tombamento;
+    setReadonly(true);
+  });
+  $(cfg.saveBtnId).addEventListener('click', async () => {
+    const rep = getSelectedReparticao();
+    const statusEl = $(cfg.statusId);
+    if(!rep || !rep.clientId){
+      statusEl.textContent = 'Nenhuma repartição conectada — não é possível salvar o equipamento.';
+      statusEl.className = 'loc-status err';
+      return;
+    }
+    const nome = $(cfg.fields.nome).value.trim();
+    if(!nome){
+      statusEl.textContent = 'Preencha ao menos o nome da máquina antes de salvar.';
+      statusEl.className = 'loc-status err';
+      return;
+    }
+    const payload = {
+      action: 'register_equipamento',
+      reparticaoId: rep.clientId,
+      nome, serie: $(cfg.fields.serie).value.trim(), uuid: $(cfg.fields.uuid).value.trim(),
+      so: $(cfg.fields.so).value.trim(), tombamento: $(cfg.fields.tombamento).value.trim(),
+      cadastradoPor: currentUser ? currentUser.nome : ''
+    };
+    statusEl.textContent = 'Salvando…';
+    statusEl.className = 'loc-status';
+    try {
+      await callAppsScript(payload);
+      await loadDropdown();
+      const novoIdx = cache.findIndex(eq => eq.nome === nome && eq.serie === payload.serie && eq.uuid === payload.uuid);
+      if(novoIdx >= 0){
+        $(cfg.selectId).value = String(novoIdx);
+        setReadonly(true);
+      }
+      // atualiza também os demais seletores (compartilham o mesmo
+      // cadastro de equipamentos por repartição), sem mexer no que
+      // cada um estiver mostrando no momento
+      allEquipSelectors.forEach(other => { if(other !== instance) other.loadDropdown(); });
+      statusEl.textContent = '✓ Equipamento salvo — já disponível para seleção nesta repartição.';
+      statusEl.className = 'loc-status ok';
+    } catch(err){
+      statusEl.textContent = 'Não foi possível salvar: ' + err.message;
+      statusEl.className = 'loc-status err';
+    }
+  });
+  const instance = { loadDropdown, setReadonly };
+  allEquipSelectors.push(instance);
+  return instance;
+}
+
+const pcEquipSelector = createEquipSelector({
+  selectId: 'f_pc_equip_select', containerId: 'f_pc_camposContainer',
+  fields: { nome: 'f_pc_equipamento', serie: 'f_pc_serie', uuid: 'f_pc_uuid', so: 'f_pc_so', tombamento: 'f_pc_tombamento' },
+  saveBtnId: 'f_pc_equip_save_btn', statusId: 'f_pc_equip_status'
 });
+// Observação: o grupo "Outro computador" da Seção 2 (fonte de
+// extração) NÃO usa esse mesmo mecanismo de cadastro/reaproveitamento
+// — são campos de digitação livre a cada relatório, já que o
+// dispositivo de origem normalmente pertence a terceiros e não é um
+// equipamento que a repartição reutiliza (diferente do PC de destino
+// da Seção 5, que é reaproveitado por ser da própria repartição).
+
+// ---------- Seção 2: alterna os campos conforme o tipo de dispositivo de origem ----------
+const origemGrupos = {
+  celular: 'origem_grupo_celular', tablet: 'origem_grupo_celular',
+  storage: 'origem_grupo_storage', pc: 'origem_grupo_pc',
+  cloud: 'origem_grupo_cloud', router: 'origem_grupo_router', outro: 'origem_grupo_outro'
+};
+function updateOrigemTipoUI(){
+  const tipo = $('f_origem_tipo').value;
+  Object.values(origemGrupos).forEach(gid => { $(gid).classList.add('hidden-view'); });
+  if(origemGrupos[tipo]) $(origemGrupos[tipo]).classList.remove('hidden-view');
+}
+$('f_origem_tipo').addEventListener('change', updateOrigemTipoUI);
 
 $('startFormBtn').addEventListener('click', () => {
   updateCustodiaOriginalReparticaoLabel();
   showView('form');
   initFormSectionStepper();
   goToFormSection(0);
-  loadEquipamentosDropdown();
+  pcEquipSelector.loadDropdown();
 });
 $('backToLastSectionBtn').addEventListener('click', () => goToFormSection(formSections.length - 1));
 
@@ -4866,6 +5021,61 @@ function esc(s){
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+const origemTipoLabels = {
+  celular: 'Celular', tablet: 'Tablet', storage: 'HD/SSD externo ou pen drive',
+  pc: 'Outro computador', cloud: 'Servidor em nuvem', router: 'Roteador / Modem', outro: 'Outro'
+};
+
+function buildOrigemRows(v){
+  const tipo = v('f_origem_tipo');
+  if(tipo === 'celular' || tipo === 'tablet'){
+    return `
+      ${row('Aparelho', v('f_aparelho'))}
+      ${row('Sistema operacional', v('f_so_celular'))}
+      ${row('IMEI', v('f_imei'))}
+      ${row('Outro IMEI (se houver)', v('f_imei2'))}
+      ${row('Número da linha associada', v('f_linha'))}
+    `;
+  }
+  if(tipo === 'storage'){
+    return `
+      ${row('Marca/modelo', v('f_storage_modelo'))}
+      ${row('Número de série', v('f_storage_serie'))}
+      ${row('Capacidade de armazenamento', v('f_storage_capacidade'))}
+      ${row('Sistema de arquivos', v('f_storage_fs'))}
+      ${row('Formato de conexão', v('f_storage_conexao'))}
+    `;
+  }
+  if(tipo === 'pc'){
+    return `
+      ${row('Nome do Dispositivo', v('f_origSrc_equipamento'))}
+      ${row('ID do Dispositivo', v('f_origSrc_serie'))}
+      ${row('ID do Produto', v('f_origSrc_uuid'))}
+      ${row('Sistema operacional - Edição e Versão', v('f_origSrc_so'))}
+      ${row('Número de tombamento', v('f_origSrc_tombamento'))}
+    `;
+  }
+  if(tipo === 'cloud'){
+    return `
+      ${row('Provedor', v('f_cloud_provedor'))}
+      ${row('Conta/e-mail associado', v('f_cloud_conta'))}
+      ${row('Método de acesso', v('f_cloud_metodo'))}
+    `;
+  }
+  if(tipo === 'router'){
+    return `
+      ${row('Marca/modelo', v('f_router_modelo'))}
+      ${row('Endereço IP', v('f_router_ip'), true)}
+      ${row('Endereço MAC', v('f_router_mac'), true)}
+      ${row('Provedor de internet (ISP)', v('f_router_isp'))}
+    `;
+  }
+  if(tipo === 'outro'){
+    return row('Descrição do dispositivo/fonte', v('f_outro_descricao'));
+  }
+  return '';
+}
+
 function row(label, value, mono){
   const v = esc(value).replace(/\n/g, '<br>');
   return `<tr><td class="lbl">${esc(label)}</td><td class="${mono?'mono':''}">${v || '—'}</td></tr>`;
@@ -4938,14 +5148,10 @@ function buildReport(){
       ${row('Local da coleta', v('f_local_coleta'))}
     </table>
 
-    <h2>2. Identificação do Dispositivo de Origem</h2>
+    <h2>2. Identificação da Fonte de Extração${origemTipoLabels[v('f_origem_tipo')] ? ' — ' + origemTipoLabels[v('f_origem_tipo')] : ''}</h2>
     <table class="rtable">
-      ${row('Aparelho', v('f_aparelho'))}
-      ${row('Sistema operacional', v('f_so_celular'))}
-      ${row('IMEI', v('f_imei'))}
-      ${row('Outro IMEI (se houver)', v('f_imei2'))}
-      ${row('Número da linha associada', v('f_linha'))}
       ${row('Usuário/proprietário informado', v('f_proprietario'))}
+      ${buildOrigemRows(v)}
     </table>
 
     <h2>3. Arquivo Extraído (Original)</h2>
@@ -5194,7 +5400,10 @@ function resetFormFields(){
   $('f_pc_equip_select').value = '';
   $('f_pc_camposContainer').classList.add('hidden-view');
   $('f_pc_equip_status').textContent = '';
-  setPcCamposReadonly(false);
+  pcEquipSelector.setReadonly(false);
+
+  $('f_origem_tipo').value = '';
+  updateOrigemTipoUI();
 
   defaultAnexos.length = 0;
   defaultAnexos.push('', '', '');
