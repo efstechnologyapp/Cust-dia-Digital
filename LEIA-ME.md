@@ -463,6 +463,27 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Nova Seção 1: "Inicialização do Procedimento de Extração"
+
+A antiga Seção 4 ("Procedimento de Cópia") virou a **Seção 1**,
+renomeada, e todas as demais seções foram renumeradas a partir dela
+(a antiga 1 virou 2, a antiga 2 virou 3, a antiga 3 virou 4 — as
+seções 5 a 10 mantiveram os mesmos números, já que ficam depois).
+
+A nova Seção 1 abre com uma ilustração de dispositivos diversos
+conectando-se ao computador de custódia digital, seguida do aviso:
+"Antes de prosseguir com as demais seções, proceda à conexão entre o
+equipamento/servidor de origem e o equipamento de destino, e
+transfira/extraia o arquivo original para o equipamento de destino."
+
+O campo **"Método de transferência"** virou um seletor (Cabo USB,
+Bluetooth, Wi-Fi Direct/rede local, Cartão de memória, Backup em
+nuvem, Conexão direta, Ferramenta forense especializada, Outro) — ao
+escolher uma opção, o campo **"Descrição do procedimento"**, logo
+abaixo, é preenchido automaticamente com o texto técnico
+correspondente àquele método (mas continua livremente editável depois,
+caso precise de ajuste fino).
+
 ## Seção 2: múltiplos tipos de fonte de extração
 
 A Seção 2 (agora "Identificação da Fonte de Extração") deixou de

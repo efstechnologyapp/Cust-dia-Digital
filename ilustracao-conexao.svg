@@ -1,0 +1,57 @@
+<svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustração de dispositivos diversos conectando-se ao computador de custódia digital">
+  <defs>
+    <style>
+      .ic-stroke{ stroke:#1B2A4A; stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+      .ic-fill{ fill:#1B2A4A; }
+      .ic-accent{ fill:#C9A24B; }
+      .ic-line{ stroke:#9AA6BB; stroke-width:2; stroke-dasharray:5 5; fill:none; }
+      .ic-label{ font-family:Georgia, 'Times New Roman', serif; font-size:11px; fill:#5B6472; text-anchor:middle; }
+    </style>
+  </defs>
+
+  <!-- linhas de conexao convergindo para o PC -->
+  <path class="ic-line" d="M100,40 C220,40 300,90 400,100"/>
+  <path class="ic-line" d="M100,95 C220,95 300,100 400,105"/>
+  <path class="ic-line" d="M100,150 C220,150 300,120 400,110"/>
+  <path class="ic-line" d="M100,195 C220,195 300,140 400,115"/>
+
+  <!-- celular -->
+  <g transform="translate(60,18)">
+    <rect x="0" y="0" width="26" height="44" rx="5" class="ic-stroke"/>
+    <line x1="6" y1="36" x2="20" y2="36" class="ic-stroke"/>
+    <text x="13" y="60" class="ic-label">Celular</text>
+  </g>
+
+  <!-- tablet -->
+  <g transform="translate(55,72)">
+    <rect x="0" y="0" width="38" height="30" rx="4" class="ic-stroke"/>
+    <line x1="30" y1="6" x2="30" y2="24" class="ic-stroke"/>
+    <text x="19" y="48" class="ic-label">Tablet</text>
+  </g>
+
+  <!-- HD/pen drive -->
+  <g transform="translate(50,128)">
+    <rect x="0" y="6" width="46" height="26" rx="4" class="ic-stroke"/>
+    <circle cx="14" cy="19" r="4" class="ic-stroke"/>
+    <line x1="30" y1="12" x2="38" y2="12" class="ic-stroke"/>
+    <line x1="30" y1="20" x2="38" y2="20" class="ic-stroke"/>
+    <text x="23" y="50" class="ic-label">HD / Pen drive</text>
+  </g>
+
+  <!-- nuvem -->
+  <g transform="translate(45,170)">
+    <path d="M14,26 a10,10 0 0,1 0,-20 a12,12 0 0,1 23,-3 a9,9 0 0,1 3,17.9 z" class="ic-stroke"/>
+    <text x="27" y="42" class="ic-label">Nuvem</text>
+  </g>
+
+  <!-- PC de custodia (destino) -->
+  <g transform="translate(420,60)">
+    <rect x="0" y="0" width="120" height="72" rx="6" class="ic-stroke"/>
+    <rect x="8" y="8" width="104" height="56" rx="2" fill="#EAF0FA"/>
+    <circle cx="60" cy="36" r="16" class="ic-accent"/>
+    <path d="M52,36 l6,6 l12,-14" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="30" y="76" width="60" height="8" rx="2" class="ic-fill"/>
+    <text x="60" y="104" class="ic-label" style="font-weight:bold;fill:#1B2A4A;">Custódia Digital</text>
+    <text x="60" y="118" class="ic-label">Computador de destino</text>
+  </g>
+</svg>

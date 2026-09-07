@@ -1544,9 +1544,36 @@
 
   <div class="progress" id="progressBar"></div>
 
-  <!-- SECTION 1 -->
+  <!-- SECTION 1 (antes era a SECTION 4 — movida para o início) -->
   <section class="card">
-    <h2><span class="num">1</span>Identificação Geral</h2>
+    <h2><span class="num">1</span>Inicialização do Procedimento de Extração</h2>
+    <img src="ilustracao-conexao.svg" alt="Ilustração de dispositivos diversos conectando-se ao computador de custódia digital" style="display:block; max-width:420px; width:100%; margin:6px auto 14px;">
+    <p style="text-align:center; color:var(--muted); font-size:13px; margin:0 0 18px; line-height:1.5;">
+      Antes de prosseguir com as demais seções, proceda à conexão entre o equipamento/servidor de origem e o equipamento de destino, e transfira/extraia o arquivo original para o equipamento de destino.
+    </p>
+    <div class="field">
+      <label>Método de transferência</label>
+      <select id="f_metodo_transf">
+        <option value="usb" selected>Cabo USB — modo MTP (Transferência de arquivos)</option>
+        <option value="bluetooth">Bluetooth</option>
+        <option value="wifi">Wi-Fi Direct / rede local</option>
+        <option value="sdcard">Cartão de memória (microSD) via leitor de cartões</option>
+        <option value="cloud">Backup em nuvem (baixado para o computador)</option>
+        <option value="direto">Conexão direta (dispositivo de armazenamento ligado diretamente ao PC)</option>
+        <option value="forense">Ferramenta forense especializada (ex.: Cellebrite, UFED)</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Descrição do procedimento</label>
+      <textarea id="f_proc_descricao">A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.</textarea>
+      <div class="hint">Texto preenchido automaticamente conforme o método escolhido acima — pode ser ajustado livremente antes de gerar o relatório.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 2 (antes era a SECTION 1) -->
+  <section class="card">
+    <h2><span class="num">2</span>Identificação Geral</h2>
     <div class="field">
       <label>Nº do relatório</label>
       <input type="text" id="f_relatorio_num" placeholder="Ex.: REL-EXT-2026-0142">
@@ -1592,9 +1619,9 @@
     </div>
   </section>
 
-  <!-- SECTION 2 -->
+  <!-- SECTION 3 (antes era a SECTION 2) -->
   <section class="card">
-    <h2><span class="num">2</span>Identificação da Fonte de Extração</h2>
+    <h2><span class="num">3</span>Identificação da Fonte de Extração</h2>
     <div class="field">
       <label>Tipo de dispositivo de origem</label>
       <select id="f_origem_tipo">
@@ -1753,9 +1780,9 @@
     </div>
   </section>
 
-  <!-- SECTION 3 -->
+  <!-- SECTION 4 (antes era a SECTION 3) -->
   <section class="card">
-    <h2><span class="num">3</span>Arquivo Extraído (Original)</h2>
+    <h2><span class="num">4</span>Arquivo Extraído (Original)</h2>
     <div class="field">
       <label>Anexar arquivo (opcional)</label>
       <div class="file-attach-row">
@@ -1806,19 +1833,6 @@
     <div class="field">
       <label>Hora exata do cálculo do hash original</label>
       <input type="text" class="mono" id="f_hora_hash_original" placeholder="dd/mm/aaaa hh:mm:ss" readonly data-wp="datetime-sec">
-    </div>
-  </section>
-
-  <!-- SECTION 4 -->
-  <section class="card">
-    <h2><span class="num">4</span>Procedimento de Cópia</h2>
-    <div class="field">
-      <label>Descrição do procedimento</label>
-      <textarea id="f_proc_descricao">A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.</textarea>
-    </div>
-    <div class="field">
-      <label>Método de transferência</label>
-      <input type="text" id="f_metodo_transf" placeholder="Ex.: Cabo USB — modo MTP (Transferência de arquivos)">
     </div>
   </section>
 
@@ -5021,6 +5035,35 @@ function esc(s){
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+const transferMethodLabels = {
+  usb: 'Cabo USB — modo MTP (Transferência de arquivos)',
+  bluetooth: 'Bluetooth',
+  wifi: 'Wi-Fi Direct / rede local',
+  sdcard: 'Cartão de memória (microSD) via leitor de cartões',
+  cloud: 'Backup em nuvem (baixado para o computador)',
+  direto: 'Conexão direta (dispositivo de armazenamento ligado diretamente ao PC)',
+  forense: 'Ferramenta forense especializada (ex.: Cellebrite, UFED)',
+  outro: 'Outro'
+};
+
+const transferMethodDescriptions = {
+  usb: 'A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.',
+  bluetooth: 'A transferência do arquivo foi realizada por meio de conexão Bluetooth entre os dispositivos, previamente pareados. Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.',
+  wifi: 'A transferência do arquivo foi realizada por meio de conexão Wi-Fi Direct/rede local entre os dispositivos. Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.',
+  sdcard: 'O arquivo foi extraído diretamente do cartão de memória (microSD) do dispositivo de origem, inserido em leitor de cartões conectado ao computador de destino. Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.',
+  cloud: 'O arquivo foi obtido por meio de backup previamente armazenado em serviço de nuvem, baixado diretamente para o computador de destino. Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.',
+  direto: 'O dispositivo de armazenamento foi conectado diretamente ao computador de destino, e o arquivo foi copiado diretamente de sua estrutura de arquivos. Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.',
+  forense: 'A extração foi realizada por meio de ferramenta forense especializada, conectada ao dispositivo de origem, que realizou a cópia do conteúdo diretamente para o computador de destino, com preservação da integridade dos dados originais.',
+  outro: ''
+};
+
+$('f_metodo_transf').addEventListener('change', () => {
+  const metodo = $('f_metodo_transf').value;
+  if(transferMethodDescriptions[metodo] !== undefined){
+    $('f_proc_descricao').value = transferMethodDescriptions[metodo];
+  }
+});
+
 const origemTipoLabels = {
   celular: 'Celular', tablet: 'Tablet', storage: 'HD/SSD externo ou pen drive',
   pc: 'Outro computador', cloud: 'Servidor em nuvem', router: 'Roteador / Modem', outro: 'Outro'
@@ -5139,7 +5182,13 @@ function buildReport(){
     </div>
     <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E INTEGRIDADE DE ARQUIVOS DIGITAIS</h1>
 
-    <h2>1. Identificação Geral</h2>
+    <h2>1. Inicialização do Procedimento de Extração</h2>
+    <p class="body-text">${esc(v('f_proc_descricao'))}</p>
+    <table class="rtable">
+      ${row('Método de transferência', transferMethodLabels[v('f_metodo_transf')] || v('f_metodo_transf'))}
+    </table>
+
+    <h2>2. Identificação Geral</h2>
     <table class="rtable">
       ${row('Nº do relatório', v('f_relatorio_num'))}
       ${row('Data e hora da coleta', [dataColeta, horarioRange].filter(Boolean).join(' — '))}
@@ -5148,13 +5197,13 @@ function buildReport(){
       ${row('Local da coleta', v('f_local_coleta'))}
     </table>
 
-    <h2>2. Identificação da Fonte de Extração${origemTipoLabels[v('f_origem_tipo')] ? ' — ' + origemTipoLabels[v('f_origem_tipo')] : ''}</h2>
+    <h2>3. Identificação da Fonte de Extração${origemTipoLabels[v('f_origem_tipo')] ? ' — ' + origemTipoLabels[v('f_origem_tipo')] : ''}</h2>
     <table class="rtable">
       ${row('Usuário/proprietário informado', v('f_proprietario'))}
       ${buildOrigemRows(v)}
     </table>
 
-    <h2>3. Arquivo Extraído (Original)</h2>
+    <h2>4. Arquivo Extraído (Original)</h2>
     <table class="rtable">
       ${row('Nome do arquivo', v('f_orig_nome'), true)}
       ${row('Caminho no dispositivo', v('f_orig_caminho'), true)}
@@ -5163,12 +5212,6 @@ function buildReport(){
       ${row('Ferramenta usada para gerar o hash', v('f_orig_ferramenta'))}
       ${row('Hash SHA-256 (ORIGINAL)', v('f_hash_original'), true)}
       ${row('Hora exata do cálculo do hash', v('f_hora_hash_original'))}
-    </table>
-
-    <h2>4. Procedimento de Cópia</h2>
-    <p class="body-text">${esc(v('f_proc_descricao'))}</p>
-    <table class="rtable">
-      ${row('Método de transferência', v('f_metodo_transf'))}
     </table>
 
     <h2>5. Identificação do Computador de Destino</h2>
@@ -5417,7 +5460,8 @@ function resetFormFields(){
   anexoFiles.push(null, null, null);
   renderAnexos();
 
-  $('f_proc_descricao').value = 'A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.';
+  $('f_metodo_transf').value = 'usb';
+  $('f_proc_descricao').value = transferMethodDescriptions.usb;
   $('f_conclusao').value = 'A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo móvel, e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.';
 
   // resincroniza os seletores em cascata de ferramenta de hash
