@@ -463,6 +463,19 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Informação de versão do app
+
+Uma única constante no código (`APP_VERSION_INFO`, perto do topo do
+JavaScript) guarda o número da versão atual, a data/hora da última
+atualização e um resumo do que mudou — **precisa ser atualizada
+manualmente a cada nova versão publicada**. Ela alimenta dois lugares:
+
+- **Rodapé da sidebar** (visível para qualquer usuário): número da
+  versão + data da atualização, em fonte pequena e discreta.
+- **Card "Dados do app"** (aba "Informações Gerais", Gestão do App):
+  linha completa "Versão do APP: ..." com o resumo da atualização,
+  em fonte menor que as demais informações do card.
+
 ## Bolinhas de pendência para o administrador
 
 O adm agora é avisado ativamente de pendências que precisam de

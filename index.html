@@ -1314,6 +1314,7 @@
 
     <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gestão do App<span class="pending-badge hidden-view" id="sidebarPendingBadge">0</span></button>
     <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Sair</button>
+    <div id="sidebarVersionInfo" style="margin-top:16px;text-align:center;font-size:10px;color:var(--muted);"></div>
   </div>
 </div>
 
@@ -3027,6 +3028,16 @@ $('connTabBtnInfo').addEventListener('click', () => switchConnTab('info'));
 $('connTabBtnSistema').addEventListener('click', () => switchConnTab('sistema'));
 $('connTabBtnUsuarios').addEventListener('click', () => switchConnTab('usuarios'));
 
+// única fonte de verdade sobre a versão atual do app — atualizar aqui
+// a cada nova versão publicada (usada tanto na sidebar quanto na aba
+// "Informações Gerais")
+const APP_VERSION_INFO = {
+  numero: 'v85',
+  dataHora: '08/09/2026, às 23h24',
+  data: '08/09/2026',
+  resumo: 'Informação de versão do app adicionada ao card "Dados do app" (Gestão do App) e ao rodapé da sidebar, com data da última atualização e resumo do que mudou.'
+};
+
 async function renderAppInfoTab(){
   const statusEl = $('appInfoStatus');
   statusEl.textContent = 'Carregando…';
@@ -3040,6 +3051,9 @@ async function renderAppInfoTab(){
     <div><b>E-mail do instituidor:</b> efstechnology.app@gmail.com</div>
     <div><b>Administradores:</b> <span id="appInfoAdmins">carregando…</span></div>
     <div><b>Conexões com outros sistemas:</b> Google Drive (armazenamento de arquivos), Google Cloud/OAuth (autenticação por repartição)</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5;">
+      <b>Versão do APP:</b> ${esc(APP_VERSION_INFO.numero)} (${esc(APP_VERSION_INFO.numero)}, atualizada em ${esc(APP_VERSION_INFO.dataHora)}) - resumo da atualização: ${esc(APP_VERSION_INFO.resumo)}
+    </div>
   `;
 
   try {
@@ -4629,6 +4643,8 @@ function refreshUserUI(){
   $('sidebarNome').textContent = currentUser.nome;
   $('sidebarCargo').textContent = currentUser.cargo || '';
   $('sidebarMatricula').textContent = 'Matrícula ' + currentUser.matricula;
+
+  $('sidebarVersionInfo').textContent = `${APP_VERSION_INFO.numero} — atualizado em ${APP_VERSION_INFO.data}`;
 
   // gerenciamento de conexões: visível só para os dois logins administradores
   $('openConnectionsBtn').classList.toggle('hidden-view', !isConnectionsAdmin());
