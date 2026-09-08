@@ -463,6 +463,25 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Ajustes na aba "Informações Gerais" e no relatório
+
+- **Contagem de repartições corrigida**: o número mostrado antes só
+  considerava repartições registradas pelo fluxo central de cadastro
+  — mas a repartição original do app (Servidor EFS Technology) nunca
+  passou por esse fluxo (é o padrão de fábrica). Agora a contagem
+  cruza também com os usuários já cadastrados em cada repartição, o
+  que corrige a subcontagem.
+- **Novo campo "📝 Funcionalidades do APP"**, logo abaixo de "Dados do
+  app" — por enquanto mostra "Aguarda descrição de funcionalidade pelo
+  adm.", até que uma descrição real seja definida.
+- **Seção 1 do formulário não aparece mais no relatório gerado**: como
+  ela é só um checklist de instruções (sem dados a registrar), o
+  relatório final não a inclui — a numeração das demais seções foi
+  ajustada (a antiga Seção 2 agora é a "1. Identificação Geral" no
+  relatório, e assim por diante, até a "9. Declaração e Assinatura").
+  O formulário em si continua tendo a Seção 1 normalmente — só o
+  relatório final não a referencia.
+
 ## Renomeações e Gestão do App
 
 - Tela de login: "Servidor cadastrado" → "Usuário cadastrado"; "Cadastrar

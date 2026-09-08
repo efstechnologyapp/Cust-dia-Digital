@@ -1329,6 +1329,9 @@
       <div class="rep-users-section-title">📱 Dados do app</div>
       <div class="rep-user-card" id="appInfoDadosApp"></div>
 
+      <div class="rep-users-section-title">📝 Funcionalidades do APP</div>
+      <div class="rep-user-card" id="appInfoFuncionalidades">Aguarda descrição de funcionalidade pelo adm.</div>
+
       <div class="rep-users-section-title">🏛️ Repartições</div>
       <div class="rep-user-card" id="appInfoReparticoes"></div>
 
@@ -5405,9 +5408,7 @@ function buildReport(){
     </div>
     <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E INTEGRIDADE DE ARQUIVOS DIGITAIS</h1>
 
-    <h2>1. Inicialização do Procedimento de Extração</h2>
-
-    <h2>2. Identificação Geral</h2>
+    <h2>1. Identificação Geral</h2>
     <table class="rtable">
       ${row('Nº do relatório', v('f_relatorio_num'))}
       ${row('Data e hora da coleta', [dataColeta, horarioRange].filter(Boolean).join(' — '))}
@@ -5416,13 +5417,13 @@ function buildReport(){
       ${row('Local da coleta', v('f_local_coleta'))}
     </table>
 
-    <h2>3. Identificação da Fonte de Extração${origemTipoLabels[v('f_origem_tipo')] ? ' — ' + origemTipoLabels[v('f_origem_tipo')] : ''}</h2>
+    <h2>2. Identificação da Fonte de Extração${origemTipoLabels[v('f_origem_tipo')] ? ' — ' + origemTipoLabels[v('f_origem_tipo')] : ''}</h2>
     <table class="rtable">
       ${row('Usuário/proprietário informado', v('f_proprietario'))}
       ${buildOrigemRows(v)}
     </table>
 
-    <h2>4. Procedimento de Extração e Identificação do Arquivo</h2>
+    <h2>3. Procedimento de Extração e Identificação do Arquivo</h2>
     <p class="body-text">${esc(v('f_proc_descricao'))}</p>
     <table class="rtable">
       ${row('Método de transferência', transferMethodLabels[v('f_metodo_transf')] || v('f_metodo_transf'))}
@@ -5435,7 +5436,7 @@ function buildReport(){
       ${row('Hora exata do cálculo do hash', v('f_hora_hash_original'))}
     </table>
 
-    <h2>5. Identificação do Computador de Destino</h2>
+    <h2>4. Identificação do Computador de Destino</h2>
     <table class="rtable">
       ${row('Nome do Dispositivo', v('f_pc_equipamento'))}
       ${row('ID do Dispositivo', v('f_pc_serie'))}
@@ -5444,7 +5445,7 @@ function buildReport(){
       ${row('Número de tombamento', v('f_pc_tombamento'))}
     </table>
 
-    <h2>6. Checagem de Integridade (arquivo transferido para o PC)</h2>
+    <h2>5. Checagem de Integridade (arquivo transferido para o PC)</h2>
     <table class="rtable">
       ${row('Nome do arquivo', v('f_cop_nome'), true)}
       ${row('Caminho completo no PC', v('f_cop_caminho'), true)}
@@ -5455,7 +5456,7 @@ function buildReport(){
       ${row('Hora exata do cálculo do hash', v('f_hora_hash_copia'))}
     </table>
 
-    <h2>7. Análise de Integridade - avaliação de identidade entre os arquivos da fonte e dos destinos (PC e Drive)</h2>
+    <h2>6. Análise de Integridade - avaliação de identidade entre os arquivos da fonte e dos destinos (PC e Drive)</h2>
     <table class="rtable">
       ${row('Hash do arquivo original (aparelho)', v('f_hash_original'), true)}
       ${row('Hash do arquivo copiado (PC)', v('f_hash_copia'), true)}
@@ -5463,17 +5464,17 @@ function buildReport(){
     </table>
     <p class="body-text">${esc(v('f_conclusao'))}</p>
 
-    <h2>8. Anexos</h2>
+    <h2>7. Anexos</h2>
     <ul class="anexos">${anexosHtml || '<li>—</li>'}</ul>
 
-    <h2>9. Cadeia de Custódia</h2>
+    <h2>8. Cadeia de Custódia</h2>
     <table class="rtable">
       ${row('Custódia do dispositivo original', v('f_custodia_dispositivo'))}
       ${row('Custódia da cópia digital', v('f_custodia_copia'))}
       ${row('Cópia adicional entregue a', v('f_custodia_entrega'))}
     </table>
 
-    <h2>10. Declaração e Assinatura</h2>
+    <h2>9. Declaração e Assinatura</h2>
     <p class="body-text">Declaro, sob as penas da lei, que o procedimento técnico acima descrito foi executado por mim, de forma fiel ao relatado, e que os valores de hash consignados correspondem exatamente aos resultados obtidos nos respectivos comandos, sem qualquer alteração, edição ou manipulação do conteúdo do arquivo original ou de sua cópia.</p>
     <div class="sig-block">
       <div class="sig-line">

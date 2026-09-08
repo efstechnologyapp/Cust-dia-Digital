@@ -546,13 +546,22 @@ function doPost(e) {
 
       var pendSheet = getOrCreateReparticoesPendentesSheet();
       var pendRows = pendSheet.getDataRange().getValues();
-      var reparticoesConfirmadas = {};
+      var reparticoesConhecidas = {};
       for (var i = 1; i < pendRows.length; i++) {
         if (String(pendRows[i][9]) === 'confirmada') {
-          reparticoesConfirmadas[String(pendRows[i][2])] = true; // ClientId
+          reparticoesConhecidas[String(pendRows[i][2])] = true; // ClientId
         }
       }
-      var reparticoesCount = Object.keys(reparticoesConfirmadas).length;
+      // a repartição padrão original do app (Servidor EFS Technology)
+      // nunca passou pelo cadastro central de repartições — só conta
+      // com base nesse cadastro sub-contaria; cruza também com o
+      // ReparticaoId de quem já está registrado como usuário, que
+      // sempre existe mesmo para essa repartição original
+      for (var i = 1; i < userRows.length; i++) {
+        var repId = String(userRows[i][4]);
+        if (repId) reparticoesConhecidas[repId] = true;
+      }
+      var reparticoesCount = Object.keys(reparticoesConhecidas).length;
 
       var equipSheet = getOrCreateEquipamentosSheet();
       var equipamentosCount = Math.max(0, equipSheet.getDataRange().getValues().length - 1);
