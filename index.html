@@ -1351,6 +1351,7 @@
     <div class="hidden-view" id="connTabSistema">
     <section class="card" style="margin-bottom:18px;">
       <h2 style="margin-top:0;">Conexões de E-mail</h2>
+      <p class="history-sub" style="margin-top:-6px;">Configuração da integração usada para enviar códigos de verificação por e-mail durante o cadastro de usuários.</p>
       <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;color:var(--muted);padding:0;">⚙️ Configurar verificação de e-mail</button>
       <div class="hidden-view" id="emailConfigPanel" style="margin-top:10px;">
         <div class="field">
@@ -3136,14 +3137,14 @@ function openUserDetailModal(u){
   callAppsScript({ action: 'list_user_access', email: u.email }).then(data => {
     const acessos = data.acessos || [];
     $('userDetailAcessos').innerHTML = acessos.length
-      ? acessos.map(a => `<div class="rep-user-detail">${esc(a)}</div>`).join('')
+      ? acessos.map(a => `<div class="rep-user-detail" style="font-size:8px;">${esc(a)}</div>`).join('')
       : '<div class="rep-users-empty">Nenhum acesso registrado ainda.</div>';
   }).catch(() => { $('userDetailAcessos').innerHTML = '<div class="rep-users-empty">Não foi possível carregar.</div>'; });
 
   callAppsScript({ action: 'list_reports', email: u.email }).then(data => {
     const relatorios = (data.relatorios || []).slice(0, 10);
     $('userDetailRelatorios').innerHTML = relatorios.length
-      ? relatorios.map(r => `<div class="rep-user-detail">${esc(r.dataEnvio)} — ${esc(r.reparticaoNome || r.reparticaoId)}${r.driveLink ? ` — <a href="${esc(r.driveLink)}" target="_blank" rel="noopener">abrir</a>` : ''}</div>`).join('')
+      ? relatorios.map(r => `<div class="rep-user-detail" style="font-size:8px;">${esc(r.dataEnvio)} — ${esc(r.reparticaoNome || r.reparticaoId)}${r.driveLink ? ` — <a href="${esc(r.driveLink)}" target="_blank" rel="noopener">abrir</a>` : ''}</div>`).join('')
       : '<div class="rep-users-empty">Nenhum relatório enviado ainda.</div>';
   }).catch(() => { $('userDetailRelatorios').innerHTML = '<div class="rep-users-empty">Não foi possível carregar.</div>'; });
 }
@@ -5092,6 +5093,17 @@ const sectionValidators = {
     }
     return true;
   },
+  4: () => {
+    const statusEl = $('f_pc_equip_status');
+    const val = $('f_pc_equip_select').value;
+    if(!val || val === '__new__'){
+      statusEl.textContent = 'Selecione um equipamento de destino já cadastrado, ou cadastre um novo (e salve-o), antes de seguir para a próxima seção.';
+      statusEl.className = 'loc-status err';
+      return false;
+    }
+    statusEl.textContent = '';
+    return true;
+  },
   5: () => {
     const statusEl = $('f_cop_file_status');
     if(!attachedFiles.cop){
@@ -5105,6 +5117,17 @@ const sectionValidators = {
     const faltando = anexosFixosDefs.filter(def => anexoFixoAplicavel(def.key) && !anexosFixosFiles[def.key]);
     if(faltando.length){
       alert('Anexe o(s) seguinte(s) arquivo(s) obrigatório(s) antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d.label).join('\n'));
+      return false;
+    }
+    return true;
+  },
+  8: () => {
+    const faltando = [];
+    if(!$('f_custodia_original_tipo').value) faltando.push('Custódia do dispositivo original — selecione uma opção');
+    if(!$('f_custodia_dispositivo').value.trim()) faltando.push('Custódia do dispositivo original — descreva o destino');
+    if(!lastEvidenceDriveLink) faltando.push('Custódia da cópia digital — envie o arquivo pelo botão "☁️ Enviar ao Drive da repartição"');
+    if(faltando.length){
+      alert('Preencha os seguintes campos obrigatórios antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d).join('\n'));
       return false;
     }
     return true;

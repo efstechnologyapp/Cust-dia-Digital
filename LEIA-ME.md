@@ -463,6 +463,22 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Seções 5 e 9: também com campos obrigatórios
+
+- **Seção 5 (Identificação do Computador de Destino)**: o usuário
+  precisa efetivamente **escolher** um equipamento no seletor —
+  selecionar um já cadastrado, ou cadastrar um novo e **salvá-lo** —
+  antes de seguir. Só digitar o nome do dispositivo sem selecionar ou
+  salvar não é suficiente; continua bloqueado.
+- **Seção 9 (Cadeia de Custódia)**: dois grupos de campos obrigatórios,
+  cada um com sua própria mensagem quando faltando:
+  - "Custódia do dispositivo original" — selecionar o tipo (Repartição
+    / Entregue ao proprietário) e preencher a descrição.
+  - "Custódia da cópia digital" — precisa ter **enviado de verdade**
+    pelo botão "☁️ Enviar ao Drive da repartição"; preencher o campo
+    de texto manualmente, sem ter clicado o botão com sucesso, não é
+    suficiente.
+
 ## Ajustes na aba "Informações Gerais" e no relatório
 
 - **Contagem de repartições corrigida**: o número mostrado antes só
