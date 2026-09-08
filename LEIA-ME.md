@@ -463,6 +463,47 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Bolinhas de pendência para o administrador
+
+O adm agora é avisado ativamente de pendências que precisam de
+atenção, sem precisar ficar checando a tela de Conexões manualmente:
+
+- **Sidebar** ("🔗 Gestão do App"): bolinha vermelha com o total de
+  repartições sem conexão confirmada + usuários sem habilitação
+  (soma das duas).
+- **Aba "Gestão de Conexões"**: bolinha com a quantidade de
+  repartições pendentes especificamente.
+- **Aba "Usuários cadastrados"**: bolinha com a quantidade de
+  usuários pendentes de habilitação, somada de todas as repartições.
+
+O número fica **dentro** da bolinha (não ao lado), e ela só aparece
+quando há pelo menos uma pendência — some sozinha quando chega a
+zero. O contador reflete sempre a pendência real, no momento — não
+"o que é novo desde a última vez que você olhou": resolvendo uma
+pendência (conectar uma repartição, habilitar um usuário), o número
+diminui na hora; nada é considerado "resolvido" só por ter sido
+visto.
+
+## Mais campos obrigatórios + correções de comportamento
+
+- **Checkboxes da Seção 1 resetam corretamente**: antes, ao concluir
+  uma tarefa e iniciar um formulário novo, os checkboxes apareciam já
+  marcados (resquício da tarefa anterior). Agora são desmarcados no
+  reset, junto com o link de envio ao Drive da custódia (evitando que
+  a Seção 9 pense que já houve envio, num relatório novo).
+- **Seção 5**: a mensagem de bloqueio (equipamento não selecionado)
+  agora aparece de verdade — antes ficava escondida dentro de uma
+  área que só é exibida depois de escolher algo no seletor.
+- **Novos campos obrigatórios**:
+  - Seção 2: "Local da coleta".
+  - Seção 3: "Usuário/proprietário informado" e "Tipo de dispositivo
+    de origem" sempre; "Aparelho" e "Sistema operacional" quando o
+    tipo for Celular ou Tablet.
+  - Seção 4: "Método de transferência" e "Caminho no dispositivo"
+    (além do anexo, que já era obrigatório).
+  - Seção 6: "Caminho completo no PC" (além do anexo, que já era
+    obrigatório).
+
 ## Seções 5 e 9: também com campos obrigatórios
 
 - **Seção 5 (Identificação do Computador de Destino)**: o usuário

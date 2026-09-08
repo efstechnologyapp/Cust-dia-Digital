@@ -582,6 +582,32 @@ function doPost(e) {
       });
     }
 
+    // ---------- contadores de pendências (badges de notificação) ----------
+    if (action === 'get_pending_counts') {
+      var pendSheet = getOrCreateReparticoesPendentesSheet();
+      var pendRows = pendSheet.getDataRange().getValues();
+      var reparticoesPendentesSet = {};
+      for (var i = 1; i < pendRows.length; i++) {
+        if (String(pendRows[i][9]) !== 'confirmada') {
+          reparticoesPendentesSet[String(pendRows[i][2])] = true; // ClientId
+        }
+      }
+      var reparticoesPendentesCount = Object.keys(reparticoesPendentesSet).length;
+
+      var usersSheet = getOrCreateUsersSheet();
+      var userRows = usersSheet.getDataRange().getValues();
+      var usuariosPendentesCount = 0;
+      for (var i = 1; i < userRows.length; i++) {
+        if (!userRows[i][6] && !userRows[i][11]) usuariosPendentesCount++; // Habilitado=false, não excluído
+      }
+
+      return respond({
+        ok: true,
+        reparticoesPendentesCount: reparticoesPendentesCount,
+        usuariosPendentesCount: usuariosPendentesCount
+      });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {

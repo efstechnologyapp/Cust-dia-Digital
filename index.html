@@ -293,6 +293,13 @@
   .hash-check.neutral{ background: #F1F3F6; color: var(--muted); font-weight:500; }
 
   .anexos-list{ margin-bottom: 10px; }
+  .pending-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:14px; height:14px; padding:0 3px;
+    border-radius:999px; background:#D63C3C; color:#fff;
+    font-size:9px; font-weight:700; line-height:1;
+    margin-left:5px; vertical-align:middle;
+  }
   .init-check-row{
     display:flex; align-items:flex-start; gap:9px;
     margin-bottom:10px; cursor:pointer;
@@ -1305,7 +1312,7 @@
       </div>
     </div>
 
-    <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gestão do App</button>
+    <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gestão do App<span class="pending-badge hidden-view" id="sidebarPendingBadge">0</span></button>
     <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Sair</button>
   </div>
 </div>
@@ -1320,8 +1327,8 @@
 
     <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line);">
       <button type="button" class="reg-tab-btn active" id="connTabBtnInfo" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--navy-dark);border-bottom:2px solid var(--navy-dark);cursor:pointer;">Informações Gerais</button>
-      <button type="button" class="reg-tab-btn" id="connTabBtnSistema" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Gestão de Conexões</button>
-      <button type="button" class="reg-tab-btn" id="connTabBtnUsuarios" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Usuários cadastrados</button>
+      <button type="button" class="reg-tab-btn" id="connTabBtnSistema" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Gestão de Conexões<span class="pending-badge hidden-view" id="conexoesTabBadge">0</span></button>
+      <button type="button" class="reg-tab-btn" id="connTabBtnUsuarios" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Usuários cadastrados<span class="pending-badge hidden-view" id="usuariosTabBadge">0</span></button>
     </div>
 
     <div id="connTabInfo">
@@ -2632,6 +2639,7 @@ async function enableRepUser(rowIndex, reparticaoId){
   try {
     await callAppsScript({ action: 'enable_user', rowIndex });
     renderRepUsersLists(reparticaoId);
+    updatePendingBadges();
   } catch(err){
     statusEl.textContent = 'Não foi possível habilitar: ' + err.message;
     statusEl.className = 'loc-status err';
@@ -2946,6 +2954,7 @@ async function conectarReparticaoPendente(p, btnEl){
     statusEl.textContent = '✓ Conectado! Movendo para "Repartições cadastradas"…';
     statusEl.className = 'loc-status ok';
     setTimeout(() => { renderReparticoesPendentesList(); }, 1200);
+    updatePendingBadges();
   } catch(err){
     statusEl.textContent = 'Não foi possível conectar: ' + err.message;
     statusEl.className = 'loc-status err';
@@ -2974,11 +2983,31 @@ $('openConnectionsBtn').addEventListener('click', () => {
   renderReparticoesManageList();
   renderReparticoesPendentesList();
   switchConnTab('info');
+  updatePendingBadges();
   showView('connections');
 });
 $('connectionsBackBtn').addEventListener('click', () => { showView('home'); });
 
 // ---------- abas da tela Conexões: "Conexões do Sistema" / "Usuários cadastrados" ----------
+// bolinhas de pendência (repartições sem conexão confirmada, usuários
+// sem habilitação) — visíveis só para administradores, na sidebar e
+// nas abas correspondentes da tela "Gestão do App"
+function setPendingBadge(id, count){
+  const el = $(id);
+  el.textContent = String(count);
+  el.classList.toggle('hidden-view', count <= 0);
+}
+async function updatePendingBadges(){
+  try {
+    const data = await callAppsScript({ action: 'get_pending_counts' });
+    const reparticoes = data.reparticoesPendentesCount || 0;
+    const usuarios = data.usuariosPendentesCount || 0;
+    setPendingBadge('sidebarPendingBadge', reparticoes + usuarios);
+    setPendingBadge('conexoesTabBadge', reparticoes);
+    setPendingBadge('usuariosTabBadge', usuarios);
+  } catch(e){ /* falha silenciosa — não é crítico */ }
+}
+
 function switchConnTab(tab){
   const tabs = {
     info: { panel: 'connTabInfo', btn: 'connTabBtnInfo' },
@@ -4603,6 +4632,7 @@ function refreshUserUI(){
 
   // gerenciamento de conexões: visível só para os dois logins administradores
   $('openConnectionsBtn').classList.toggle('hidden-view', !isConnectionsAdmin());
+  if(isConnectionsAdmin()) updatePendingBadges();
 
   // enquanto o usuário não tiver nenhuma conexão efetiva com os
   // serviços Google de alguma repartição, a sidebar mostra só
@@ -5084,31 +5114,57 @@ const sectionValidators = {
     statusEl.textContent = '';
     return true;
   },
+  1: () => {
+    if(!$('f_local_coleta').value.trim()){
+      alert('Preencha o campo "Local da coleta" antes de seguir para a próxima seção.');
+      return false;
+    }
+    return true;
+  },
+  2: () => {
+    const faltando = [];
+    if(!$('f_proprietario').value.trim()) faltando.push('Usuário/proprietário informado');
+    if(!$('f_origem_tipo').value) faltando.push('Tipo de dispositivo de origem');
+    const tipo = $('f_origem_tipo').value;
+    if(tipo === 'celular' || tipo === 'tablet'){
+      if(!$('f_aparelho').value.trim()) faltando.push('Aparelho');
+      if(!$('f_so_celular').value.trim()) faltando.push('Sistema operacional');
+    }
+    if(faltando.length){
+      alert('Preencha os seguintes campos obrigatórios antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d).join('\n'));
+      return false;
+    }
+    return true;
+  },
   3: () => {
-    const statusEl = $('f_orig_file_status');
-    if(!attachedFiles.orig){
-      statusEl.textContent = 'Anexe o arquivo (cópia para o Drive) antes de seguir para a próxima seção.';
-      statusEl.className = 'loc-status err';
+    const faltando = [];
+    if(!$('f_metodo_transf').value) faltando.push('Método de transferência');
+    if(!attachedFiles.orig) faltando.push('Adicionar arquivo (cópia para o Drive)');
+    if(!$('f_orig_caminho').value.trim()) faltando.push('Caminho no dispositivo');
+    if(faltando.length){
+      alert('Preencha os seguintes campos obrigatórios antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d).join('\n'));
+      $('f_orig_file_status').textContent = !attachedFiles.orig ? 'Anexe o arquivo (cópia para o Drive) antes de seguir para a próxima seção.' : '';
+      $('f_orig_file_status').className = 'loc-status err';
       return false;
     }
     return true;
   },
   4: () => {
-    const statusEl = $('f_pc_equip_status');
     const val = $('f_pc_equip_select').value;
     if(!val || val === '__new__'){
-      statusEl.textContent = 'Selecione um equipamento de destino já cadastrado, ou cadastre um novo (e salve-o), antes de seguir para a próxima seção.';
-      statusEl.className = 'loc-status err';
+      alert('Selecione um equipamento de destino já cadastrado, ou cadastre um novo (e salve-o), antes de seguir para a próxima seção.');
       return false;
     }
-    statusEl.textContent = '';
     return true;
   },
   5: () => {
-    const statusEl = $('f_cop_file_status');
-    if(!attachedFiles.cop){
-      statusEl.textContent = 'Anexe o arquivo (arquivo transferido para o PC) antes de seguir para a próxima seção.';
-      statusEl.className = 'loc-status err';
+    const faltando = [];
+    if(!attachedFiles.cop) faltando.push('Anexar arquivo (arquivo transferido para o PC)');
+    if(!$('f_cop_caminho').value.trim()) faltando.push('Caminho completo no PC');
+    if(faltando.length){
+      alert('Preencha os seguintes campos obrigatórios antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d).join('\n'));
+      $('f_cop_file_status').textContent = !attachedFiles.cop ? 'Anexe o arquivo (arquivo transferido para o PC) antes de seguir para a próxima seção.' : '';
+      $('f_cop_file_status').className = 'loc-status err';
       return false;
     }
     return true;
@@ -5677,8 +5733,11 @@ $('historyBackBtn').addEventListener('click', () => {
 // ---------- conclusão da tarefa: histórico + Google Drive + volta para home ----------
 function resetFormFields(){
   document.querySelectorAll('#formView input[type="text"], #formView input[type="hidden"], #formView textarea').forEach(el => { el.value = ''; });
+  document.querySelectorAll('.init-check').forEach(c => { c.checked = false; });
+  $('initChecklistStatus').textContent = '';
   attachedFiles.orig = null;
   attachedFiles.cop = null;
+  lastEvidenceDriveLink = null;
   $('f_orig_file_name').textContent = '';
   $('f_cop_file_name').textContent = '';
   $('f_orig_file_status').textContent = '';
