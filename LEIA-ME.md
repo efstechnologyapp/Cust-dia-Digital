@@ -463,26 +463,95 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
-## Nova Seção 1: "Inicialização do Procedimento de Extração"
+## Renomeações e Gestão do App
 
-A antiga Seção 4 ("Procedimento de Cópia") virou a **Seção 1**,
-renomeada, e todas as demais seções foram renumeradas a partir dela
-(a antiga 1 virou 2, a antiga 2 virou 3, a antiga 3 virou 4 — as
-seções 5 a 10 mantiveram os mesmos números, já que ficam depois).
+- Tela de login: "Servidor cadastrado" → "Usuário cadastrado"; "Cadastrar
+  novo servidor" → "Cadastrar novo usuário".
+- Sidebar: botão renomeado para **"🔗 Gestão do App"**.
+- A tela antes chamada "Conexões do Sistema" virou **"Gestão do App"**,
+  agora com **três abas**:
+  - **Informações Gerais** (nova, primeira): dados do app (nome,
+    legenda, data de criação, URL, e-mail do instituidor,
+    administradores com nome e e-mail, conexões com outros sistemas),
+    e contadores de repartições, usuários, equipamentos, relatórios
+    enviados e arquivos enviados — tudo buscado ao vivo da central.
+  - **Gestão de Conexões** (antes "Conexões do Sistema", sem mudança
+    de conteúdo).
+  - **Usuários cadastrados** (sem mudança).
 
-A nova Seção 1 abre com uma ilustração de dispositivos diversos
-conectando-se ao computador de custódia digital, seguida do aviso:
-"Antes de prosseguir com as demais seções, proceda à conexão entre o
-equipamento/servidor de origem e o equipamento de destino, e
-transfira/extraia o arquivo original para o equipamento de destino."
+## Histórico de acesso: só atos específicos, com descrição
 
-O campo **"Método de transferência"** virou um seletor (Cabo USB,
+O registro de acesso de cada usuário deixou de anotar simplesmente
+"entrou no app" a cada uso — agora só registra, com descrição do que
+foi feito: login, logout, alteração de cadastro (com os campos que
+mudaram), conexão a uma repartição, envio de relatório, exclusão de
+relatório do histórico, e adição/remoção de conexão com uma
+repartição pela aba "Conexões" do perfil. Qualquer outro uso do app
+que não se encaixe nesses atos não é registrado.
+
+## Seção 1: aviso de criptografia e checklist obrigatório
+
+A Seção 1 ("Inicialização do Procedimento de Extração") abre com uma
+ilustração de dispositivos diversos conectando-se ao computador de
+custódia digital (com a logo do app na telinha do monitor), seguida
+de uma faixa amarela de aviso: "Este sistema não acessa informações em
+fontes travadas por criptografia..." — e por um checklist de 3 itens,
+cada um com sua própria caixinha de confirmação. **O usuário só
+consegue avançar para a Seção 2 depois de marcar as três**; tentar
+avançar sem marcar mostra uma mensagem de bloqueio.
+
+## Seção 4: "Procedimento de Extração e Identificação do Arquivo"
+
+Os campos **"Método de transferência"** (seletor: Cabo USB,
 Bluetooth, Wi-Fi Direct/rede local, Cartão de memória, Backup em
-nuvem, Conexão direta, Ferramenta forense especializada, Outro) — ao
-escolher uma opção, o campo **"Descrição do procedimento"**, logo
-abaixo, é preenchido automaticamente com o texto técnico
-correspondente àquele método (mas continua livremente editável depois,
-caso precise de ajuste fino).
+nuvem, Conexão direta, Ferramenta forense especializada, Outro) e
+**"Descrição do procedimento"** (preenchida automaticamente conforme
+o método escolhido, mas editável) foram movidos para o início da
+Seção 4, renomeada de "Arquivo Extraído (Original)" para
+**"Procedimento de Extração e Identificação do Arquivo"**.
+
+O campo de anexo dessa seção passou a se chamar **"Adicionar arquivo
+(cópia para o Drive)"** e é **obrigatório** — sem anexar, o usuário
+não consegue avançar para a próxima seção (aparece uma mensagem
+pedindo o anexo).
+
+## Seção 6 e 7: renomeadas
+
+- Seção 6: "Arquivo Copiado (Cópia no PC)" → **"Checagem de
+  Integridade (arquivo transferido para o PC)"**. O campo de anexo
+  virou **"Anexar arquivo (arquivo transferido para o PC)"**, também
+  obrigatório para avançar.
+- Seção 7: "Verificação de Integridade" → **"Análise de Integridade -
+  avaliação de identidade entre os arquivos da fonte e dos destinos
+  (PC e Drive)"**.
+
+## Seção 8 (Anexos): campos obrigatórios conforme o tipo de fonte
+
+Os 3 campos padrão da Seção 8 deixaram de ser descrições genéricas —
+agora são anexos específicos, cada um só aparecendo (e sendo exigido)
+conforme o **tipo de dispositivo de origem** escolhido na Seção 3:
+
+- **Foto/imagem do equipamento fonte** — exigida para celular, tablet,
+  HD/SSD/pen drive, computador e roteador/modem (qualquer fonte
+  física).
+- **Foto/captura de tela da fonte do arquivo em nuvem** — exigida só
+  para servidor em nuvem.
+- **Foto/captura de tela do arquivo aberto com informações de dados
+  no equipamento fonte** — exigida para celular, tablet, computador e
+  nuvem (fontes com tela).
+
+O usuário não consegue avançar da Seção 8 sem anexar os campos
+aplicáveis ao tipo escolhido — uma mensagem lista exatamente o que
+falta. Itens extras continuam podendo ser adicionados livremente,
+sem obrigatoriedade. O nome do arquivo anexado (e a data de
+criação/modificação, quando disponível) aparece dentro do próprio
+campo, não mais como uma marcação separada abaixo.
+
+## Seção 3: proprietário primeiro, "Computador" em vez de "Outro computador"
+
+O campo "Usuário/proprietário informado" passou a ser o primeiro da
+Seção 3, antes do seletor de tipo. A opção do seletor antes chamada
+"Outro computador" foi renomeada para **"Computador"**.
 
 ## Seção 2: múltiplos tipos de fonte de extração
 
@@ -495,7 +564,7 @@ de dispositivo de origem"** define quais campos aparecem:
   salvar manual).
 - **💾 HD/SSD externo ou pen drive**: marca/modelo, número de série,
   capacidade, sistema de arquivos, formato de conexão.
-- **🖥️ Outro computador**: campos de digitação livre (Nome do
+- **🖥️ Computador**: campos de digitação livre (Nome do
   Dispositivo, ID do Dispositivo, ID do Produto, Sistema operacional,
   tombamento) — **não** usa o cadastro/reaproveitamento da Seção 5,
   de propósito: o computador de destino (Seção 5) é da própria

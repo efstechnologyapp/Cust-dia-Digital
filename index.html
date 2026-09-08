@@ -293,6 +293,15 @@
   .hash-check.neutral{ background: #F1F3F6; color: var(--muted); font-weight:500; }
 
   .anexos-list{ margin-bottom: 10px; }
+  .init-check-row{
+    display:flex; align-items:flex-start; gap:9px;
+    margin-bottom:10px; cursor:pointer;
+    color: var(--muted); font-size:13px; line-height:1.5;
+  }
+  .init-check-row input[type="checkbox"]{
+    margin-top:3px; width:17px; height:17px; flex-shrink:0; cursor:pointer;
+    accent-color: var(--navy-dark);
+  }
   .anexo-row{
     display:flex; gap:8px; margin-bottom:8px;
   }
@@ -1101,7 +1110,7 @@
 
     <div id="loginExisting">
       <div class="field">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Servidor cadastrado</label>
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Usuário cadastrado</label>
         <select id="loginSelect"></select>
       </div>
       <div class="field">
@@ -1109,7 +1118,7 @@
         <input type="password" id="loginPin" inputmode="numeric" maxlength="4" placeholder="••••">
       </div>
       <button class="btn-primary" id="loginBtn">Entrar</button>
-      <button class="btn-link" id="showRegisterBtn">Cadastrar novo servidor</button>
+      <button class="btn-link" id="showRegisterBtn">Cadastrar novo usuário</button>
       <button class="btn-link" id="showSyncBtn" style="font-size:12.5px;">📲 Já tenho cadastro (entrar em outro aparelho)</button>
     </div>
 
@@ -1296,7 +1305,7 @@
       </div>
     </div>
 
-    <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gerenciar Repartições</button>
+    <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gestão do App</button>
     <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Sair</button>
   </div>
 </div>
@@ -1307,14 +1316,36 @@
     <button id="connectionsBackBtn">← Voltar</button>
   </div>
   <div class="history-wrap">
-    <h2 class="history-title">Conexões do Sistema</h2>
+    <h2 class="history-title">Gestão do App</h2>
 
     <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line);">
-      <button type="button" class="reg-tab-btn active" id="connTabBtnSistema" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--navy-dark);border-bottom:2px solid var(--navy-dark);cursor:pointer;">Conexões do Sistema</button>
-      <button type="button" class="reg-tab-btn" id="connTabBtnUsuarios" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Usuários cadastrados</button>
+      <button type="button" class="reg-tab-btn active" id="connTabBtnInfo" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--navy-dark);border-bottom:2px solid var(--navy-dark);cursor:pointer;">Informações Gerais</button>
+      <button type="button" class="reg-tab-btn" id="connTabBtnSistema" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Gestão de Conexões</button>
+      <button type="button" class="reg-tab-btn" id="connTabBtnUsuarios" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Usuários cadastrados</button>
     </div>
 
-    <div id="connTabSistema">
+    <div id="connTabInfo">
+      <div class="loc-status" id="appInfoStatus"></div>
+      <div class="rep-users-section-title">📱 Dados do app</div>
+      <div class="rep-user-card" id="appInfoDadosApp"></div>
+
+      <div class="rep-users-section-title">🏛️ Repartições</div>
+      <div class="rep-user-card" id="appInfoReparticoes"></div>
+
+      <div class="rep-users-section-title">👤 Usuários</div>
+      <div class="rep-user-card" id="appInfoUsuarios"></div>
+
+      <div class="rep-users-section-title">💻 Equipamentos de destino</div>
+      <div class="rep-user-card" id="appInfoEquipamentos"></div>
+
+      <div class="rep-users-section-title">📤 Relatórios enviados</div>
+      <div class="rep-user-card" id="appInfoRelatorios"></div>
+
+      <div class="rep-users-section-title">📎 Arquivos enviados</div>
+      <div class="rep-user-card" id="appInfoArquivos"></div>
+    </div>
+
+    <div class="hidden-view" id="connTabSistema">
     <section class="card" style="margin-bottom:18px;">
       <h2 style="margin-top:0;">Conexões de E-mail</h2>
       <button class="btn-link" id="toggleEmailConfigBtn" style="font-size:11px;color:var(--muted);padding:0;">⚙️ Configurar verificação de e-mail</button>
@@ -1548,27 +1579,27 @@
   <section class="card">
     <h2><span class="num">1</span>Inicialização do Procedimento de Extração</h2>
     <img src="ilustracao-conexao.svg" alt="Ilustração de dispositivos diversos conectando-se ao computador de custódia digital" style="display:block; max-width:420px; width:100%; margin:6px auto 14px;">
-    <p style="text-align:center; color:var(--muted); font-size:13px; margin:0 0 18px; line-height:1.5;">
-      Antes de prosseguir com as demais seções, proceda à conexão entre o equipamento/servidor de origem e o equipamento de destino, e transfira/extraia o arquivo original para o equipamento de destino.
+    <div style="background:#FBF6E9;border:1px solid #E8D8A6;border-radius:8px;padding:9px 12px;margin:0 0 16px;font-size:11.5px;color:#7A6B2E;line-height:1.5;">
+      <b>Atenção!</b> Este sistema não acessa informações em fontes travadas por criptografia. Sua utilidade se restringe à extração de arquivos em equipamentos abertos/sem bloqueios ou desbloqueados mediante consentimento e informação do código pelo proprietário ou após procedimento de descriptografia proveniente de ordem judicial.
+    </div>
+    <p style="text-align:center; color:var(--muted); font-size:13px; margin:0 0 8px; line-height:1.5;">
+      Antes de prosseguir com as demais seções:
     </p>
-    <div class="field">
-      <label>Método de transferência</label>
-      <select id="f_metodo_transf">
-        <option value="usb" selected>Cabo USB — modo MTP (Transferência de arquivos)</option>
-        <option value="bluetooth">Bluetooth</option>
-        <option value="wifi">Wi-Fi Direct / rede local</option>
-        <option value="sdcard">Cartão de memória (microSD) via leitor de cartões</option>
-        <option value="cloud">Backup em nuvem (baixado para o computador)</option>
-        <option value="direto">Conexão direta (dispositivo de armazenamento ligado diretamente ao PC)</option>
-        <option value="forense">Ferramenta forense especializada (ex.: Cellebrite, UFED)</option>
-        <option value="outro">Outro</option>
-      </select>
+    <div id="initChecklist">
+      <label class="init-check-row">
+        <input type="checkbox" class="init-check" data-idx="1">
+        <span><b>1.</b> Certifique-se da existência da pasta de destino do arquivo no equipamento de destino;</span>
+      </label>
+      <label class="init-check-row">
+        <input type="checkbox" class="init-check" data-idx="2">
+        <span><b>2.</b> No equipamento/servidor fonte, localize o(s) arquivo(s) a se(rem) extraídos/transferidos ao equipamento de destino; e</span>
+      </label>
+      <label class="init-check-row">
+        <input type="checkbox" class="init-check" data-idx="3">
+        <span><b>3.</b> Estabeleça a conexão entre o equipamento/servidor fonte e o equipamento de destino.</span>
+      </label>
     </div>
-    <div class="field">
-      <label>Descrição do procedimento</label>
-      <textarea id="f_proc_descricao">A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.</textarea>
-      <div class="hint">Texto preenchido automaticamente conforme o método escolhido acima — pode ser ajustado livremente antes de gerar o relatório.</div>
-    </div>
+    <div class="loc-status" id="initChecklistStatus" style="margin-top:8px;"></div>
   </section>
 
   <!-- SECTION 2 (antes era a SECTION 1) -->
@@ -1623,22 +1654,22 @@
   <section class="card">
     <h2><span class="num">3</span>Identificação da Fonte de Extração</h2>
     <div class="field">
+      <label>Usuário/proprietário informado</label>
+      <input type="text" id="f_proprietario" placeholder="Nome completo">
+      <div class="hint"><b>Como localizar:</b> não é extraído do dispositivo — declarar verbalmente pelo detentor, com conferência de documento de identificação.</div>
+    </div>
+    <div class="field">
       <label>Tipo de dispositivo de origem</label>
       <select id="f_origem_tipo">
         <option value="" disabled selected>Selecione o tipo…</option>
         <option value="celular">📱 Celular</option>
         <option value="tablet">📲 Tablet</option>
         <option value="storage">💾 HD/SSD externo ou pen drive</option>
-        <option value="pc">🖥️ Outro computador</option>
+        <option value="pc">🖥️ Computador</option>
         <option value="cloud">☁️ Servidor em nuvem</option>
         <option value="router">📡 Roteador / Modem</option>
         <option value="outro">Outro</option>
       </select>
-    </div>
-    <div class="field">
-      <label>Usuário/proprietário informado</label>
-      <input type="text" id="f_proprietario" placeholder="Nome completo">
-      <div class="hint"><b>Como localizar:</b> não é extraído do dispositivo — declarar verbalmente pelo detentor, com conferência de documento de identificação.</div>
     </div>
 
     <!-- Grupo: Celular / Tablet -->
@@ -1782,9 +1813,27 @@
 
   <!-- SECTION 4 (antes era a SECTION 3) -->
   <section class="card">
-    <h2><span class="num">4</span>Arquivo Extraído (Original)</h2>
+    <h2><span class="num">4</span>Procedimento de Extração e Identificação do Arquivo</h2>
     <div class="field">
-      <label>Anexar arquivo (opcional)</label>
+      <label>Método de transferência</label>
+      <select id="f_metodo_transf">
+        <option value="usb" selected>Cabo USB — modo MTP (Transferência de arquivos)</option>
+        <option value="bluetooth">Bluetooth</option>
+        <option value="wifi">Wi-Fi Direct / rede local</option>
+        <option value="sdcard">Cartão de memória (microSD) via leitor de cartões</option>
+        <option value="cloud">Backup em nuvem (baixado para o computador)</option>
+        <option value="direto">Conexão direta (dispositivo de armazenamento ligado diretamente ao PC)</option>
+        <option value="forense">Ferramenta forense especializada (ex.: Cellebrite, UFED)</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Descrição do procedimento</label>
+      <textarea id="f_proc_descricao">A transferência do arquivo do dispositivo móvel para o computador foi realizada por meio de cabo USB, com o aparelho configurado no modo "Transferência de arquivos (MTP)". Em nenhum momento o arquivo foi aberto, editado ou processado por aplicativo intermediário antes da cópia.</textarea>
+      <div class="hint">Texto preenchido automaticamente conforme o método escolhido acima — pode ser ajustado livremente antes de gerar o relatório.</div>
+    </div>
+    <div class="field">
+      <label>Adicionar arquivo (cópia para o Drive)</label>
       <div class="file-attach-row">
         <input type="file" id="f_orig_file_input" style="display:none;">
         <button type="button" class="btn-attach" id="f_orig_file_btn">📎 Selecionar arquivo</button>
@@ -1879,9 +1928,9 @@
 
   <!-- SECTION 6 -->
   <section class="card">
-    <h2><span class="num">6</span>Arquivo Copiado (Cópia no PC)</h2>
+    <h2><span class="num">6</span>Checagem de Integridade (arquivo transferido para o PC)</h2>
     <div class="field">
-      <label>Anexar arquivo (opcional)</label>
+      <label>Anexar arquivo (arquivo transferido para o PC)</label>
       <div class="file-attach-row">
         <input type="file" id="f_cop_file_input" style="display:none;">
         <button type="button" class="btn-attach" id="f_cop_file_btn">📎 Selecionar arquivo</button>
@@ -1929,7 +1978,7 @@
 
   <!-- SECTION 7 (auto) -->
   <section class="card">
-    <h2><span class="num">7</span>Verificação de Integridade</h2>
+    <h2><span class="num">7</span>Análise de Integridade - avaliação de identidade entre os arquivos da fonte e dos destinos (PC e Drive)</h2>
     <p class="desc">Preenchido automaticamente a partir dos hashes informados nas seções 3 e 6.</p>
     <div id="hashCompareBox" class="hash-check neutral">Informe os dois hashes acima para comparar automaticamente.</div>
     <div class="field">
@@ -2310,6 +2359,8 @@ function renderRepSelectDropdown(){
 // pra decidir o que aparece no seletor da barra lateral
 function markReparticaoConectada(clientId){
   if(!currentUser || !clientId) return;
+  const repInfo = loadReparticoes().find(r => r.clientId === clientId);
+  logUserAction('conexão a repartição', repInfo ? repInfo.nome : clientId);
   const conectadas = new Set(currentUser.conectadas || []);
   if(conectadas.has(clientId)) return;
   conectadas.add(clientId);
@@ -2918,24 +2969,71 @@ $('openConnectionsBtn').addEventListener('click', () => {
   resetNewReparticaoForm();
   renderReparticoesManageList();
   renderReparticoesPendentesList();
-  switchConnTab('sistema');
+  switchConnTab('info');
   showView('connections');
 });
 $('connectionsBackBtn').addEventListener('click', () => { showView('home'); });
 
 // ---------- abas da tela Conexões: "Conexões do Sistema" / "Usuários cadastrados" ----------
 function switchConnTab(tab){
-  const isSistema = tab === 'sistema';
-  $('connTabSistema').classList.toggle('hidden-view', !isSistema);
-  $('connTabUsuarios').classList.toggle('hidden-view', isSistema);
-  $('connTabBtnSistema').style.borderBottomColor = isSistema ? 'var(--navy-dark)' : 'transparent';
-  $('connTabBtnSistema').style.color = isSistema ? 'var(--navy-dark)' : 'var(--muted)';
-  $('connTabBtnUsuarios').style.borderBottomColor = !isSistema ? 'var(--navy-dark)' : 'transparent';
-  $('connTabBtnUsuarios').style.color = !isSistema ? 'var(--navy-dark)' : 'var(--muted)';
-  if(!isSistema) renderAllUsersList();
+  const tabs = {
+    info: { panel: 'connTabInfo', btn: 'connTabBtnInfo' },
+    sistema: { panel: 'connTabSistema', btn: 'connTabBtnSistema' },
+    usuarios: { panel: 'connTabUsuarios', btn: 'connTabBtnUsuarios' }
+  };
+  Object.entries(tabs).forEach(([key, ids]) => {
+    const active = key === tab;
+    $(ids.panel).classList.toggle('hidden-view', !active);
+    $(ids.btn).style.borderBottomColor = active ? 'var(--navy-dark)' : 'transparent';
+    $(ids.btn).style.color = active ? 'var(--navy-dark)' : 'var(--muted)';
+  });
+  if(tab === 'usuarios') renderAllUsersList();
+  if(tab === 'info') renderAppInfoTab();
 }
+$('connTabBtnInfo').addEventListener('click', () => switchConnTab('info'));
 $('connTabBtnSistema').addEventListener('click', () => switchConnTab('sistema'));
 $('connTabBtnUsuarios').addEventListener('click', () => switchConnTab('usuarios'));
+
+async function renderAppInfoTab(){
+  const statusEl = $('appInfoStatus');
+  statusEl.textContent = 'Carregando…';
+  statusEl.className = 'loc-status';
+
+  $('appInfoDadosApp').innerHTML = `
+    <div><b>Nome:</b> Custódia Digital</div>
+    <div><b>Legenda:</b> Extração e Verificação de Integridade de Arquivos Digitais</div>
+    <div><b>Data de criação:</b> 02/09/2026</div>
+    <div><b>URL:</b> https://efstechnologyapp.github.io/Cust-dia-Digital/</div>
+    <div><b>E-mail do instituidor:</b> efstechnology.app@gmail.com</div>
+    <div><b>Administradores:</b> <span id="appInfoAdmins">carregando…</span></div>
+    <div><b>Conexões com outros sistemas:</b> Google Drive (armazenamento de arquivos), Google Cloud/OAuth (autenticação por repartição)</div>
+  `;
+
+  try {
+    const [statsData, usersData] = await Promise.all([
+      callAppsScript({ action: 'get_app_stats' }),
+      callAppsScript({ action: 'list_all_users' })
+    ]);
+    statusEl.textContent = '';
+
+    const adminEmails = ['fillipe.firmo@gmail.com', 'efstechnology.app@gmail.com'];
+    const usuarios = usersData.usuarios || [];
+    const admins = adminEmails.map(email => {
+      const u = usuarios.find(x => x.email === email);
+      return u ? `${u.nome} (${email})` : email;
+    });
+    $('appInfoAdmins').textContent = admins.join('; ');
+
+    $('appInfoReparticoes').innerHTML = `<div><b>Quantidade cadastrada:</b> ${statsData.reparticoesCount}</div>`;
+    $('appInfoUsuarios').innerHTML = `<div><b>Quantidade cadastrada:</b> ${statsData.usuariosCount}</div>`;
+    $('appInfoEquipamentos').innerHTML = `<div><b>Quantidade cadastrada:</b> ${statsData.equipamentosCount}</div>`;
+    $('appInfoRelatorios').innerHTML = `<div><b>Quantidade enviada:</b> ${statsData.relatoriosCount}</div>`;
+    $('appInfoArquivos').innerHTML = `<div><b>Quantidade enviada:</b> ${statsData.arquivosCount}</div>`;
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar as estatísticas: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
 
 async function renderAllUsersList(){
   const statusEl = $('allUsersStatus');
@@ -3119,7 +3217,7 @@ function requireExistingDriveToken(clientId){
 $('driveConnectBtn').addEventListener('click', async () => {
   const rep = getSelectedReparticao();
   if(!rep){
-    alert('Selecione (ou cadastre) uma repartição primeiro, em "🔗 Gerenciar Repartições".');
+    alert('Selecione (ou cadastre) uma repartição primeiro, em "🔗 Gestão do App".');
     return;
   }
   const btn = $('driveConnectBtn');
@@ -3268,6 +3366,13 @@ async function handleCustodyShare(){
     if(rep && rep.clientId && rep.folderId){
       const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
       lastEvidenceDriveLink = result.webViewLink || null;
+      if(currentUser && currentUser.email){
+        callAppsScript({
+          action: 'log_arquivo_enviado',
+          email: currentUser.email, reparticaoId: rep.clientId,
+          arquivo: file.name, driveLink: lastEvidenceDriveLink || ''
+        }).catch(() => {});
+      }
       // prioriza o nome salvo no cadastro da repartição — a consulta ao
       // Drive quase sempre falha aqui, já que o escopo de permissão do
       // app não alcança metadados de pastas que ele não criou
@@ -3690,7 +3795,7 @@ function populateLoginSelect(){
   sel.innerHTML = '';
   if(list.length === 0){
     const opt = document.createElement('option');
-    opt.textContent = 'Nenhum servidor cadastrado';
+    opt.textContent = 'Nenhum usuário cadastrado';
     opt.disabled = true; opt.selected = true;
     sel.appendChild(opt);
     return;
@@ -3858,6 +3963,7 @@ async function removeMinhaConexaoReparticao(r){
   statusEl.className = 'loc-status';
   try {
     await callAppsScript({ action: 'remove_user', rowIndex: r.rowIndex });
+    logUserAction('removeu conexão com repartição', r.reparticaoNome);
     renderUserReparticoesList();
   } catch(err){
     statusEl.textContent = 'Não foi possível remover: ' + err.message;
@@ -3995,6 +4101,7 @@ $('addUserRepConfirmBtn').addEventListener('click', async () => {
       reparticaoNome: nome
     });
     $('addUserRepForm').classList.add('hidden-view');
+    logUserAction('adicionou conexão com repartição', nome);
     renderUserReparticoesList();
   } catch(err){
     statusEl.textContent = 'Não foi possível adicionar: ' + err.message;
@@ -4339,11 +4446,23 @@ $('registerBtn').addEventListener('click', () => {
     const repEditSelecionada = reparticaoIdField ? loadReparticoes().find(r => r.id === reparticaoIdField) : null;
     const reparticaoClientIdEdit = repEditSelecionada ? repEditSelecionada.clientId : existing.reparticaoId;
     const updated = { ...existing, nome, cargo, matricula, email, telefone, reparticaoId: reparticaoClientIdEdit, pin: pin || existing.pin };
+
+    // identifica quais campos realmente mudaram, para registrar no
+    // histórico de acesso com a descrição exigida
+    const camposAlterados = [];
+    if(existing.nome !== nome) camposAlterados.push('nome');
+    if(existing.cargo !== cargo) camposAlterados.push('cargo');
+    if(existing.matricula !== matricula) camposAlterados.push('matrícula');
+    if(existing.email !== email) camposAlterados.push('e-mail');
+    if(existing.telefone !== telefone) camposAlterados.push('telefone');
+    if(pin) camposAlterados.push('PIN');
+
     list[editingIndex] = updated;
     saveServidores(list);
     currentUser = updated;
     currentUserIndex = editingIndex;
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+    if(camposAlterados.length) logUserAction('alteração de cadastro', camposAlterados.join(', '));
 
     // sincroniza as alterações com a central — atualiza nome/cargo/
     // matrícula/telefone em TODAS as repartições da pessoa de uma vez
@@ -4426,7 +4545,7 @@ $('loginBtn').addEventListener('click', () => {
   const idx = $('loginSelect').value;
   const pin = $('loginPin').value.trim();
   if(idx === '' || idx === undefined || !list[idx]){
-    showLoginError('Selecione um servidor cadastrado.');
+    showLoginError('Selecione um usuário cadastrado.');
     return;
   }
   const servidor = list[idx];
@@ -4437,15 +4556,22 @@ $('loginBtn').addEventListener('click', () => {
   loginAs(+idx);
 });
 
+// registra, na central, um ato específico praticado pelo usuário
+// logado — só os atos explicitamente listados entram no histórico de
+// acesso (login, logout, edição de cadastro, conexão a repartição,
+// envio/exclusão de relatório, adição/remoção de conexão)
+function logUserAction(acao, detalhe){
+  if(!currentUser || !currentUser.email) return;
+  callAppsScript({ action: 'log_access', email: currentUser.email, acao, detalhe: detalhe || '' }).catch(() => {});
+}
+
 function loginAs(index){
   const list = loadServidores();
   currentUserIndex = index;
   currentUser = list[index];
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
   sessionStorage.setItem(SESSION_KEY + '_idx', String(index));
-  if(currentUser.email){
-    callAppsScript({ action: 'log_access', email: currentUser.email }).catch(() => {});
-  }
+  logUserAction('login');
   enterApp();
 }
 
@@ -4631,6 +4757,7 @@ function enterApp(){
 }
 
 function doLogout(){
+  logUserAction('logout');
   currentUser = null;
   currentUserIndex = null;
   sessionStorage.removeItem(SESSION_KEY);
@@ -4914,7 +5041,10 @@ function initFormSectionStepper(){
     nextBtn.className = 'btn-generate';
     nextBtn.style.cssText = 'width:auto;padding:10px 22px;margin:0;';
     nextBtn.textContent = idx === sections.length - 1 ? 'Ir para revisão final →' : 'Próxima seção →';
-    nextBtn.addEventListener('click', () => goToFormSection(idx + 1));
+    nextBtn.addEventListener('click', () => {
+      if(!canAdvanceFromSection(idx)) return;
+      goToFormSection(idx + 1);
+    });
     btnWrap.appendChild(nextBtn);
     sec.appendChild(btnWrap);
   });
@@ -4935,18 +5065,126 @@ function goToFormSection(idx){
   $('formView').scrollIntoView({ behavior: 'instant', block: 'start' });
 }
 
-// ---------- anexos ----------
-const defaultAnexos = ['', '', ''];
-const defaultAnexoHints = [
-  'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no APARELHO, mostrando claramente o hash, o nome do arquivo extraído e o horário do sistema.',
-  'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no PC, mostrando claramente o hash, o caminho do arquivo copiado e o horário do sistema.',
-  'Descreva a cópia do arquivo extraído armazenada em mídia apartada, sob controle de custódia (ex.: pen drive lacrado, HD externo, CD/DVD gravado).'
+// validações que bloqueiam o avanço de uma seção específica — cada
+// função retorna true se pode avançar, ou mostra sua própria mensagem
+// de bloqueio e retorna false
+const sectionValidators = {
+  0: () => {
+    const statusEl = $('initChecklistStatus');
+    const todasMarcadas = Array.from(document.querySelectorAll('.init-check')).every(c => c.checked);
+    if(!todasMarcadas){
+      statusEl.textContent = 'Confirme todos os itens acima antes de prosseguir com o preenchimento.';
+      statusEl.className = 'loc-status err';
+      return false;
+    }
+    statusEl.textContent = '';
+    return true;
+  },
+  3: () => {
+    const statusEl = $('f_orig_file_status');
+    if(!attachedFiles.orig){
+      statusEl.textContent = 'Anexe o arquivo (cópia para o Drive) antes de seguir para a próxima seção.';
+      statusEl.className = 'loc-status err';
+      return false;
+    }
+    return true;
+  },
+  5: () => {
+    const statusEl = $('f_cop_file_status');
+    if(!attachedFiles.cop){
+      statusEl.textContent = 'Anexe o arquivo (arquivo transferido para o PC) antes de seguir para a próxima seção.';
+      statusEl.className = 'loc-status err';
+      return false;
+    }
+    return true;
+  },
+  7: () => {
+    const faltando = anexosFixosDefs.filter(def => anexoFixoAplicavel(def.key) && !anexosFixosFiles[def.key]);
+    if(faltando.length){
+      alert('Anexe o(s) seguinte(s) arquivo(s) obrigatório(s) antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d.label).join('\n'));
+      return false;
+    }
+    return true;
+  }
+};
+function canAdvanceFromSection(idx){
+  const validator = sectionValidators[idx];
+  return validator ? validator() : true;
+}
+
+// ---------- anexos (Seção 8) ----------
+// os 3 campos fixos abaixo são o que a Seção 3 (tipo de fonte) exige
+// como obrigatório — cada um só aparece e é exigido para os tipos
+// listados; campos extras que o usuário adicionar continuam livres
+const anexoRequiredMap = {
+  foto_equip: ['celular', 'tablet', 'storage', 'pc', 'router'],
+  foto_nuvem: ['cloud'],
+  foto_arquivo_aberto: ['celular', 'tablet', 'pc', 'cloud']
+};
+const anexosFixosDefs = [
+  { key: 'foto_equip', label: 'Foto/imagem do equipamento fonte' },
+  { key: 'foto_nuvem', label: 'Foto/captura de tela da fonte do arquivo em nuvem' },
+  { key: 'foto_arquivo_aberto', label: 'Foto/captura de tela do arquivo aberto com informações de dados no equipamento fonte' }
 ];
-const anexoFiles = [null, null, null]; // arquivo anexado (opcional) para cada linha, na mesma ordem
+const anexosFixosValues = { foto_equip: '', foto_nuvem: '', foto_arquivo_aberto: '' };
+const anexosFixosFiles = { foto_equip: null, foto_nuvem: null, foto_arquivo_aberto: null };
+const defaultAnexos = []; // itens extras livres, adicionados pelo usuário
+const defaultAnexoHints = [];
+const anexoFiles = [];
 const anexosList = $('anexosList');
+
+function anexoFixoAplicavel(key){
+  const tipo = $('f_origem_tipo').value;
+  return anexoRequiredMap[key].includes(tipo);
+}
 
 function renderAnexos(){
   anexosList.innerHTML = '';
+
+  // campos fixos exigidos pelo tipo de fonte (Seção 3)
+  anexosFixosDefs.forEach(def => {
+    if(!anexoFixoAplicavel(def.key)) return;
+    const row = document.createElement('div');
+    row.className = 'anexo-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.readOnly = true;
+    input.placeholder = 'Anexe o arquivo (📎) — dados preenchidos automaticamente';
+    input.value = anexosFixosValues[def.key];
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      anexosFixosFiles[def.key] = file;
+      const dataInfo = file.lastModified ? formatDateTimeFromMs(file.lastModified) : '';
+      anexosFixosValues[def.key] = `${file.name}${dataInfo ? ' — criado/modificado em ' + dataInfo : ''}`;
+      renderAnexos();
+    });
+
+    const clipBtn = document.createElement('button');
+    clipBtn.type = 'button';
+    clipBtn.title = 'Anexar o arquivo descrito';
+    clipBtn.setAttribute('aria-label', 'Anexar o arquivo descrito');
+    clipBtn.textContent = '📎';
+    clipBtn.addEventListener('click', () => fileInput.click());
+
+    row.appendChild(input);
+    row.appendChild(clipBtn);
+    row.appendChild(fileInput);
+    anexosList.appendChild(row);
+
+    const label = document.createElement('div');
+    label.className = 'hint';
+    label.style.marginTop = '2px';
+    label.innerHTML = `<b>${esc(def.label)}</b> (obrigatório)`;
+    anexosList.appendChild(label);
+  });
+
+  // itens extras, livres, adicionados pelo usuário
   defaultAnexos.forEach((val, idx) => {
     const row = document.createElement('div');
     row.className = 'anexo-row';
@@ -4964,6 +5202,8 @@ function renderAnexos(){
       const file = e.target.files[0];
       if(!file) return;
       anexoFiles[idx] = file;
+      const dataInfo = file.lastModified ? formatDateTimeFromMs(file.lastModified) : '';
+      defaultAnexos[idx] = `${file.name}${dataInfo ? ' — criado/modificado em ' + dataInfo : ''}`;
       renderAnexos();
     });
 
@@ -4984,31 +5224,11 @@ function renderAnexos(){
     row.appendChild(fileInput);
     row.appendChild(rm);
     anexosList.appendChild(row);
-
-    if(defaultAnexoHints[idx]){
-      const hint = document.createElement('div');
-      hint.className = 'hint';
-      hint.style.marginTop = '2px';
-      hint.textContent = defaultAnexoHints[idx];
-      anexosList.appendChild(hint);
-    }
-    if(anexoFiles[idx]){
-      const fileTag = document.createElement('div');
-      fileTag.className = 'loc-status ok';
-      fileTag.style.marginTop = '2px';
-      fileTag.textContent = `📎 ${anexoFiles[idx].name} `;
-      const rmFile = document.createElement('button');
-      rmFile.type = 'button';
-      rmFile.textContent = 'remover arquivo';
-      rmFile.style.cssText = 'border:none;background:none;color:var(--warn-ink);font-size:11.5px;text-decoration:underline;cursor:pointer;padding:0;margin-left:6px;';
-      rmFile.addEventListener('click', () => { anexoFiles[idx] = null; renderAnexos(); });
-      fileTag.appendChild(rmFile);
-      anexosList.appendChild(fileTag);
-    }
   });
 }
 renderAnexos();
 $('addAnexoBtn').addEventListener('click', () => { defaultAnexos.push(''); defaultAnexoHints.push(''); anexoFiles.push(null); renderAnexos(); });
+$('f_origem_tipo').addEventListener('change', () => renderAnexos());
 
 // ---------- hash live compare ----------
 function normHash(v){ return (v||'').trim().toLowerCase().replace(/\s+/g,''); }
@@ -5066,7 +5286,7 @@ $('f_metodo_transf').addEventListener('change', () => {
 
 const origemTipoLabels = {
   celular: 'Celular', tablet: 'Tablet', storage: 'HD/SSD externo ou pen drive',
-  pc: 'Outro computador', cloud: 'Servidor em nuvem', router: 'Roteador / Modem', outro: 'Outro'
+  pc: 'Computador', cloud: 'Servidor em nuvem', router: 'Roteador / Modem', outro: 'Outro'
 };
 
 function buildOrigemRows(v){
@@ -5158,7 +5378,10 @@ function buildReport(){
     hashStatus: (!hashA || !hashB) ? 'neutral' : (hashA === hashB ? 'ok' : 'warn')
   };
 
-  const anexosHtml = defaultAnexos.filter(a => a.trim()).map(a => `<li>${esc(a)}</li>`).join('');
+  const anexosFixosHtml = anexosFixosDefs
+    .filter(def => anexoFixoAplicavel(def.key) && anexosFixosValues[def.key].trim())
+    .map(def => `<li><b>${esc(def.label)}:</b> ${esc(anexosFixosValues[def.key])}</li>`).join('');
+  const anexosHtml = anexosFixosHtml + defaultAnexos.filter(a => a.trim()).map(a => `<li>${esc(a)}</li>`).join('');
 
   const dataColeta = v('f_data_coleta');
   const horarioRange = [v('f_horario_inicio'), v('f_horario_fim')].filter(Boolean).join(' às ');
@@ -5183,10 +5406,6 @@ function buildReport(){
     <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E INTEGRIDADE DE ARQUIVOS DIGITAIS</h1>
 
     <h2>1. Inicialização do Procedimento de Extração</h2>
-    <p class="body-text">${esc(v('f_proc_descricao'))}</p>
-    <table class="rtable">
-      ${row('Método de transferência', transferMethodLabels[v('f_metodo_transf')] || v('f_metodo_transf'))}
-    </table>
 
     <h2>2. Identificação Geral</h2>
     <table class="rtable">
@@ -5203,8 +5422,10 @@ function buildReport(){
       ${buildOrigemRows(v)}
     </table>
 
-    <h2>4. Arquivo Extraído (Original)</h2>
+    <h2>4. Procedimento de Extração e Identificação do Arquivo</h2>
+    <p class="body-text">${esc(v('f_proc_descricao'))}</p>
     <table class="rtable">
+      ${row('Método de transferência', transferMethodLabels[v('f_metodo_transf')] || v('f_metodo_transf'))}
       ${row('Nome do arquivo', v('f_orig_nome'), true)}
       ${row('Caminho no dispositivo', v('f_orig_caminho'), true)}
       ${row('Tamanho do arquivo', v('f_orig_tamanho'))}
@@ -5223,7 +5444,7 @@ function buildReport(){
       ${row('Número de tombamento', v('f_pc_tombamento'))}
     </table>
 
-    <h2>6. Arquivo Copiado (Cópia no PC)</h2>
+    <h2>6. Checagem de Integridade (arquivo transferido para o PC)</h2>
     <table class="rtable">
       ${row('Nome do arquivo', v('f_cop_nome'), true)}
       ${row('Caminho completo no PC', v('f_cop_caminho'), true)}
@@ -5234,7 +5455,7 @@ function buildReport(){
       ${row('Hora exata do cálculo do hash', v('f_hora_hash_copia'))}
     </table>
 
-    <h2>7. Verificação de Integridade</h2>
+    <h2>7. Análise de Integridade - avaliação de identidade entre os arquivos da fonte e dos destinos (PC e Drive)</h2>
     <table class="rtable">
       ${row('Hash do arquivo original (aparelho)', v('f_hash_original'), true)}
       ${row('Hash do arquivo copiado (PC)', v('f_hash_copia'), true)}
@@ -5414,7 +5635,9 @@ function openHistoryRecord(id){
 }
 function deleteHistoryRecord(id){
   if(!confirm('Excluir este relatório do histórico? Essa ação não pode ser desfeita.')) return;
+  const record = loadHistory().find(r => r.id === id);
   saveHistoryList(loadHistory().filter(r => r.id !== id));
+  logUserAction('exclusão de relatório do histórico', record ? record.relatorioNum : '');
   renderHistoryList();
 }
 
@@ -5449,15 +5672,9 @@ function resetFormFields(){
   updateOrigemTipoUI();
 
   defaultAnexos.length = 0;
-  defaultAnexos.push('', '', '');
   defaultAnexoHints.length = 0;
-  defaultAnexoHints.push(
-    'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no APARELHO, mostrando claramente o hash, o nome do arquivo extraído e o horário do sistema.',
-    'Anexe (fisicamente, ao processo) uma captura de tela do comando executado no PC, mostrando claramente o hash, o caminho do arquivo copiado e o horário do sistema.',
-    'Descreva a cópia do arquivo extraído armazenada em mídia apartada, sob controle de custódia (ex.: pen drive lacrado, HD externo, CD/DVD gravado).'
-  );
   anexoFiles.length = 0;
-  anexoFiles.push(null, null, null);
+  Object.keys(anexosFixosValues).forEach(k => { anexosFixosValues[k] = ''; anexosFixosFiles[k] = null; });
   renderAnexos();
 
   $('f_metodo_transf').value = 'usb';
@@ -5536,6 +5753,7 @@ async function concludeTask(){
           arquivo: file.name,
           driveLink: result.webViewLink || ''
         }).catch(() => {});
+        logUserAction('envio de relatório', rep.nome);
       }
     } catch(err){
       alert('O relatório foi salvo no histórico, mas não foi possível enviar ao Google Drive: ' + err.message);

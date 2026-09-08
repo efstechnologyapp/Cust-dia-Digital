@@ -396,7 +396,7 @@ function doPost(e) {
       var email = (data.email || '').trim().toLowerCase();
       if (!email) return respond({ ok: true });
       var sheet = getOrCreateAcessosSheet();
-      sheet.appendRow([email, new Date()]);
+      sheet.appendRow([email, new Date(), data.acao || '', data.detalhe || '']);
       return respond({ ok: true });
     }
 
@@ -407,9 +407,12 @@ function doPost(e) {
       var rows = sheet.getDataRange().getValues();
       var acessos = [];
       for (var i = 1; i < rows.length; i++) {
-        if (String(rows[i][0]).toLowerCase() === email) {
-          acessos.push(rows[i][1] ? formatDate_(rows[i][1]) : '');
-        }
+        if (String(rows[i][0]).toLowerCase() !== email) continue;
+        var acao = rows[i][2] ? String(rows[i][2]) : '';
+        if (!acao) continue; // só entram registros com um ato descrito
+        var detalhe = rows[i][3] ? String(rows[i][3]) : '';
+        var descricao = acao + (detalhe ? ' — ' + detalhe : '');
+        acessos.push((rows[i][1] ? formatDate_(rows[i][1]) : '') + ': ' + descricao);
       }
       acessos.reverse();
       return respond({ ok: true, acessos: acessos.slice(0, 10) });
@@ -518,6 +521,58 @@ function doPost(e) {
       return respond({ ok: true });
     }
 
+    if (action === 'log_arquivo_enviado') {
+      var sheet = getOrCreateArquivosEnviadosSheet();
+      sheet.appendRow([
+        (data.email || '').trim().toLowerCase(),
+        data.reparticaoId || '',
+        data.arquivo || '',
+        data.driveLink || '',
+        new Date()
+      ]);
+      return respond({ ok: true });
+    }
+
+    // ---------- estatísticas gerais do app (aba "Informações Gerais") ----------
+    if (action === 'get_app_stats') {
+      var usersSheet = getOrCreateUsersSheet();
+      var userRows = usersSheet.getDataRange().getValues();
+      var emailsUnicos = {};
+      for (var i = 1; i < userRows.length; i++) {
+        var email = String(userRows[i][1]).toLowerCase();
+        if (email && !userRows[i][11]) emailsUnicos[email] = true; // ignora excluídos
+      }
+      var usuariosCount = Object.keys(emailsUnicos).length;
+
+      var pendSheet = getOrCreateReparticoesPendentesSheet();
+      var pendRows = pendSheet.getDataRange().getValues();
+      var reparticoesConfirmadas = {};
+      for (var i = 1; i < pendRows.length; i++) {
+        if (String(pendRows[i][9]) === 'confirmada') {
+          reparticoesConfirmadas[String(pendRows[i][2])] = true; // ClientId
+        }
+      }
+      var reparticoesCount = Object.keys(reparticoesConfirmadas).length;
+
+      var equipSheet = getOrCreateEquipamentosSheet();
+      var equipamentosCount = Math.max(0, equipSheet.getDataRange().getValues().length - 1);
+
+      var reportsSheet = getOrCreateReportsSheet();
+      var relatoriosCount = Math.max(0, reportsSheet.getDataRange().getValues().length - 1);
+
+      var arquivosSheet = getOrCreateArquivosEnviadosSheet();
+      var arquivosCount = Math.max(0, arquivosSheet.getDataRange().getValues().length - 1);
+
+      return respond({
+        ok: true,
+        usuariosCount: usuariosCount,
+        reparticoesCount: reparticoesCount,
+        equipamentosCount: equipamentosCount,
+        relatoriosCount: relatoriosCount,
+        arquivosCount: arquivosCount
+      });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
@@ -574,7 +629,14 @@ function getOrCreateAcessosSheet() {
   var sheet = ss.getSheetByName('Acessos');
   if (!sheet) {
     sheet = ss.insertSheet('Acessos');
-    sheet.appendRow(['Email', 'DataHora']);
+    sheet.appendRow(['Email', 'DataHora', 'Acao', 'Detalhe']);
+    return sheet;
+  }
+  if (sheet.getRange(1, 3).getValue() !== 'Acao') {
+    sheet.getRange(1, 3).setValue('Acao');
+  }
+  if (sheet.getRange(1, 4).getValue() !== 'Detalhe') {
+    sheet.getRange(1, 4).setValue('Detalhe');
   }
   return sheet;
 }
@@ -594,6 +656,25 @@ function getOrCreateEquipamentosSheet() {
   if (!sheet) {
     sheet = ss.insertSheet('Equipamentos');
     sheet.appendRow(['ReparticaoId', 'Nome', 'Serie', 'Uuid', 'SistemaOperacional', 'Tombamento', 'CadastradoPor', 'DataCadastro']);
+  }
+  return sheet;
+}
+
+function getOrCreateArquivosEnviadosSheet() {
+  var props = PropertiesService.getScriptProperties();
+  var ssId = props.getProperty('USERS_SHEET_ID');
+  var ss = null;
+  if (ssId) {
+    try { ss = SpreadsheetApp.openById(ssId); } catch (e) { ss = null; }
+  }
+  if (!ss) {
+    getOrCreateUsersSheet();
+    ss = SpreadsheetApp.openById(props.getProperty('USERS_SHEET_ID'));
+  }
+  var sheet = ss.getSheetByName('ArquivosEnviados');
+  if (!sheet) {
+    sheet = ss.insertSheet('ArquivosEnviados');
+    sheet.appendRow(['Email', 'ReparticaoId', 'Arquivo', 'DriveLink', 'DataEnvio']);
   }
   return sheet;
 }
