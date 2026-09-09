@@ -463,6 +463,36 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Bloco de assinatura + QR Code reorganizados
+
+Reformulado como um retângulo único, bem discreto, no final do
+relatório (Seção 9), em 3 colunas de tamanho equilibrado entre si:
+
+- **Esquerda:** logo do app (18px) + "Custódia Digital" abaixo.
+- **Meio:** assinatura digital, impressão da chave e carimbo de
+  tempo — rótulos encurtados, valores bem truncados, fonte reduzida
+  (5.5px) e largura limitada a 120px.
+- **Direita:** QR Code de verificação pública (38×38), com legenda
+  minúscula "Verificação pública".
+
+Caixa pequena, discreta, dentro de uma borda arredondada,
+centralizada — não chama atenção na página.
+
+## Correção: assinatura digital/carimbo de tempo apareciam colados, sem separação
+
+Bug relatado pelo usuário: no relatório, o rótulo e o valor da
+assinatura digital e do carimbo de tempo apareciam grudados, sem
+espaço nenhum entre eles (ex.: "...deste relatórionIgc6TFiw...").
+
+**Causa**: o bloco `digitalSignatureBlock` estava declarado como uma
+`<div>`, mas o conteúdo inserido nele é HTML de linhas de tabela
+(`<tr><td>...`) — que é inválido dentro de uma `<div>` (só é válido
+dentro de `<table>`). O navegador desmontava essa estrutura e colava
+tudo sem separação visual.
+
+**Correção**: trocado `<div class="rtable">` por `<table class="rtable">`
+— rótulo e valor agora ficam corretamente em células separadas.
+
 ## Correção: envio ao Drive podia travar "para sempre"
 
 Bug relatado pelo usuário: ao clicar em "✅ Concluir Tarefa", o app

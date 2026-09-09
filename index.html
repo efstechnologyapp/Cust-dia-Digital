@@ -444,6 +444,7 @@
     font-weight:700;
     width: 34%;
   }
+  #digitalSignatureBlock td{ padding: 1.5px 3px !important; font-size: 5.5px !important; }
   .rtable tr td.mono{
     font-family: var(--mono);
     font-size: 11px;
@@ -5553,11 +5554,10 @@ function addVerificationQrCode(){
   const wrap = document.createElement('div');
   wrap.style.cssText = 'display:inline-block;';
   el.appendChild(wrap);
-  new QRCode(wrap, { text: verifyUrl, width: 120, height: 120 });
+  new QRCode(wrap, { text: verifyUrl, width: 38, height: 38 });
   const caption = document.createElement('p');
-  caption.className = 'body-text';
-  caption.style.cssText = 'font-size:10px;color:var(--muted);margin-top:4px;';
-  caption.textContent = 'Escaneie para verificar publicamente o hash deste relatório, sem precisar de login.';
+  caption.style.cssText = 'font-size:5px;color:var(--muted);margin-top:2px;line-height:1.1;';
+  caption.textContent = 'Verificação pública';
   el.appendChild(caption);
 }
 
@@ -6073,7 +6073,7 @@ async function addDigitalSignatureToReport(matricula){
   const el = $('digitalSignatureBlock');
   if(!el) return;
   if(!(window.crypto && window.crypto.subtle)){
-    el.innerHTML = row('Assinatura digital', 'Não disponível neste navegador/contexto (requer https).');
+    el.innerHTML = row('Assinatura', 'Indisponível (requer https).');
     return;
   }
   try {
@@ -6085,15 +6085,20 @@ async function addDigitalSignatureToReport(matricula){
     const spki = await crypto.subtle.exportKey('spki', publicKey);
     const fingerprint = await sha256Hex(spki);
     el.innerHTML = `
-      ${row('Assinatura digital (ECDSA P-256) sobre os hashes deste relatório', sigB64, true)}
-      ${row('Impressão digital da chave pública do signatário', fingerprint, true)}
+      ${row('Assinatura', truncateMiddle(sigB64, 8), true)}
+      ${row('Chave pública', truncateMiddle(fingerprint, 8), true)}
     `;
     window.__lastSignature = { signature: sigB64, fingerprint, dataString };
     addTimestampProofToReport();
     addVerificationQrCode();
   } catch(err){
-    el.innerHTML = row('Assinatura digital', 'Não foi possível gerar: ' + err.message);
+    el.innerHTML = row('Assinatura', 'Erro ao gerar.');
   }
+}
+
+function truncateMiddle(v, len){
+  if(!v) return v;
+  return v.length > len ? v.slice(0, len) + '…' : v;
 }
 
 // ---------- carimbo de tempo em blockchain (OpenTimestamps) ----------
@@ -6106,7 +6111,7 @@ async function addTimestampProofToReport(){
   if(!el) return;
   const hashHex = normHash($('f_hash_lista_original').value) || normHash((origArquivosManager.getEntries()[0] || {}).hash || '');
   if(!hashHex || !/^[0-9a-f]{64}$/.test(hashHex)){
-    el.innerHTML += row('Carimbo de tempo (OpenTimestamps)', 'Não disponível — nenhum hash SHA-256 válido encontrado na Seção 4.');
+    el.innerHTML += row('Carimbo de tempo', 'Indisponível.');
     return;
   }
   try {
@@ -6121,14 +6126,13 @@ async function addTimestampProofToReport(){
     const otsB64 = btoa(String.fromCharCode(...new Uint8Array(otsBuf)));
     const dataUri = 'data:application/octet-stream;base64,' + otsB64;
     el.innerHTML += `
-      <tr><td class="lbl">Carimbo de tempo (OpenTimestamps)</td><td>
-        Prova obtida com sucesso sobre o hash acima — pode levar algumas horas para ser confirmada na blockchain do Bitcoin.
-        <a href="${dataUri}" download="prova_${hashHex.slice(0,10)}.ots">📥 Baixar arquivo de prova (.ots)</a>,
-        verificável gratuitamente em <a href="https://opentimestamps.org" target="_blank" rel="noopener">opentimestamps.org</a>.
+      <tr><td class="lbl">Carimbo de tempo</td><td>
+        <a href="${dataUri}" download="prova_${hashHex.slice(0,10)}.ots">📥 Prova .ots</a> —
+        <a href="https://opentimestamps.org" target="_blank" rel="noopener">verificar</a>
       </td></tr>
     `;
   } catch(err){
-    el.innerHTML += row('Carimbo de tempo (OpenTimestamps)', 'Não foi possível obter no momento — requer conexão com a internet ao gerar o relatório. (' + err.message + ')');
+    el.innerHTML += row('Carimbo de tempo', 'Indisponível (sem internet).');
   }
 }
 
@@ -6298,8 +6302,14 @@ function buildReport(){
         Data e hora da emissão: ${emissaoTexto}
       </div>
     </div>
-    <div id="digitalSignatureBlock" class="rtable" style="margin-top:10px;"></div>
-    <div id="reportQrCode" style="text-align:center;margin-top:14px;"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:center;gap:8px;border:1px solid var(--line,#ccc);border-radius:6px;padding:6px;margin-top:14px;font-size:5.5px;line-height:1.2;">
+      <div style="flex:0 0 40px;text-align:center;">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital" style="width:18px;height:18px;border-radius:3px;">
+        <div style="font-weight:bold;color:var(--navy-dark,#1B2A4A);margin-top:1px;">Custódia Digital</div>
+      </div>
+      <table id="digitalSignatureBlock" class="rtable" style="flex:0 1 auto;max-width:120px;font-size:5.5px;"></table>
+      <div id="reportQrCode" style="flex:0 0 40px;text-align:center;"></div>
+    </div>
     ${custodiaProprietarioHtml}
   `;
   $('reportPaper').innerHTML = html;
