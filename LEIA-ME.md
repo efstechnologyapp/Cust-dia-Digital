@@ -463,6 +463,98 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Conformidade ampliada com o Manual de POP (MJSP) e novas funcionalidades
+
+Grande leva de melhorias, todas testadas individualmente:
+
+- **Fotos da Seção 8 agora vão para o Drive de verdade** (antes só o nome
+  entrava no relatório, a imagem em si se perdia). O botão "☁️ Enviar
+  ao Drive da repartição" (Seção 9) agora envia também os anexos
+  obrigatórios/extras da Seção 8, além dos arquivos da Seção 6.
+- **Fuso horário**: campo na Seção 3 (dispositivo de origem, manual) e
+  na Seção 5 (PC de destino, com botão de detecção automática via
+  `Intl.DateTimeFormat`).
+- **Bloqueador de escrita (write blocker)**: campo condicional para HD/
+  SSD/pen drive e Computador como fonte, com campo de ferramenta que
+  só aparece se a resposta for "Sim".
+- **Alterações além do normal da extração**: campo na Seção 3, com
+  seletor "Nenhuma"/"Houve alteração" — o segundo abre uma descrição
+  livre.
+- **Página "Sobre o App"**: nova seção citando a conformidade com o
+  Manual de POP de Informática Forense (MJSP), com link direto ao PDF
+  e lista das funcionalidades que atendem a ele.
+- **Agrupamento de relatórios por processo/inquérito**: novo campo
+  "Número do processo/inquérito" na Seção 2 — no histórico (ambas as
+  abas), relatórios do mesmo processo aparecem sob um cabeçalho comum
+  "📁 Processo/Inquérito ...".
+- **Assinatura digital criptográfica**: cada usuário tem um par de
+  chaves ECDSA P-256 gerado e guardado só no próprio aparelho (nunca
+  enviado a lugar nenhum); todo relatório é assinado sobre os hashes
+  dos arquivos, com a assinatura e a impressão digital da chave pública
+  exibidas no relatório.
+- **Carimbo de tempo em blockchain (OpenTimestamps)**: o hash da lista
+  de arquivos originais é enviado ao calendário público do
+  OpenTimestamps, que devolve uma prova (.ots) para download,
+  verificável de forma independente em opentimestamps.org — **essa
+  parte depende de conexão com a internet no momento de gerar o
+  relatório**, e não pôde ser testada de ponta a ponta neste ambiente
+  de desenvolvimento (sem acesso à rede); o código trata a falha de
+  rede sem quebrar o resto do relatório.
+- **QR Code + verificação pública**: cada relatório ganha um QR Code
+  (biblioteca `qrcodejs`, via CDN) apontando para uma página de
+  verificação **sem exigir login**, onde qualquer pessoa cola o hash
+  do arquivo que tem em mãos e o app confirma, no próprio navegador,
+  se bate com o hash registrado — sem enviar nada a servidor nenhum.
+- **Busca/filtro global de relatórios**: nova aba "Relatórios" na
+  Gestão do App, com busca por número do relatório, processo,
+  repartição ou responsável, entre todos os relatórios já enviados em
+  qualquer repartição.
+
+**Não implementado, por decisão do usuário:** fluxo de revisão/
+aprovação por um segundo papel de revisor.
+
+**Não implementado, por limitação técnica:** minificação/ofuscação do
+código. Este ambiente de desenvolvimento não tem acesso à internet
+para baixar ferramentas de minificação (terser, uglify-js), e um
+minificador manual via busca-e-substituição seria arriscado demais
+para um arquivo deste tamanho e complexidade — o risco de quebrar
+algo silenciosamente não vale a pena numa ferramenta forense.
+**Recomendação**: rodar `npx terser index.html --compress --mangle -o
+index.min.html` (ou uma ferramenta online equivalente) como uma etapa
+de build manual, fora deste ambiente, logo antes de cada publicação —
+sempre testando o resultado antes de subir ao GitHub.
+
+## Múltiplos arquivos por dispositivo fonte (Seções 4 e 6)
+
+As Seções 4 ("Procedimento de Extração e Identificação do Arquivo")
+e 6 ("Checagem de Integridade") deixaram de aceitar só 1 arquivo cada
+— agora suportam uma **lista** de arquivos, com um botão "➕
+Adicionar outro arquivo" em cada seção. Cada item da lista tem seus
+próprios campos (anexo, nome, caminho, tamanho, data, ferramenta de
+hash, hash e hora do hash), calculados individualmente.
+
+- **Hash da lista de hashes**: campo calculado automaticamente
+  (SHA-256 sobre a concatenação dos hashes individuais, na ordem em
+  que foram adicionados), conforme recomendação do Manual de POP de
+  Informática Forense (MJSP). Aparece no relatório só quando há mais
+  de 1 arquivo.
+- **Comparação par a par (Seção 7)**: cada arquivo original é
+  comparado com o arquivo copiado de mesma posição na lista (1º com
+  1º, 2º com 2º...) — o resultado mostra o status de cada par e um
+  veredito geral.
+- **Validação de quantidade**: a Seção 6 exige que a quantidade de
+  arquivos seja igual à da Seção 4, além de cada um ter anexo e
+  caminho preenchidos, antes de liberar o avanço.
+- **Envio ao Drive (Seção 9)**: o botão agora envia **todos** os
+  arquivos anexados na Seção 6, um de cada vez, adicionando uma frase
+  de custódia para cada um.
+- Tecnicamente, os antigos campos fixos (`f_orig_nome`,
+  `f_hash_original`, etc.) foram substituídos por uma fábrica reutilizável
+  (`createMultiFileManager`), instanciada uma vez para cada seção —
+  os valores de cada entrada ficam guardados em memória (não só no
+  DOM), para sobreviver a adições/remoções de itens da lista sem
+  perder o que já foi digitado.
+
 ## Histórico separado por dispositivo
 
 A tela de histórico de relatórios agora tem duas abas: **"Deste

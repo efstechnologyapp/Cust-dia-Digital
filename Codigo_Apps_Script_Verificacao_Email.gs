@@ -299,7 +299,8 @@ function doPost(e) {
         data.arquivo || '',
         data.driveLink || '',
         new Date(),
-        data.reparticaoNome || ''
+        data.reparticaoNome || '',
+        data.processoNum || ''
       ]);
       return respond({ ok: true });
     }
@@ -319,7 +320,8 @@ function doPost(e) {
           driveLink: String(r[5]),
           dataEnvio: r[6] ? formatDate_(r[6]) : '',
           reparticaoId: String(r[2]),
-          reparticaoNome: r[7] ? String(r[7]) : ''
+          reparticaoNome: r[7] ? String(r[7]) : '',
+          processoNum: r[8] ? String(r[8]) : ''
         });
       }
       relatorios.reverse(); // mais recentes primeiro
@@ -631,6 +633,29 @@ function doPost(e) {
       });
     }
 
+    // ---------- lista completa de relatórios (Gestão do App > busca) ----------
+    if (action === 'list_all_reports') {
+      var sheet = getOrCreateReportsSheet();
+      var rows = sheet.getDataRange().getValues();
+      var relatorios = [];
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        relatorios.push({
+          email: String(r[0]),
+          nome: String(r[1]),
+          reparticaoId: String(r[2]),
+          relatorioNum: String(r[3]),
+          arquivo: String(r[4]),
+          driveLink: String(r[5]),
+          dataEnvio: r[6] ? formatDate_(r[6]) : '',
+          reparticaoNome: r[7] ? String(r[7]) : '',
+          processoNum: r[8] ? String(r[8]) : ''
+        });
+      }
+      relatorios.reverse();
+      return respond({ ok: true, relatorios: relatorios });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
@@ -754,11 +779,14 @@ function getOrCreateReportsSheet() {
   var sheet = ss.getSheetByName('Relatorios');
   if (!sheet) {
     sheet = ss.insertSheet('Relatorios');
-    sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio', 'ReparticaoNome']);
+    sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio', 'ReparticaoNome', 'ProcessoNum']);
     return sheet;
   }
   if (sheet.getRange(1, 8).getValue() !== 'ReparticaoNome') {
     sheet.getRange(1, 8).setValue('ReparticaoNome');
+  }
+  if (sheet.getRange(1, 9).getValue() !== 'ProcessoNum') {
+    sheet.getRange(1, 9).setValue('ProcessoNum');
   }
   return sheet;
 }

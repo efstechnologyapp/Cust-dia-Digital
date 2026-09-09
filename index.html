@@ -10,6 +10,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <title>Custódia Digital — Extração e Verificação de Integridade</title>
 <style>
   :root{
@@ -1329,6 +1330,28 @@
   </div>
 </div>
 
+<!-- ===== VERIFICAÇÃO PÚBLICA (acessível sem login, via QR Code do relatório) ===== -->
+<div id="verifyView" class="hidden-view" style="position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;">
+  <div class="history-wrap" style="max-width:480px;margin:0 auto;padding:20px 16px;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div class="logo-badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital"></div>
+      <h2 class="app-brand-name">Custódia Digital</h2>
+      <p class="app-brand-tagline">Verificação Pública de Integridade</p>
+    </div>
+    <div class="rep-users-section-title">Hash registrado no relatório (do QR Code)</div>
+    <div class="rep-user-card">
+      <input type="text" class="mono" id="verifyHashFromQr" readonly style="width:100%;border:none;background:none;font-size:12px;word-break:break-all;">
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label>Hash do arquivo que você tem em mãos</label>
+      <textarea id="verifyHashInput" placeholder="Cole aqui o hash SHA-256 do arquivo que você está conferindo" style="min-height:70px;"></textarea>
+    </div>
+    <button type="button" class="btn-primary" id="verifyCheckBtn" style="width:100%;margin-top:8px;">Verificar</button>
+    <div id="verifyResultBox" class="hash-check neutral" style="margin-top:14px;">O resultado da comparação aparece aqui.</div>
+    <p class="history-sub" style="margin-top:18px;">Esta verificação é feita inteiramente neste navegador, comparando os dois valores — nenhum dado é enviado a qualquer servidor.</p>
+  </div>
+</div>
+
 <!-- ===== SOBRE O APP ===== -->
 <div id="aboutAppView">
   <div class="report-toolbar">
@@ -1343,6 +1366,21 @@
     <div class="rep-users-section-title">O que o app faz</div>
     <div class="rep-user-card">
       Auxilia servidores no preenchimento padronizado de relatórios técnicos de extração de arquivos digitais (celulares, tablets, HD/SSD, computadores, servidores em nuvem, roteadores/modems), com cálculo automático de hash, cadeia de custódia, anexos obrigatórios conforme o tipo de fonte, e envio direto ao Google Drive da repartição responsável.
+    </div>
+    <div class="rep-users-section-title">Conformidade com o Manual de POP (MJSP)</div>
+    <div class="rep-user-card">
+      Este app foi estruturado com base no <a href="https://www.gov.br/mj/pt-br/assuntos/sua-seguranca/seguranca-publica/analise-e-pesquisa/pop/pop-pericia-criminal-2024-informatica-forense-vol-5-pdf.pdf/@@download/file" target="_blank" rel="noopener">Manual de Procedimento Operacional Padrão — Perícia Criminal, Informática Forense (Ministério da Justiça e Segurança Pública, 2024)</a>, no que se aplica ao seu escopo (documentação de uma extração manual já realizada, e não à perícia forense completa de um dispositivo). Funcionalidades do app que atendem diretamente ao manual:
+      <ul style="margin:8px 0 0;padding-left:18px;">
+        <li>Cálculo de hash SHA-256 do arquivo original e da cópia, com comparação automática de integridade</li>
+        <li>Hash da lista de hashes, quando há mais de um arquivo por relatório</li>
+        <li>Identificação completa do material (marca, modelo, número de série, IMEI, operadora)</li>
+        <li>Registro de fotos do equipamento fonte, como recomendado pelo manual</li>
+        <li>Registro de fuso horário do dispositivo de origem e do computador de destino</li>
+        <li>Registro do uso (ou não) de bloqueador de escrita (write blocker)</li>
+        <li>Campo dedicado para alterações promovidas no material além das normais da extração</li>
+        <li>Cadeia de custódia completa: responsável, data/hora, destino do dispositivo original e da cópia digital</li>
+        <li>Aviso explícito de que o sistema não realiza quebra de criptografia nem contorna bloqueios de dispositivo — escopo que o manual reserva à perícia criminal formal</li>
+      </ul>
     </div>
     <div class="rep-users-section-title" id="aboutAppUpdateTitle"></div>
     <div class="rep-user-card" id="aboutAppUpdateContent"></div>
@@ -1361,6 +1399,7 @@
       <button type="button" class="reg-tab-btn active" id="connTabBtnInfo" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--navy-dark);border-bottom:2px solid var(--navy-dark);cursor:pointer;">Informações Gerais</button>
       <button type="button" class="reg-tab-btn" id="connTabBtnSistema" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Gestão de Conexões<span class="pending-badge hidden-view" id="conexoesTabBadge">0</span></button>
       <button type="button" class="reg-tab-btn" id="connTabBtnUsuarios" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Usuários cadastrados<span class="pending-badge hidden-view" id="usuariosTabBadge">0</span></button>
+      <button type="button" class="reg-tab-btn" id="connTabBtnRelatorios" style="flex:1;background:none;border:none;padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Relatórios</button>
     </div>
 
     <div id="connTabInfo">
@@ -1451,6 +1490,14 @@
       <p class="history-sub">Todos os usuários já cadastrados no sistema, em qualquer repartição — pendentes ou não de conexão efetiva com o Google.</p>
       <div class="loc-status" id="allUsersStatus"></div>
       <div id="allUsersList"></div>
+    </div>
+    <div class="hidden-view" id="connTabRelatorios">
+      <p class="history-sub">Busca por todos os relatórios enviados ao Drive, em qualquer repartição.</p>
+      <div class="field">
+        <input type="text" id="allReportsSearchInput" placeholder="Buscar por nº do relatório, processo, repartição ou responsável…">
+      </div>
+      <div class="loc-status" id="allReportsStatus"></div>
+      <div id="allReportsList"></div>
     </div>
   </div>
 </div>
@@ -1648,6 +1695,11 @@
       <div class="hint"><b>Como localizar:</b> numeração sequencial de controle interno da unidade (livro de registro ou planilha de controle).</div>
     </div>
     <div class="field">
+      <label>Número do processo/inquérito</label>
+      <input type="text" id="f_processo_num" placeholder="Ex.: 0000123-45.2026.8.15.0001">
+      <div class="hint">Usado para agrupar, no histórico, todos os relatórios ligados ao mesmo processo/inquérito — mesmo que gerados em dispositivos diferentes ou em momentos diferentes.</div>
+    </div>
+    <div class="field">
       <label>Finalidade</label>
       <textarea id="f_finalidade" placeholder="Ex.: Extração de conversa de WhatsApp para instrução do procedimento nº ..."></textarea>
       <div class="hint"><b>Como localizar:</b> número do processo/procedimento vinculado, consultável no sistema PJe.</div>
@@ -1707,6 +1759,11 @@
         <option value="router">📡 Roteador / Modem</option>
         <option value="outro">Outro</option>
       </select>
+    </div>
+    <div class="field">
+      <label>Fuso horário configurado no dispositivo</label>
+      <input type="text" id="f_origem_fuso" placeholder="Ex.: (UTC-03:00) Horário de Brasília">
+      <div class="hint"><b>Como localizar:</b> Android: Config. > Sistema > Data e hora > Fuso horário. iOS: Ajustes > Geral > Data e Hora. Windows: Config. > Hora e Idioma. Importante conferir também se o horário de verão está ativado — o Manual de POP de Informática Forense (MJSP) recomenda observar isso, pois pode afetar a temporalidade das evidências.</div>
     </div>
 
     <!-- Grupo: Celular / Tablet -->
@@ -1772,6 +1829,16 @@
         <label>Formato de conexão</label>
         <input type="text" id="f_storage_conexao" placeholder="Ex.: USB-C 3.2, USB-A 2.0">
       </div>
+      <div class="field">
+        <label>Utilizou bloqueador de escrita (write blocker)?</label>
+        <select id="f_storage_write_blocker">
+          <option value="">Selecione…</option>
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+        <input type="text" id="f_storage_write_blocker_ferramenta" class="hidden-view" placeholder="Qual ferramenta/equipamento (hardware ou software)?">
+        <div class="hint">Recomendação do Manual de POP de Informática Forense (MJSP): usar bloqueador de escrita por hardware ou software para impedir qualquer alteração nos dados da mídia original durante a extração.</div>
+      </div>
     </div>
 
     <!-- Grupo: Outro computador (reaproveita o cadastro de equipamentos da repartição) -->
@@ -1799,6 +1866,16 @@
       <div class="field">
         <label>Número de tombamento</label>
         <input type="text" id="f_origSrc_tombamento" placeholder="Ex.: 2026.001234 (se aplicável — pode não haver, tratando-se de equipamento de terceiro)">
+      </div>
+      <div class="field">
+        <label>Utilizou bloqueador de escrita (write blocker)?</label>
+        <select id="f_origSrc_write_blocker">
+          <option value="">Selecione…</option>
+          <option value="sim">Sim</option>
+          <option value="nao">Não</option>
+        </select>
+        <input type="text" id="f_origSrc_write_blocker_ferramenta" class="hidden-view" placeholder="Qual ferramenta/equipamento (hardware ou software)?">
+        <div class="hint">Recomendação do Manual de POP de Informática Forense (MJSP): usar bloqueador de escrita por hardware ou software para impedir qualquer alteração nos dados da mídia original durante a extração.</div>
       </div>
     </div>
 
@@ -1870,55 +1947,24 @@
       <div class="hint">Texto preenchido automaticamente conforme o método escolhido acima — pode ser ajustado livremente antes de gerar o relatório.</div>
     </div>
     <div class="field">
+      <label>Alterações promovidas no material além das normalmente realizadas pela ferramenta de extração</label>
+      <select id="f_alteracoes_tipo">
+        <option value="nenhuma" selected>Nenhuma alteração além das normais da extração</option>
+        <option value="sim">Houve alteração adicional (descrever abaixo)</option>
+      </select>
+      <textarea id="f_alteracoes_descricao" class="hidden-view" placeholder="Descreva a alteração física ou lógica promovida no material (ex.: necessidade de reiniciar o aparelho, instalação de app auxiliar, alteração de configuração do dispositivo, etc.)"></textarea>
+      <div class="hint">Exigência do Manual de POP de Informática Forense (MJSP): mencionar qualquer alteração física ou lógica causada no material examinado, além das inerentes ao próprio processo de extração.</div>
+    </div>
+    <div class="field">
       <label>Adicionar arquivo (cópia para o Drive)</label>
-      <div class="file-attach-row">
-        <input type="file" id="f_orig_file_input" style="display:none;">
-        <button type="button" class="btn-attach" id="f_orig_file_btn">📎 Selecionar arquivo</button>
-        <span class="file-attach-name" id="f_orig_file_name"></span>
-      </div>
-      <div class="loc-status" id="f_orig_file_status"></div>
-      <div class="hint"><b>Como localizar:</b> selecione o arquivo extraído do celular (ex.: msgstore.db.crypt14). Nome, tamanho, data de modificação e o hash SHA-256 são calculados e preenchidos automaticamente — o conteúdo do arquivo é processado só no aparelho e não é enviado a lugar nenhum.</div>
+      <div class="hint">Extraiu mais de um arquivo deste dispositivo? Cada um entra como um item separado abaixo — nome, tamanho, data e hash são calculados individualmente, e um hash consolidado de todos eles é gerado automaticamente ao final.</div>
     </div>
+    <div id="origArquivosList"></div>
+    <button type="button" class="btn-attach" id="addOrigArquivoBtn" style="margin-bottom:14px;">➕ Adicionar outro arquivo do dispositivo fonte</button>
     <div class="field">
-      <label>Nome do arquivo</label>
-      <input type="text" class="mono" id="f_orig_nome" placeholder="msgstore.db.crypt14">
-    </div>
-    <div class="field">
-      <label>Caminho no dispositivo</label>
-      <input type="text" class="mono" id="f_orig_caminho" placeholder="Ex.: /storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Databases/...">
-      <div class="hint"><b>Como localizar, conforme o tipo de fonte (Seção 2):</b><br>
-      • <b>Celular/Tablet (Android):</b> gerenciador de arquivos > Armazenamento interno > Android > media > com.whatsapp > WhatsApp > Databases.<br>
-      • <b>HD/SSD externo, pen drive ou outro computador:</b> navegue até a pasta/arquivo pelo gerenciador de arquivos do sistema.<br>
-      • <b>Servidor em nuvem:</b> caminho da pasta/arquivo dentro do provedor (ex.: "Meu Drive/Backups/...").<br>
-      • Se a extração for feita por ferramenta rodando no PC (com o dispositivo conectado), o caminho também pode ser obtido segurando Shift e clicando com o botão direito do mouse sobre o arquivo, depois clicando com o botão esquerdo na opção "Copiar como caminho".</div>
-    </div>
-    <div class="row2">
-      <div class="field">
-        <label>Tamanho do arquivo</label>
-        <input type="text" id="f_orig_tamanho" placeholder="Ex.: 184.372.916 bytes">
-      </div>
-      <div class="field">
-        <label>Última modificação</label>
-        <input type="text" class="mono" id="f_orig_modificacao" placeholder="dd/mm/aaaa hh:mm:ss" readonly data-wp="datetime-sec">
-      </div>
-    </div>
-    <div class="field">
-      <label>Ferramenta usada para gerar o hash no aparelho</label>
-      <div class="cascade-row">
-        <select id="f_orig_ferramenta_sis"></select>
-        <select id="f_orig_ferramenta_tool"></select>
-      </div>
-      <input type="text" id="f_orig_ferramenta_outro" class="hidden-view" placeholder="Especifique a ferramenta/comando utilizado">
-      <input type="hidden" id="f_orig_ferramenta">
-    </div>
-    <div class="field">
-      <label>Hash SHA-256 do arquivo ORIGINAL</label>
-      <input type="text" class="mono" id="f_hash_original" placeholder="Cole aqui o valor gerado no celular">
-      <div class="hint"><b>Como localizar:</b> resultado exibido no app/terminal logo após executar o comando de hash — capture a tela.</div>
-    </div>
-    <div class="field">
-      <label>Hora exata do cálculo do hash original</label>
-      <input type="text" class="mono" id="f_hora_hash_original" placeholder="dd/mm/aaaa hh:mm:ss" readonly data-wp="datetime-sec">
+      <label>Hash da lista de hashes (arquivos originais)</label>
+      <input type="text" class="mono" id="f_hash_lista_original" readonly placeholder="Calculado automaticamente a partir dos hashes acima">
+      <div class="hint">Camada extra de integridade sobre o conjunto de arquivos originais, conforme recomendação do Manual de POP de Informática Forense (MJSP) — recalculado automaticamente sempre que um hash da lista acima muda.</div>
     </div>
   </section>
 
@@ -1961,6 +2007,14 @@
       <button type="button" class="btn-attach hidden-view" id="f_pc_equip_save_btn">💾 Salvar equipamento nesta repartição</button>
       <div class="loc-status" id="f_pc_equip_status"></div>
     </div>
+    <div class="field">
+      <label>Fuso horário configurado no PC</label>
+      <div class="file-attach-row">
+        <input type="text" id="f_pc_fuso" placeholder="Ex.: (UTC-03:00) Horário de Brasília">
+        <button type="button" class="btn-attach" id="f_pc_fuso_detect_btn">🕐 Detectar automaticamente</button>
+      </div>
+      <div class="hint">O botão preenche com o fuso horário configurado neste computador (o mesmo em que o formulário está sendo preenchido agora). Confira também se o horário de verão está ativado — o Manual de POP de Informática Forense (MJSP) recomenda observar isso, pois pode afetar a temporalidade das evidências.</div>
+    </div>
   </section>
 
   <!-- SECTION 6 -->
@@ -1968,56 +2022,23 @@
     <h2><span class="num">6</span>Checagem de Integridade (arquivo transferido para o PC)</h2>
     <div class="field">
       <label>Anexar arquivo (arquivo transferido para o PC)</label>
-      <div class="file-attach-row">
-        <input type="file" id="f_cop_file_input" style="display:none;">
-        <button type="button" class="btn-attach" id="f_cop_file_btn">📎 Selecionar arquivo</button>
-        <span class="file-attach-name" id="f_cop_file_name"></span>
-      </div>
-      <div class="loc-status" id="f_cop_file_status"></div>
-      <div class="hint"><b>Como localizar:</b> selecione o arquivo copiado no PC. Nome, tamanho e o hash SHA-256 são calculados e preenchidos automaticamente — o conteúdo do arquivo é processado só no aparelho e não é enviado a lugar nenhum.</div>
+      <div class="hint">Um item aqui pra cada arquivo anexado na Seção 4 — mantenha a mesma ordem, para a comparação de hashes da Seção 7 funcionar corretamente.</div>
     </div>
+    <div id="copArquivosList"></div>
+    <button type="button" class="btn-attach" id="addCopArquivoBtn" style="margin-bottom:14px;">➕ Adicionar outro arquivo copiado no PC</button>
     <div class="field">
-      <label>Nome do arquivo</label>
-      <input type="text" class="mono" id="f_cop_nome" placeholder="msgstore.db.crypt14">
-    </div>
-    <div class="field">
-      <label>Caminho completo no PC</label>
-      <input type="text" class="mono" id="f_cop_caminho" placeholder="C:\Extracao_WhatsApp\Processo_0000123-45\msgstore.db.crypt14">
-      <div class="hint"><b>Como localizar:</b> segure Shift e clique com o botão direito do mouse sobre o arquivo, depois clique com o botão esquerdo na opção "Copiar como caminho". Se a opção já aparecer sem precisar de Shift (comum em versões mais novas do Windows), pode usar direto.</div>
-    </div>
-    <div class="field">
-      <label>Tamanho do arquivo copiado</label>
-      <input type="text" id="f_cop_tamanho" placeholder="Ex.: 184.372.916 bytes">
-    </div>
-    <div class="field">
-      <label>Data e hora da criação/transferência do arquivo</label>
-      <input type="text" class="mono" id="f_cop_data_criacao" placeholder="dd/mm/aaaa hh:mm:ss">
-      <div class="hint"><b>Como localizar:</b> preenchido automaticamente com a data de criação/modificação do arquivo anexado acima — confira se corresponde ao horário real da transferência.</div>
-    </div>
-    <div class="field">
-      <label>Ferramenta usada para gerar o hash no PC</label>
-      <div class="cascade-row">
-        <select id="f_cop_ferramenta_sis"></select>
-        <select id="f_cop_ferramenta_tool"></select>
-      </div>
-      <input type="text" id="f_cop_ferramenta_outro" class="hidden-view" placeholder="Especifique a ferramenta/comando utilizado">
-      <input type="hidden" id="f_cop_ferramenta">
-    </div>
-    <div class="field">
-      <label>Hash SHA-256 do arquivo COPIADO</label>
-      <input type="text" class="mono" id="f_hash_copia" placeholder="Cole aqui o valor gerado no PC">
-    </div>
-    <div class="field">
-      <label>Hora exata do cálculo do hash da cópia</label>
-      <input type="text" class="mono" id="f_hora_hash_copia" placeholder="dd/mm/aaaa hh:mm:ss" readonly data-wp="datetime-sec">
+      <label>Hash da lista de hashes (arquivos copiados)</label>
+      <input type="text" class="mono" id="f_hash_lista_copia" readonly placeholder="Calculado automaticamente a partir dos hashes acima">
+      <div class="hint">Camada extra de integridade sobre o conjunto de arquivos copiados, conforme recomendação do Manual de POP de Informática Forense (MJSP).</div>
     </div>
   </section>
 
   <!-- SECTION 7 (auto) -->
   <section class="card">
     <h2><span class="num">7</span>Análise de Integridade - avaliação de identidade entre os arquivos da fonte e dos destinos (PC e Drive)</h2>
-    <p class="desc">Preenchido automaticamente a partir dos hashes informados nas seções 3 e 6.</p>
-    <div id="hashCompareBox" class="hash-check neutral">Informe os dois hashes acima para comparar automaticamente.</div>
+    <p class="desc">Preenchido automaticamente a partir dos hashes informados nas seções 4 e 6, arquivo por arquivo.</p>
+    <div id="hashCompareList"></div>
+    <div id="hashCompareBox" class="hash-check neutral">Adicione ao menos um arquivo nas Seções 4 e 6 para comparar automaticamente.</div>
     <div class="field">
       <label>Conclusão técnica</label>
       <textarea id="f_conclusao">A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo móvel, e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.</textarea>
@@ -3067,7 +3088,8 @@ function switchConnTab(tab){
   const tabs = {
     info: { panel: 'connTabInfo', btn: 'connTabBtnInfo' },
     sistema: { panel: 'connTabSistema', btn: 'connTabBtnSistema' },
-    usuarios: { panel: 'connTabUsuarios', btn: 'connTabBtnUsuarios' }
+    usuarios: { panel: 'connTabUsuarios', btn: 'connTabBtnUsuarios' },
+    relatorios: { panel: 'connTabRelatorios', btn: 'connTabBtnRelatorios' }
   };
   Object.entries(tabs).forEach(([key, ids]) => {
     const active = key === tab;
@@ -3077,10 +3099,53 @@ function switchConnTab(tab){
   });
   if(tab === 'usuarios') renderAllUsersList();
   if(tab === 'info') renderAppInfoTab();
+  if(tab === 'relatorios') loadAllReportsForSearch();
 }
 $('connTabBtnInfo').addEventListener('click', () => switchConnTab('info'));
 $('connTabBtnSistema').addEventListener('click', () => switchConnTab('sistema'));
 $('connTabBtnUsuarios').addEventListener('click', () => switchConnTab('usuarios'));
+$('connTabBtnRelatorios').addEventListener('click', () => switchConnTab('relatorios'));
+
+// ---------- busca/filtro global de relatórios (Gestão do App) ----------
+let allReportsCache = [];
+async function loadAllReportsForSearch(){
+  const statusEl = $('allReportsStatus');
+  statusEl.textContent = 'Carregando…';
+  statusEl.className = 'loc-status';
+  try {
+    const data = await callAppsScript({ action: 'list_all_reports' });
+    allReportsCache = data.relatorios || [];
+    statusEl.textContent = '';
+    renderAllReportsList('');
+  } catch(err){
+    statusEl.textContent = 'Não foi possível carregar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+}
+function renderAllReportsList(termo){
+  const listEl = $('allReportsList');
+  const t = (termo || '').trim().toLowerCase();
+  const filtrados = !t ? allReportsCache : allReportsCache.filter(r =>
+    (r.relatorioNum || '').toLowerCase().includes(t) ||
+    (r.processoNum || '').toLowerCase().includes(t) ||
+    (r.reparticaoNome || '').toLowerCase().includes(t) ||
+    (r.nome || '').toLowerCase().includes(t)
+  );
+  if(filtrados.length === 0){
+    listEl.innerHTML = '<div class="rep-users-empty">Nenhum relatório encontrado.</div>';
+    return;
+  }
+  listEl.innerHTML = filtrados.slice(0, 100).map(r => `
+    <div class="rep-user-card">
+      <div class="rep-user-nome">${esc(r.relatorioNum || 'Sem número')}${r.processoNum ? ' — Processo ' + esc(r.processoNum) : ''}</div>
+      <div class="rep-user-detail">Repartição: ${esc(r.reparticaoNome || r.reparticaoId)}</div>
+      <div class="rep-user-detail">Responsável: ${esc(r.nome)} (${esc(r.email)})</div>
+      <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
+      ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>` : ''}
+    </div>
+  `).join('');
+}
+$('allReportsSearchInput').addEventListener('input', () => renderAllReportsList($('allReportsSearchInput').value));
 
 // única fonte de verdade sobre a versão atual do app — atualizar aqui
 // a cada nova versão publicada (usada tanto na sidebar quanto na aba
@@ -3465,7 +3530,7 @@ function appendToTextarea(textareaEl, sentence){
   textareaEl.value = textareaEl.value.trim() ? textareaEl.value.trim() + '\n' + sentence : sentence;
 }
 
-const attachedFiles = { orig: null, cop: null };
+const attachedFiles = { orig: null, cop: null }; // mantido só para compatibilidade de leitura por código externo; não é mais a fonte de dados dos arquivos (ver origArquivosManager/copArquivosManager)
 
 // prefixa o arquivo com as iniciais dos dois primeiros nomes de quem
 // está enviando, ex.: "Fillipe Amorim Firmo da Silva" -> "FA - nome.ext"
@@ -3476,42 +3541,70 @@ function renameFileWithInitials(file){
   return new File([file], prefix + file.name, { type: file.type });
 }
 
-let lastEvidenceDriveLink = null; // link do Drive do arquivo evidência (Seção 9), consumido ao concluir a tarefa
+let lastEvidenceDriveLink = null; // link do Drive do último arquivo evidência enviado (Seção 9), consumido ao concluir a tarefa
 
 async function handleCustodyShare(){
-  const fileOriginal = attachedFiles.cop;
+  const entradasCop = copArquivosManager.getEntries().filter(e => e.file);
+  const anexosParaEnviar = [
+    ...anexosFixosDefs.filter(def => anexosFixosFiles[def.key]).map(def => ({ file: anexosFixosFiles[def.key], label: def.label })),
+    ...anexoFiles.map((f, idx) => f ? { file: f, label: defaultAnexos[idx] || `Anexo extra ${idx + 1}` } : null).filter(Boolean)
+  ];
   const statusEl = $('shareRepStatus');
   const textareaEl = $('f_custodia_copia');
-  if(!fileOriginal){
-    statusEl.textContent = 'Anexe o arquivo copiado na Seção 6 antes de enviar.';
+  if(entradasCop.length === 0){
+    statusEl.textContent = 'Anexe ao menos um arquivo copiado na Seção 6 antes de enviar.';
     statusEl.className = 'loc-status err';
     return;
   }
-  const file = renameFileWithInitials(fileOriginal);
   const rep = getSelectedReparticao();
   const btn = $('shareRepBtn');
   btn.disabled = true;
   try {
     if(rep && rep.clientId && rep.folderId){
-      const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
-      lastEvidenceDriveLink = result.webViewLink || null;
-      if(currentUser && currentUser.email){
-        callAppsScript({
-          action: 'log_arquivo_enviado',
-          email: currentUser.email, reparticaoId: rep.clientId,
-          arquivo: file.name, driveLink: lastEvidenceDriveLink || ''
-        }).catch(() => {});
-      }
-      // prioriza o nome salvo no cadastro da repartição — a consulta ao
-      // Drive quase sempre falha aqui, já que o escopo de permissão do
-      // app não alcança metadados de pastas que ele não criou
       const folderName = rep.folderNome || await getDriveFolderName(rep.folderId, rep.clientId);
-      const sentence = buildCustodySentence(file.name, `da ${rep.nome}`, folderName || rep.folderId);
-      appendToTextarea(textareaEl, sentence);
-      statusEl.textContent = '✓ ' + sentence;
+      const total = entradasCop.length + anexosParaEnviar.length;
+      let enviados = 0;
+      for(let idx = 0; idx < entradasCop.length; idx++){
+        const file = renameFileWithInitials(entradasCop[idx].file);
+        enviados++;
+        statusEl.textContent = `Enviando arquivo ${enviados} de ${total} (${file.name})…`;
+        statusEl.className = 'loc-status';
+        const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
+        lastEvidenceDriveLink = result.webViewLink || null;
+        if(currentUser && currentUser.email){
+          callAppsScript({
+            action: 'log_arquivo_enviado',
+            email: currentUser.email, reparticaoId: rep.clientId,
+            arquivo: file.name, driveLink: lastEvidenceDriveLink || ''
+          }).catch(() => {});
+        }
+        const sentence = buildCustodySentence(file.name, `da ${rep.nome}`, folderName || rep.folderId);
+        appendToTextarea(textareaEl, sentence);
+      }
+      // envia também os anexos obrigatórios/extras da Seção 8 (fotos do
+      // equipamento, da tela em nuvem, do arquivo aberto, etc.), para
+      // que fiquem de fato preservados como evidência, e não só citados
+      // por nome no relatório
+      for(let idx = 0; idx < anexosParaEnviar.length; idx++){
+        const item = anexosParaEnviar[idx];
+        const file = renameFileWithInitials(item.file);
+        enviados++;
+        statusEl.textContent = `Enviando anexo ${enviados} de ${total} (${file.name})…`;
+        statusEl.className = 'loc-status';
+        const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
+        if(currentUser && currentUser.email){
+          callAppsScript({
+            action: 'log_arquivo_enviado',
+            email: currentUser.email, reparticaoId: rep.clientId,
+            arquivo: file.name, driveLink: result.webViewLink || ''
+          }).catch(() => {});
+        }
+      }
+      statusEl.textContent = `✓ ${total} arquivo(s) enviado(s) com sucesso.`;
       statusEl.className = 'loc-status ok';
-    } else if(navigator.share && navigator.canShare && navigator.canShare({ files: [file] })){
-      await navigator.share({ files: [file], title: file.name });
+    } else if(navigator.share && navigator.canShare && navigator.canShare({ files: entradasCop.map(e => renameFileWithInitials(e.file)) })){
+      const filesToShare = entradasCop.map(e => renameFileWithInitials(e.file));
+      await navigator.share({ files: filesToShare, title: filesToShare[0].name });
       statusEl.textContent = 'Compartilhado via menu do celular — confirme manualmente onde foi salvo.';
       statusEl.className = 'loc-status ok';
     } else {
@@ -3530,6 +3623,37 @@ async function handleCustodyShare(){
 $('shareRepBtn').addEventListener('click', handleCustodyShare);
 
 // ---------- Seção 9: seletor de custódia do dispositivo original ----------
+// ---------- fuso horário do PC de destino (detectável automaticamente) ----------
+// ---------- alterações além do normal (Seção 3) ----------
+$('f_alteracoes_tipo').addEventListener('change', () => {
+  const mostrar = $('f_alteracoes_tipo').value === 'sim';
+  $('f_alteracoes_descricao').classList.toggle('hidden-view', !mostrar);
+  if(!mostrar) $('f_alteracoes_descricao').value = '';
+});
+
+// ---------- bloqueador de escrita (HD/SSD e computador como fonte) ----------
+['f_storage_write_blocker', 'f_origSrc_write_blocker'].forEach(id => {
+  const ferramentaId = id + '_ferramenta';
+  $(id).addEventListener('change', () => {
+    $(ferramentaId).classList.toggle('hidden-view', $(id).value !== 'sim');
+    if($(id).value !== 'sim') $(ferramentaId).value = '';
+  });
+});
+
+$('f_pc_fuso_detect_btn').addEventListener('click', () => {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const offsetMin = -new Date().getTimezoneOffset();
+    const sinal = offsetMin >= 0 ? '+' : '-';
+    const abs = Math.abs(offsetMin);
+    const horas = String(Math.floor(abs / 60)).padStart(2, '0');
+    const min = String(abs % 60).padStart(2, '0');
+    $('f_pc_fuso').value = `(UTC${sinal}${horas}:${min}) ${tz}`;
+  } catch(e){
+    alert('Não foi possível detectar o fuso horário automaticamente neste navegador. Preencha manualmente.');
+  }
+});
+
 function updateCustodiaOriginalReparticaoLabel(){
   const rep = getSelectedReparticao();
   const opt = document.querySelector('#f_custodia_original_tipo option[value="reparticao"]');
@@ -3546,60 +3670,6 @@ $('f_custodia_original_tipo').addEventListener('change', () => {
   }
 });
 
-function setupFileAttach({ btnId, inputId, nameId, statusId, hashFieldId, nomeFieldId, tamanhoFieldId, modificacaoFieldId, horaHashFieldId, attachKey }){
-  const btn = $(btnId), input = $(inputId), nameEl = $(nameId), statusEl = $(statusId);
-
-  btn.addEventListener('click', () => input.click());
-  input.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    if(attachKey) attachedFiles[attachKey] = file;
-    nameEl.textContent = file.name;
-
-    if(!(window.crypto && window.crypto.subtle)){
-      statusEl.textContent = 'Este navegador/contexto não permite calcular o hash automaticamente (recurso requer o app aberto em https). Preencha o hash manualmente.';
-      statusEl.className = 'loc-status err';
-      if(nomeFieldId) $(nomeFieldId).value = file.name;
-      if(tamanhoFieldId) $(tamanhoFieldId).value = formatBytes(file.size);
-      if(modificacaoFieldId && file.lastModified) $(modificacaoFieldId).value = formatDateTimeFromMs(file.lastModified);
-      return;
-    }
-
-    btn.disabled = true;
-    statusEl.textContent = 'Calculando hash SHA-256 do arquivo…';
-    statusEl.className = 'loc-status';
-    try {
-      const buf = await file.arrayBuffer();
-      const hex = await sha256Hex(buf);
-
-      if(nomeFieldId) $(nomeFieldId).value = file.name;
-      if(tamanhoFieldId) $(tamanhoFieldId).value = formatBytes(file.size);
-      if(modificacaoFieldId && file.lastModified) $(modificacaoFieldId).value = formatDateTimeFromMs(file.lastModified);
-      $(hashFieldId).value = hex;
-      if(horaHashFieldId) $(horaHashFieldId).value = formatDateTimeFromMs(Date.now());
-      updateHashCompare();
-
-      statusEl.textContent = '✓ Hash calculado a partir do arquivo anexado.';
-      statusEl.className = 'loc-status ok';
-    } catch(err){
-      statusEl.textContent = 'Não foi possível calcular o hash automaticamente: ' + err.message + '. Preencha manualmente.';
-      statusEl.className = 'loc-status err';
-    } finally {
-      btn.disabled = false;
-    }
-  });
-}
-
-setupFileAttach({
-  btnId: 'f_orig_file_btn', inputId: 'f_orig_file_input', nameId: 'f_orig_file_name', statusId: 'f_orig_file_status',
-  hashFieldId: 'f_hash_original', nomeFieldId: 'f_orig_nome', tamanhoFieldId: 'f_orig_tamanho',
-  modificacaoFieldId: 'f_orig_modificacao', horaHashFieldId: 'f_hora_hash_original', attachKey: 'orig'
-});
-setupFileAttach({
-  btnId: 'f_cop_file_btn', inputId: 'f_cop_file_input', nameId: 'f_cop_file_name', statusId: 'f_cop_file_status',
-  hashFieldId: 'f_hash_copia', nomeFieldId: 'f_cop_nome', tamanhoFieldId: 'f_cop_tamanho',
-  modificacaoFieldId: 'f_cop_data_criacao', horaHashFieldId: 'f_hora_hash_copia', attachKey: 'cop'
-});
 updateDriveStatusUI(isDriveConnectedFlag());
 
 
@@ -3671,8 +3741,234 @@ function setupCascade(sisId, toolId, outroId, hiddenId, optionsMap){
   populateTool();
 }
 
-setupCascade('f_orig_ferramenta_sis', 'f_orig_ferramenta_tool', 'f_orig_ferramenta_outro', 'f_orig_ferramenta', FERRAMENTA_APARELHO);
-setupCascade('f_cop_ferramenta_sis', 'f_cop_ferramenta_tool', 'f_cop_ferramenta_outro', 'f_cop_ferramenta', FERRAMENTA_PC);
+// ---------- múltiplos arquivos por dispositivo fonte (Seções 4 e 6) ----------
+// fábrica reutilizável: cada seção tem sua própria lista de arquivos,
+// cada um com anexo + cálculo automático de hash, e um hash da lista
+// (soma de todos os hashes individuais) é recalculado a cada mudança,
+// conforme recomendação do Manual de POP de Informática Forense (MJSP)
+function createMultiFileManager(cfg){
+  const entries = [];
+  let nextId = 0;
+  const listEl = $(cfg.listContainerId);
+
+  function ids(id){
+    const p = cfg.idPrefix;
+    return {
+      fileBtn: `${p}_file_btn_${id}`, fileInput: `${p}_file_input_${id}`,
+      fileName: `${p}_file_name_${id}`, fileStatus: `${p}_file_status_${id}`,
+      nome: `${p}_nome_${id}`, caminho: `${p}_caminho_${id}`,
+      tamanho: `${p}_tamanho_${id}`, data: `${p}_data_${id}`,
+      ferrSis: `${p}_ferr_sis_${id}`, ferrTool: `${p}_ferr_tool_${id}`,
+      ferrOutro: `${p}_ferr_outro_${id}`, ferrHidden: `${p}_ferr_hidden_${id}`,
+      hash: `${p}_hash_${id}`, horaHash: `${p}_hora_hash_${id}`
+    };
+  }
+
+  function novaEntrada(){
+    return { id: nextId++, file: null, nome: '', caminho: '', tamanho: '', data: '', ferramenta: '', hash: '', horaHash: '' };
+  }
+
+  // restaura a seleção da cascata sis/ferramenta a partir do valor
+  // salvo na entrada — necessário porque cada redesenho da lista cria
+  // seletores novos, começando do zero
+  function restoreFerramenta(i, valor){
+    const sisSel = $(i.ferrSis), toolSel = $(i.ferrTool), outroInp = $(i.ferrOutro), hidden = $(i.ferrHidden);
+    if(!valor){ hidden.value = ''; return; }
+    for(const sis of Object.keys(cfg.ferramentaOptions)){
+      if(cfg.ferramentaOptions[sis].includes(valor)){
+        sisSel.value = sis;
+        sisSel.dispatchEvent(new Event('change'));
+        toolSel.value = valor;
+        toolSel.dispatchEvent(new Event('change'));
+        return;
+      }
+    }
+    toolSel.value = 'Outro (especificar)';
+    toolSel.dispatchEvent(new Event('change'));
+    outroInp.value = valor;
+    hidden.value = valor;
+  }
+
+  async function onFileChange(entry, i, btn, input, nameEl, statusEl){
+    const file = input.files[0];
+    if(!file) return;
+    entry.file = file;
+    nameEl.textContent = file.name;
+    if(!(window.crypto && window.crypto.subtle)){
+      statusEl.textContent = 'Este navegador/contexto não permite calcular o hash automaticamente (recurso requer o app aberto em https). Preencha o hash manualmente.';
+      statusEl.className = 'loc-status err';
+      entry.nome = file.name; $(i.nome).value = entry.nome;
+      entry.tamanho = formatBytes(file.size); $(i.tamanho).value = entry.tamanho;
+      if(file.lastModified){ entry.data = formatDateTimeFromMs(file.lastModified); $(i.data).value = entry.data; }
+      return;
+    }
+    btn.disabled = true;
+    statusEl.textContent = 'Calculando hash SHA-256 do arquivo…';
+    statusEl.className = 'loc-status';
+    try {
+      const buf = await file.arrayBuffer();
+      const hex = await sha256Hex(buf);
+      entry.nome = file.name; $(i.nome).value = entry.nome;
+      entry.tamanho = formatBytes(file.size); $(i.tamanho).value = entry.tamanho;
+      if(file.lastModified){ entry.data = formatDateTimeFromMs(file.lastModified); $(i.data).value = entry.data; }
+      entry.hash = hex; $(i.hash).value = entry.hash;
+      entry.horaHash = formatDateTimeFromMs(Date.now()); $(i.horaHash).value = entry.horaHash;
+      statusEl.textContent = '✓ Hash calculado a partir do arquivo anexado.';
+      statusEl.className = 'loc-status ok';
+      cfg.onUpdate();
+    } catch(err){
+      statusEl.textContent = 'Não foi possível calcular o hash automaticamente: ' + err.message + '. Preencha manualmente.';
+      statusEl.className = 'loc-status err';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderEntry(entry, index){
+    const i = ids(entry.id);
+    const removable = entries.length > 1;
+    const div = document.createElement('div');
+    div.className = 'multi-file-entry';
+    div.style.cssText = 'border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px;';
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <b style="font-size:12.5px;color:var(--muted);">Arquivo ${index + 1}</b>
+        ${removable ? `<button type="button" class="btn-link" data-remove-entry="${entry.id}" style="color:var(--warn-ink);font-size:11.5px;">Remover</button>` : ''}
+      </div>
+      <div class="field">
+        <div class="file-attach-row">
+          <input type="file" id="${i.fileInput}" style="display:none;">
+          <button type="button" class="btn-attach" id="${i.fileBtn}">📎 Selecionar arquivo</button>
+          <span class="file-attach-name" id="${i.fileName}">${esc(entry.file ? entry.file.name : '')}</span>
+        </div>
+        <div class="loc-status" id="${i.fileStatus}"></div>
+      </div>
+      <div class="field">
+        <label>Nome do arquivo</label>
+        <input type="text" class="mono" id="${i.nome}" placeholder="msgstore.db.crypt14" value="${esc(entry.nome)}">
+      </div>
+      <div class="field">
+        <label>${cfg.caminhoLabel}</label>
+        <input type="text" class="mono" id="${i.caminho}" placeholder="${cfg.caminhoPlaceholder}" value="${esc(entry.caminho)}">
+        <div class="hint">${cfg.caminhoHint}</div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>${cfg.tamanhoLabel}</label>
+          <input type="text" id="${i.tamanho}" placeholder="Ex.: 184.372.916 bytes" value="${esc(entry.tamanho)}">
+        </div>
+        <div class="field">
+          <label>${cfg.dataLabel}</label>
+          <input type="text" class="mono" id="${i.data}" placeholder="dd/mm/aaaa hh:mm:ss" value="${esc(entry.data)}">
+        </div>
+      </div>
+      <div class="field">
+        <label>${cfg.ferramentaLabel}</label>
+        <div class="cascade-row">
+          <select id="${i.ferrSis}"></select>
+          <select id="${i.ferrTool}"></select>
+        </div>
+        <input type="text" id="${i.ferrOutro}" class="hidden-view" placeholder="Especifique a ferramenta/comando utilizado">
+        <input type="hidden" id="${i.ferrHidden}">
+      </div>
+      <div class="field">
+        <label>${cfg.hashLabel}</label>
+        <input type="text" class="mono" id="${i.hash}" placeholder="${cfg.hashPlaceholder}" value="${esc(entry.hash)}">
+      </div>
+      <div class="field">
+        <label>${cfg.horaHashLabel}</label>
+        <input type="text" class="mono" id="${i.horaHash}" placeholder="dd/mm/aaaa hh:mm:ss" readonly value="${esc(entry.horaHash)}">
+      </div>
+    `;
+    listEl.appendChild(div);
+
+    setupCascade(i.ferrSis, i.ferrTool, i.ferrOutro, i.ferrHidden, cfg.ferramentaOptions);
+    restoreFerramenta(i, entry.ferramenta);
+
+    const btn = $(i.fileBtn), input = $(i.fileInput), nameEl = $(i.fileName), statusEl = $(i.fileStatus);
+    btn.addEventListener('click', () => input.click());
+    input.addEventListener('change', () => onFileChange(entry, i, btn, input, nameEl, statusEl));
+
+    // mantém a entrada em memória sincronizada com o que o usuário
+    // digita manualmente, para sobreviver a um redesenho da lista
+    $(i.nome).addEventListener('input', e => entry.nome = e.target.value);
+    $(i.caminho).addEventListener('input', e => entry.caminho = e.target.value);
+    $(i.tamanho).addEventListener('input', e => entry.tamanho = e.target.value);
+    $(i.data).addEventListener('input', e => entry.data = e.target.value);
+    $(i.ferrHidden).addEventListener('input', e => entry.ferramenta = e.target.value);
+    $(i.hash).addEventListener('input', e => { entry.hash = e.target.value; cfg.onUpdate(); });
+
+    if(removable){
+      div.querySelector('[data-remove-entry]').addEventListener('click', () => {
+        const idx = entries.findIndex(en => en.id === entry.id);
+        if(idx >= 0) entries.splice(idx, 1);
+        renderAll();
+        cfg.onUpdate();
+      });
+    }
+  }
+
+  function renderAll(){
+    listEl.innerHTML = '';
+    entries.forEach((entry, index) => renderEntry(entry, index));
+  }
+
+  function addEntry(){
+    entries.push(novaEntrada());
+    renderAll();
+  }
+
+  function reset(){
+    entries.length = 0;
+    nextId = 0;
+    addEntry();
+    $(cfg.hashListaFieldId).value = '';
+  }
+
+  function getEntries(){
+    return entries.map(entry => ({ ...entry }));
+  }
+
+  async function updateHashLista(){
+    const hashes = getEntries().map(e => normHash(e.hash)).filter(h => h);
+    if(hashes.length === 0){ $(cfg.hashListaFieldId).value = ''; return; }
+    const enc = new TextEncoder().encode(hashes.join(''));
+    $(cfg.hashListaFieldId).value = await sha256Hex(enc.buffer);
+  }
+
+  $(cfg.addBtnId).addEventListener('click', addEntry);
+  addEntry();
+
+  return { getEntries, reset, updateHashLista };
+}
+
+const origArquivosManager = createMultiFileManager({
+  listContainerId: 'origArquivosList', addBtnId: 'addOrigArquivoBtn', idPrefix: 'orig',
+  hashListaFieldId: 'f_hash_lista_original', ferramentaOptions: FERRAMENTA_APARELHO,
+  caminhoLabel: 'Caminho no dispositivo',
+  caminhoPlaceholder: 'Ex.: /storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Databases/...',
+  caminhoHint: '<b>Como localizar, conforme o tipo de fonte (Seção 3):</b><br>' +
+    '• <b>Celular/Tablet (Android):</b> gerenciador de arquivos > Armazenamento interno > Android > media > com.whatsapp > WhatsApp > Databases.<br>' +
+    '• <b>HD/SSD externo, pen drive ou outro computador:</b> navegue até a pasta/arquivo pelo gerenciador de arquivos do sistema.<br>' +
+    '• <b>Servidor em nuvem:</b> caminho da pasta/arquivo dentro do provedor (ex.: "Meu Drive/Backups/...").',
+  tamanhoLabel: 'Tamanho do arquivo', dataLabel: 'Última modificação',
+  ferramentaLabel: 'Ferramenta usada para gerar o hash no aparelho',
+  hashLabel: 'Hash SHA-256 do arquivo ORIGINAL', hashPlaceholder: 'Cole aqui o valor gerado no celular',
+  horaHashLabel: 'Hora exata do cálculo do hash original',
+  onUpdate: () => { origArquivosManager.updateHashLista(); updateHashCompare(); }
+});
+const copArquivosManager = createMultiFileManager({
+  listContainerId: 'copArquivosList', addBtnId: 'addCopArquivoBtn', idPrefix: 'cop',
+  hashListaFieldId: 'f_hash_lista_copia', ferramentaOptions: FERRAMENTA_PC,
+  caminhoLabel: 'Caminho completo no PC',
+  caminhoPlaceholder: 'C:\\Extracao_WhatsApp\\Processo_0000123-45\\msgstore.db.crypt14',
+  caminhoHint: '<b>Como localizar:</b> segure Shift e clique com o botão direito do mouse sobre o arquivo, depois clique com o botão esquerdo na opção "Copiar como caminho".',
+  tamanhoLabel: 'Tamanho do arquivo copiado', dataLabel: 'Data e hora da criação/transferência do arquivo',
+  ferramentaLabel: 'Ferramenta usada para gerar o hash no PC',
+  hashLabel: 'Hash SHA-256 do arquivo COPIADO', hashPlaceholder: 'Cole aqui o valor gerado no PC',
+  horaHashLabel: 'Hora exata do cálculo do hash da cópia',
+  onUpdate: () => { copArquivosManager.updateHashLista(); updateHashCompare(); }
+});
 
 // ---------- OCR: ler IMEI de uma foto ----------
 function extractImeiCandidates(text){
@@ -5138,6 +5434,52 @@ $('startFormBtn').addEventListener('click', () => {
 });
 $('backToLastSectionBtn').addEventListener('click', () => goToFormSection(formSections.length - 1));
 
+// ---------- QR Code de verificação pública ----------
+function addVerificationQrCode(){
+  const el = $('reportQrCode');
+  if(!el) return;
+  el.innerHTML = '';
+  const hashHex = normHash($('f_hash_lista_original').value) || normHash((origArquivosManager.getEntries()[0] || {}).hash || '');
+  if(!hashHex || !window.QRCode) return;
+  const baseUrl = location.origin + location.pathname;
+  const verifyUrl = `${baseUrl}?verificar=${hashHex}`;
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:inline-block;';
+  el.appendChild(wrap);
+  new QRCode(wrap, { text: verifyUrl, width: 120, height: 120 });
+  const caption = document.createElement('p');
+  caption.className = 'body-text';
+  caption.style.cssText = 'font-size:10px;color:var(--muted);margin-top:4px;';
+  caption.textContent = 'Escaneie para verificar publicamente o hash deste relatório, sem precisar de login.';
+  el.appendChild(caption);
+}
+
+// ---------- tela de verificação pública (acessível sem login) ----------
+(function initPublicVerification(){
+  const params = new URLSearchParams(location.search);
+  const hash = params.get('verificar');
+  if(!hash) return;
+  $('verifyHashFromQr').value = normHash(hash);
+  $('verifyView').classList.remove('hidden-view');
+  $('verifyCheckBtn').addEventListener('click', () => {
+    const a = normHash($('verifyHashFromQr').value);
+    const b = normHash($('verifyHashInput').value);
+    const box = $('verifyResultBox');
+    if(!b){
+      box.className = 'hash-check neutral';
+      box.textContent = 'Cole o hash do arquivo que você tem em mãos para comparar.';
+      return;
+    }
+    if(a === b){
+      box.className = 'hash-check ok';
+      box.textContent = '✓ CONFERE — o hash do arquivo em suas mãos é idêntico ao registrado no relatório.';
+    } else {
+      box.className = 'hash-check warn';
+      box.textContent = '⚠ NÃO CONFERE — os hashes são diferentes. O arquivo em mãos não corresponde ao registrado neste relatório.';
+    }
+  });
+})();
+
 // restaura sessão ativa, se houver
 (function initSession(){
   populateLoginSelect();
@@ -5251,12 +5593,13 @@ const sectionValidators = {
   3: () => {
     const faltando = [];
     if(!$('f_metodo_transf').value) faltando.push('Método de transferência');
-    if(!attachedFiles.orig) faltando.push('Adicionar arquivo (cópia para o Drive)');
-    if(!$('f_orig_caminho').value.trim()) faltando.push('Caminho no dispositivo');
+    const entradas = origArquivosManager.getEntries();
+    entradas.forEach((e, idx) => {
+      if(!e.file) faltando.push(`Arquivo ${idx + 1} — anexar o arquivo (cópia para o Drive)`);
+      if(!e.caminho.trim()) faltando.push(`Arquivo ${idx + 1} — Caminho no dispositivo`);
+    });
     if(faltando.length){
       alert('Preencha os seguintes campos obrigatórios antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d).join('\n'));
-      $('f_orig_file_status').textContent = !attachedFiles.orig ? 'Anexe o arquivo (cópia para o Drive) antes de seguir para a próxima seção.' : '';
-      $('f_orig_file_status').className = 'loc-status err';
       return false;
     }
     return true;
@@ -5271,12 +5614,16 @@ const sectionValidators = {
   },
   5: () => {
     const faltando = [];
-    if(!attachedFiles.cop) faltando.push('Anexar arquivo (arquivo transferido para o PC)');
-    if(!$('f_cop_caminho').value.trim()) faltando.push('Caminho completo no PC');
+    const entradas = copArquivosManager.getEntries();
+    entradas.forEach((e, idx) => {
+      if(!e.file) faltando.push(`Arquivo ${idx + 1} — anexar o arquivo (transferido para o PC)`);
+      if(!e.caminho.trim()) faltando.push(`Arquivo ${idx + 1} — Caminho completo no PC`);
+    });
+    if(entradas.length !== origArquivosManager.getEntries().length){
+      faltando.push(`A quantidade de arquivos aqui (${entradas.length}) deve ser igual à quantidade informada na Seção 4 (${origArquivosManager.getEntries().length})`);
+    }
     if(faltando.length){
       alert('Preencha os seguintes campos obrigatórios antes de seguir para a próxima seção:\n\n' + faltando.map(d => '• ' + d).join('\n'));
-      $('f_cop_file_status').textContent = !attachedFiles.cop ? 'Anexe o arquivo (arquivo transferido para o PC) antes de seguir para a próxima seção.' : '';
-      $('f_cop_file_status').className = 'loc-status err';
       return false;
     }
     return true;
@@ -5424,26 +5771,60 @@ renderAnexos();
 $('addAnexoBtn').addEventListener('click', () => { defaultAnexos.push(''); defaultAnexoHints.push(''); anexoFiles.push(null); renderAnexos(); });
 $('f_origem_tipo').addEventListener('change', () => renderAnexos());
 
-// ---------- hash live compare ----------
+// ---------- hash live compare (múltiplos arquivos, par a par) ----------
 function normHash(v){ return (v||'').trim().toLowerCase().replace(/\s+/g,''); }
 function updateHashCompare(){
-  const a = normHash($('f_hash_original').value);
-  const b = normHash($('f_hash_copia').value);
+  const originais = origArquivosManager.getEntries();
+  const copias = copArquivosManager.getEntries();
+  const listEl = $('hashCompareList');
   const box = $('hashCompareBox');
-  if(!a || !b){
+  listEl.innerHTML = '';
+
+  const comHash = originais.filter(e => normHash(e.hash)).length > 0 || copias.filter(e => normHash(e.hash)).length > 0;
+  if(!comHash){
     box.className = 'hash-check neutral';
-    box.textContent = 'Informe os dois hashes acima para comparar automaticamente.';
+    box.textContent = 'Adicione ao menos um arquivo nas Seções 4 e 6 para comparar automaticamente.';
     return;
   }
-  if(a === b){
+
+  const max = Math.max(originais.length, copias.length);
+  let todasOk = true;
+  let algumaComparada = false;
+  for(let idx = 0; idx < max; idx++){
+    const a = normHash((originais[idx] || {}).hash);
+    const b = normHash((copias[idx] || {}).hash);
+    const nome = (originais[idx] || {}).nome || (copias[idx] || {}).nome || `Arquivo ${idx + 1}`;
+    const row = document.createElement('div');
+    row.className = 'hash-check';
+    row.style.marginBottom = '8px';
+    if(!a || !b){
+      row.classList.add('neutral');
+      row.textContent = `${nome}: aguardando os dois hashes para comparar.`;
+    } else {
+      algumaComparada = true;
+      if(a === b){
+        row.classList.add('ok');
+        row.textContent = `✓ ${nome}: HASHES IDÊNTICOS.`;
+      } else {
+        row.classList.add('warn');
+        row.textContent = `⚠ ${nome}: HASHES DIVERGENTES.`;
+        todasOk = false;
+      }
+    }
+    listEl.appendChild(row);
+  }
+
+  if(!algumaComparada){
+    box.className = 'hash-check neutral';
+    box.textContent = 'Informe os hashes correspondentes nas Seções 4 e 6 para comparar automaticamente.';
+  } else if(todasOk){
     box.className = 'hash-check ok';
-    box.textContent = '✓ HASHES IDÊNTICOS — integridade confirmada.';
+    box.textContent = '✓ TODOS OS HASHES CONFEREM — integridade confirmada para todos os arquivos.';
   } else {
     box.className = 'hash-check warn';
-    box.textContent = '⚠ HASHES DIVERGENTES — a integridade da cópia NÃO pode ser confirmada. Revise os valores antes de gerar o relatório.';
+    box.textContent = '⚠ HÁ DIVERGÊNCIA em pelo menos um arquivo — a integridade da(s) cópia(s) NÃO pode ser confirmada. Revise os valores antes de gerar o relatório.';
   }
 }
-['f_hash_original','f_hash_copia'].forEach(id => $(id).addEventListener('input', updateHashCompare));
 
 function esc(s){
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -5483,6 +5864,12 @@ const origemTipoLabels = {
   pc: 'Computador', cloud: 'Servidor em nuvem', router: 'Roteador / Modem', outro: 'Outro'
 };
 
+function writeBlockerLabel(valor, ferramenta){
+  if(valor === 'sim') return 'Sim' + (ferramenta ? ` — ${ferramenta}` : '');
+  if(valor === 'nao') return 'Não';
+  return '';
+}
+
 function buildOrigemRows(v){
   const tipo = v('f_origem_tipo');
   if(tipo === 'celular' || tipo === 'tablet'){
@@ -5501,6 +5888,7 @@ function buildOrigemRows(v){
       ${row('Capacidade de armazenamento', v('f_storage_capacidade'))}
       ${row('Sistema de arquivos', v('f_storage_fs'))}
       ${row('Formato de conexão', v('f_storage_conexao'))}
+      ${row('Utilizou bloqueador de escrita (write blocker)?', writeBlockerLabel(v('f_storage_write_blocker'), v('f_storage_write_blocker_ferramenta')))}
     `;
   }
   if(tipo === 'pc'){
@@ -5510,6 +5898,7 @@ function buildOrigemRows(v){
       ${row('ID do Produto', v('f_origSrc_uuid'))}
       ${row('Sistema operacional - Edição e Versão', v('f_origSrc_so'))}
       ${row('Número de tombamento', v('f_origSrc_tombamento'))}
+      ${row('Utilizou bloqueador de escrita (write blocker)?', writeBlockerLabel(v('f_origSrc_write_blocker'), v('f_origSrc_write_blocker_ferramenta')))}
     `;
   }
   if(tipo === 'cloud'){
@@ -5539,15 +5928,125 @@ function row(label, value, mono){
 }
 
 // ---------- build report ----------
+// ---------- assinatura digital criptográfica (chave própria do usuário,
+// gerada e guardada só neste aparelho, nunca enviada a lugar nenhum) ----------
+const SIGN_KEY_STORAGE_PREFIX = 'custodia_signkey_';
+
+async function getOrCreateSigningKeyPair(matricula){
+  const key = SIGN_KEY_STORAGE_PREFIX + (matricula || 'sem_matricula');
+  const stored = localStorage.getItem(key);
+  if(stored){
+    try {
+      const jwk = JSON.parse(stored);
+      const privateKey = await crypto.subtle.importKey('jwk', jwk.privateKey, { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign']);
+      const publicKey = await crypto.subtle.importKey('jwk', jwk.publicKey, { name: 'ECDSA', namedCurve: 'P-256' }, true, ['verify']);
+      return { privateKey, publicKey };
+    } catch(e){ /* chave corrompida — gera uma nova abaixo */ }
+  }
+  const keyPair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const privateJwk = await crypto.subtle.exportKey('jwk', keyPair.privateKey);
+  const publicJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
+  localStorage.setItem(key, JSON.stringify({ privateKey: privateJwk, publicKey: publicJwk }));
+  return keyPair;
+}
+
+function buildSignatureCanonicalData(){
+  const origHashes = origArquivosManager.getEntries().map(e => normHash(e.hash)).filter(Boolean);
+  const copHashes = copArquivosManager.getEntries().map(e => normHash(e.hash)).filter(Boolean);
+  return [
+    $('f_relatorio_num').value || '',
+    $('f_processo_num').value || '',
+    origHashes.join(','),
+    copHashes.join(','),
+    currentUser ? currentUser.matricula : ''
+  ].join('|');
+}
+
+async function addDigitalSignatureToReport(matricula){
+  const el = $('digitalSignatureBlock');
+  if(!el) return;
+  if(!(window.crypto && window.crypto.subtle)){
+    el.innerHTML = row('Assinatura digital', 'Não disponível neste navegador/contexto (requer https).');
+    return;
+  }
+  try {
+    const { privateKey, publicKey } = await getOrCreateSigningKeyPair(matricula);
+    const dataString = buildSignatureCanonicalData();
+    const enc = new TextEncoder().encode(dataString);
+    const sigBuf = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, privateKey, enc);
+    const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sigBuf)));
+    const spki = await crypto.subtle.exportKey('spki', publicKey);
+    const fingerprint = await sha256Hex(spki);
+    el.innerHTML = `
+      ${row('Assinatura digital (ECDSA P-256) sobre os hashes deste relatório', sigB64, true)}
+      ${row('Impressão digital da chave pública do signatário', fingerprint, true)}
+    `;
+    window.__lastSignature = { signature: sigB64, fingerprint, dataString };
+    addTimestampProofToReport();
+    addVerificationQrCode();
+  } catch(err){
+    el.innerHTML = row('Assinatura digital', 'Não foi possível gerar: ' + err.message);
+  }
+}
+
+// ---------- carimbo de tempo em blockchain (OpenTimestamps) ----------
+// envia só o HASH (nunca o conteúdo do arquivo) para o calendário
+// público do OpenTimestamps, que devolve uma prova (.ots) ancorada
+// futuramente na blockchain do Bitcoin — gratuito, e verificável por
+// qualquer pessoa, independente de confiar neste app ou no Google
+async function addTimestampProofToReport(){
+  const el = $('digitalSignatureBlock');
+  if(!el) return;
+  const hashHex = normHash($('f_hash_lista_original').value) || normHash((origArquivosManager.getEntries()[0] || {}).hash || '');
+  if(!hashHex || !/^[0-9a-f]{64}$/.test(hashHex)){
+    el.innerHTML += row('Carimbo de tempo (OpenTimestamps)', 'Não disponível — nenhum hash SHA-256 válido encontrado na Seção 4.');
+    return;
+  }
+  try {
+    const bytes = new Uint8Array(hashHex.match(/.{2}/g).map(b => parseInt(b, 16)));
+    const response = await fetch('https://a.pool.opentimestamps.org/digest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: bytes
+    });
+    if(!response.ok) throw new Error('servidor respondeu ' + response.status);
+    const otsBuf = await response.arrayBuffer();
+    const otsB64 = btoa(String.fromCharCode(...new Uint8Array(otsBuf)));
+    const dataUri = 'data:application/octet-stream;base64,' + otsB64;
+    el.innerHTML += `
+      <tr><td class="lbl">Carimbo de tempo (OpenTimestamps)</td><td>
+        Prova obtida com sucesso sobre o hash acima — pode levar algumas horas para ser confirmada na blockchain do Bitcoin.
+        <a href="${dataUri}" download="prova_${hashHex.slice(0,10)}.ots">📥 Baixar arquivo de prova (.ots)</a>,
+        verificável gratuitamente em <a href="https://opentimestamps.org" target="_blank" rel="noopener">opentimestamps.org</a>.
+      </td></tr>
+    `;
+  } catch(err){
+    el.innerHTML += row('Carimbo de tempo (OpenTimestamps)', 'Não foi possível obter no momento — requer conexão com a internet ao gerar o relatório. (' + err.message + ')');
+  }
+}
+
 function buildReport(){
   const v = id => $(id).value;
 
-  const hashA = normHash(v('f_hash_original'));
-  const hashB = normHash(v('f_hash_copia'));
+  const origEntradas = origArquivosManager.getEntries();
+  const copEntradas = copArquivosManager.getEntries();
+  const maxArquivos = Math.max(origEntradas.length, copEntradas.length, 1);
+  let todasIdenticas = true;
+  let algumaVerificada = false;
+  for(let idx = 0; idx < maxArquivos; idx++){
+    const a = normHash((origEntradas[idx] || {}).hash);
+    const b = normHash((copEntradas[idx] || {}).hash);
+    if(a && b){
+      algumaVerificada = true;
+      if(a !== b) todasIdenticas = false;
+    } else {
+      todasIdenticas = false;
+    }
+  }
   let matchHtml;
-  if(!hashA || !hashB){
+  if(!algumaVerificada){
     matchHtml = `<span class="badge-match warn">NÃO VERIFICADO</span>`;
-  } else if(hashA === hashB){
+  } else if(todasIdenticas){
     matchHtml = `<span class="badge-match ok">HASHES IDÊNTICOS</span>`;
   } else {
     matchHtml = `<span class="badge-match warn">HASHES DIVERGENTES</span>`;
@@ -5566,10 +6065,11 @@ function buildReport(){
 
   window.__lastReportMeta = {
     relatorioNum: v('f_relatorio_num'),
+    processoNum: v('f_processo_num'),
     responsavel: nomeAssinatura,
     cargo: cargoAssinatura,
     emissao: emissaoTexto,
-    hashStatus: (!hashA || !hashB) ? 'neutral' : (hashA === hashB ? 'ok' : 'warn')
+    hashStatus: !algumaVerificada ? 'neutral' : (todasIdenticas ? 'ok' : 'warn')
   };
 
   const anexosFixosHtml = anexosFixosDefs
@@ -5602,6 +6102,7 @@ function buildReport(){
     <h2>1. Identificação Geral</h2>
     <table class="rtable">
       ${row('Nº do relatório', v('f_relatorio_num'))}
+      ${row('Número do processo/inquérito', v('f_processo_num'))}
       ${row('Data e hora da coleta', [dataColeta, horarioRange].filter(Boolean).join(' — '))}
       ${row('Responsável pela coleta', v('f_responsavel'))}
       ${row('Finalidade', v('f_finalidade'))}
@@ -5611,6 +6112,7 @@ function buildReport(){
     <h2>2. Identificação da Fonte de Extração${origemTipoLabels[v('f_origem_tipo')] ? ' — ' + origemTipoLabels[v('f_origem_tipo')] : ''}</h2>
     <table class="rtable">
       ${row('Usuário/proprietário informado', v('f_proprietario'))}
+      ${row('Fuso horário configurado no dispositivo', v('f_origem_fuso'))}
       ${buildOrigemRows(v)}
     </table>
 
@@ -5618,14 +6120,21 @@ function buildReport(){
     <p class="body-text">${esc(v('f_proc_descricao'))}</p>
     <table class="rtable">
       ${row('Método de transferência', transferMethodLabels[v('f_metodo_transf')] || v('f_metodo_transf'))}
-      ${row('Nome do arquivo', v('f_orig_nome'), true)}
-      ${row('Caminho no dispositivo', v('f_orig_caminho'), true)}
-      ${row('Tamanho do arquivo', v('f_orig_tamanho'))}
-      ${row('Data/hora da última modificação', v('f_orig_modificacao'))}
-      ${row('Ferramenta usada para gerar o hash', v('f_orig_ferramenta'))}
-      ${row('Hash SHA-256 (ORIGINAL)', v('f_hash_original'), true)}
-      ${row('Hora exata do cálculo do hash', v('f_hora_hash_original'))}
+      ${row('Alterações promovidas além das normais da extração', v('f_alteracoes_tipo') === 'sim' ? v('f_alteracoes_descricao') : 'Nenhuma')}
     </table>
+    ${origEntradas.map((e, idx) => `
+      <p class="body-text" style="margin:10px 0 4px;"><b>Arquivo original ${idx + 1}</b></p>
+      <table class="rtable">
+        ${row('Nome do arquivo', e.nome, true)}
+        ${row('Caminho no dispositivo', e.caminho, true)}
+        ${row('Tamanho do arquivo', e.tamanho)}
+        ${row('Data/hora da última modificação', e.data)}
+        ${row('Ferramenta usada para gerar o hash', e.ferramenta)}
+        ${row('Hash SHA-256 (ORIGINAL)', e.hash, true)}
+        ${row('Hora exata do cálculo do hash', e.horaHash)}
+      </table>
+    `).join('')}
+    ${origEntradas.length > 1 ? `<table class="rtable">${row('Hash da lista de hashes (arquivos originais)', v('f_hash_lista_original'), true)}</table>` : ''}
 
     <h2>4. Identificação do Computador de Destino</h2>
     <table class="rtable">
@@ -5634,23 +6143,30 @@ function buildReport(){
       ${row('ID do Produto', v('f_pc_uuid'))}
       ${row('Sistema operacional - Edição e Versão', v('f_pc_so'))}
       ${row('Número de tombamento', v('f_pc_tombamento'))}
+      ${row('Fuso horário configurado no PC', v('f_pc_fuso'))}
     </table>
 
     <h2>5. Checagem de Integridade (arquivo transferido para o PC)</h2>
-    <table class="rtable">
-      ${row('Nome do arquivo', v('f_cop_nome'), true)}
-      ${row('Caminho completo no PC', v('f_cop_caminho'), true)}
-      ${row('Tamanho do arquivo copiado', v('f_cop_tamanho'))}
-      ${row('Data e hora da criação/transferência do arquivo', v('f_cop_data_criacao'), true)}
-      ${row('Ferramenta usada para gerar o hash', v('f_cop_ferramenta'))}
-      ${row('Hash SHA-256 (CÓPIA)', v('f_hash_copia'), true)}
-      ${row('Hora exata do cálculo do hash', v('f_hora_hash_copia'))}
-    </table>
+    ${copEntradas.map((e, idx) => `
+      <p class="body-text" style="margin:10px 0 4px;"><b>Arquivo copiado ${idx + 1}</b></p>
+      <table class="rtable">
+        ${row('Nome do arquivo', e.nome, true)}
+        ${row('Caminho completo no PC', e.caminho, true)}
+        ${row('Tamanho do arquivo copiado', e.tamanho)}
+        ${row('Data e hora da criação/transferência do arquivo', e.data, true)}
+        ${row('Ferramenta usada para gerar o hash', e.ferramenta)}
+        ${row('Hash SHA-256 (CÓPIA)', e.hash, true)}
+        ${row('Hora exata do cálculo do hash', e.horaHash)}
+      </table>
+    `).join('')}
+    ${copEntradas.length > 1 ? `<table class="rtable">${row('Hash da lista de hashes (arquivos copiados)', v('f_hash_lista_copia'), true)}</table>` : ''}
 
     <h2>6. Análise de Integridade - avaliação de identidade entre os arquivos da fonte e dos destinos (PC e Drive)</h2>
     <table class="rtable">
-      ${row('Hash do arquivo original (aparelho)', v('f_hash_original'), true)}
-      ${row('Hash do arquivo copiado (PC)', v('f_hash_copia'), true)}
+      ${Array.from({ length: maxArquivos }).map((_, idx) => {
+        const nome = (origEntradas[idx] || {}).nome || (copEntradas[idx] || {}).nome || `Arquivo ${idx + 1}`;
+        return row(`Hash original × cópia — ${nome}`, `${(origEntradas[idx] || {}).hash || '—'} × ${(copEntradas[idx] || {}).hash || '—'}`, true);
+      }).join('')}
       <tr><td class="lbl">Resultado da comparação</td><td>${matchHtml}</td></tr>
     </table>
     <p class="body-text">${esc(v('f_conclusao'))}</p>
@@ -5675,9 +6191,12 @@ function buildReport(){
         Data e hora da emissão: ${emissaoTexto}
       </div>
     </div>
+    <div id="digitalSignatureBlock" class="rtable" style="margin-top:10px;"></div>
+    <div id="reportQrCode" style="text-align:center;margin-top:14px;"></div>
     ${custodiaProprietarioHtml}
   `;
   $('reportPaper').innerHTML = html;
+  addDigitalSignatureToReport(matriculaAssinatura);
 }
 
 // ---------- histórico de relatórios ----------
@@ -5700,6 +6219,7 @@ function saveReportToHistory(){
     matricula: currentUser.matricula,
     reparticaoId: rep ? rep.clientId : '',
     relatorioNum: meta.relatorioNum || '',
+    processoNum: meta.processoNum || '',
     responsavel: meta.responsavel || '',
     cargo: meta.cargo || '',
     emissao: meta.emissao || '',
@@ -5739,6 +6259,29 @@ function switchHistoryTab(tab){
 $('historyTabBtnLocal').addEventListener('click', () => switchHistoryTab('local'));
 $('historyTabBtnOutros').addEventListener('click', () => switchHistoryTab('outros'));
 
+// agrupa uma lista de registros de histórico pelo nº do processo/
+// inquérito, e desenha um cabeçalho antes de cada grupo — registros
+// sem processo vinculado ficam soltos, sem cabeçalho, no final
+function renderGroupedByProcesso(container, records, cardBuilderFn){
+  const comProcesso = new Map(); // processoNum -> registros, na ordem em que apareceram
+  const semProcesso = [];
+  records.forEach(r => {
+    const proc = (r.processoNum || '').trim();
+    if(!proc){ semProcesso.push(r); return; }
+    if(!comProcesso.has(proc)) comProcesso.set(proc, []);
+    comProcesso.get(proc).push(r);
+  });
+  comProcesso.forEach((grupo, proc) => {
+    const header = document.createElement('div');
+    header.className = 'history-sub';
+    header.style.cssText = 'margin:14px 0 6px;font-weight:600;color:var(--navy-dark);';
+    header.textContent = `📁 Processo/Inquérito ${proc}`;
+    container.appendChild(header);
+    grupo.forEach(r => container.appendChild(cardBuilderFn(r)));
+  });
+  semProcesso.forEach(r => container.appendChild(cardBuilderFn(r)));
+}
+
 async function renderHistoryList(){
   const container = $('historyList');
   const emptyMsg = $('historyEmpty');
@@ -5771,61 +6314,65 @@ async function renderHistoryList(){
   emptyMsg.classList.toggle('hidden-view', mine.length > 0);
   emptyMsgOutros.classList.toggle('hidden-view', centralOnly.length > 0);
 
-  mine.forEach(record => {
-    const badgeClass = record.hashStatus === 'ok' ? 'ok' : (record.hashStatus === 'warn' ? 'warn' : 'neutral');
-    const badgeText = record.hashStatus === 'ok' ? 'HASHES IDÊNTICOS' : (record.hashStatus === 'warn' ? 'VERIFICAR HASHES' : 'NÃO VERIFICADO');
-    const driveBadge = record.enviadoDrive
-      ? `<span class="history-badge ok">☁️ Enviado ao Drive</span>`
-      : `<span class="history-badge neutral">☁️ Não enviado ao Drive</span>`;
-    const driveLinkHtml = record.driveLink
-      ? `<div><a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>`
-      : '';
-    const evidenceLinkHtml = record.arquivoDigitalDriveLink
-      ? `<div><a href="${esc(record.arquivoDigitalDriveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir arquivo digital no Drive</a></div>`
-      : '';
-
-    const card = document.createElement('div');
-    card.className = 'history-card';
-    card.innerHTML = `
-      <div class="history-card-top">
-        <div class="history-card-num">${esc(record.relatorioNum || 'Sem número')}</div>
-        <div class="history-card-date">${esc(record.emissao || '')}</div>
-      </div>
-      <div class="history-card-row"><b>Responsável:</b> ${esc(record.responsavel || '—')}${record.cargo ? ' — ' + esc(record.cargo) : ''}</div>
-      <div style="margin:4px 0;">
-        <span class="history-badge ${badgeClass}">${badgeText}</span>
-        ${driveBadge}
-      </div>
-      ${driveLinkHtml}
-      ${evidenceLinkHtml}
-      <div class="history-card-actions">
-        <button data-action="open">Abrir</button>
-        <button data-action="delete" class="danger">Excluir</button>
-      </div>
-    `;
-    card.querySelector('[data-action="open"]').addEventListener('click', () => openHistoryRecord(record.id));
-    card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteHistoryRecord(record.id));
-    container.appendChild(card);
-  });
+  renderGroupedByProcesso(container, mine, buildLocalHistoryCard);
 
   // relatórios enviados de OUTRO aparelho: não há conteúdo local para
   // reabrir/imprimir, então o card só mostra os dados básicos + o link do Drive
-  centralOnly.forEach(r => {
-    const card = document.createElement('div');
-    card.className = 'history-card';
-    card.innerHTML = `
-      <div class="history-card-top">
-        <div class="history-card-num">${esc(r.relatorioNum || r.arquivo || 'Sem número')}</div>
-        <div class="history-card-date">${esc(r.dataEnvio || '')}</div>
-      </div>
-      <div class="history-card-row" style="color:var(--muted);font-style:italic;">📱 Enviado de outro aparelho</div>
-      <div style="margin:4px 0;">
-        <span class="history-badge ok">☁️ Enviado ao Drive</span>
-      </div>
-      <div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>
-    `;
-    containerOutros.appendChild(card);
-  });
+  renderGroupedByProcesso(containerOutros, centralOnly, buildCentralHistoryCard);
+}
+
+function buildLocalHistoryCard(record){
+  const badgeClass = record.hashStatus === 'ok' ? 'ok' : (record.hashStatus === 'warn' ? 'warn' : 'neutral');
+  const badgeText = record.hashStatus === 'ok' ? 'HASHES IDÊNTICOS' : (record.hashStatus === 'warn' ? 'VERIFICAR HASHES' : 'NÃO VERIFICADO');
+  const driveBadge = record.enviadoDrive
+    ? `<span class="history-badge ok">☁️ Enviado ao Drive</span>`
+    : `<span class="history-badge neutral">☁️ Não enviado ao Drive</span>`;
+  const driveLinkHtml = record.driveLink
+    ? `<div><a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>`
+    : '';
+  const evidenceLinkHtml = record.arquivoDigitalDriveLink
+    ? `<div><a href="${esc(record.arquivoDigitalDriveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir arquivo digital no Drive</a></div>`
+    : '';
+
+  const card = document.createElement('div');
+  card.className = 'history-card';
+  card.innerHTML = `
+    <div class="history-card-top">
+      <div class="history-card-num">${esc(record.relatorioNum || 'Sem número')}</div>
+      <div class="history-card-date">${esc(record.emissao || '')}</div>
+    </div>
+    <div class="history-card-row"><b>Responsável:</b> ${esc(record.responsavel || '—')}${record.cargo ? ' — ' + esc(record.cargo) : ''}</div>
+    <div style="margin:4px 0;">
+      <span class="history-badge ${badgeClass}">${badgeText}</span>
+      ${driveBadge}
+    </div>
+    ${driveLinkHtml}
+    ${evidenceLinkHtml}
+    <div class="history-card-actions">
+      <button data-action="open">Abrir</button>
+      <button data-action="delete" class="danger">Excluir</button>
+    </div>
+  `;
+  card.querySelector('[data-action="open"]').addEventListener('click', () => openHistoryRecord(record.id));
+  card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteHistoryRecord(record.id));
+  return card;
+}
+
+function buildCentralHistoryCard(r){
+  const card = document.createElement('div');
+  card.className = 'history-card';
+  card.innerHTML = `
+    <div class="history-card-top">
+      <div class="history-card-num">${esc(r.relatorioNum || r.arquivo || 'Sem número')}</div>
+      <div class="history-card-date">${esc(r.dataEnvio || '')}</div>
+    </div>
+    <div class="history-card-row" style="color:var(--muted);font-style:italic;">📱 Enviado de outro aparelho</div>
+    <div style="margin:4px 0;">
+      <span class="history-badge ok">☁️ Enviado ao Drive</span>
+    </div>
+    <div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>
+  `;
+  return card;
 }
 
 function openHistoryRecord(id){
@@ -5860,16 +6407,13 @@ function resetFormFields(){
   document.querySelectorAll('#formView input[type="text"], #formView input[type="hidden"], #formView textarea').forEach(el => { el.value = ''; });
   document.querySelectorAll('.init-check').forEach(c => { c.checked = false; });
   $('initChecklistStatus').textContent = '';
-  attachedFiles.orig = null;
-  attachedFiles.cop = null;
+  origArquivosManager.reset();
+  copArquivosManager.reset();
   lastEvidenceDriveLink = null;
-  $('f_orig_file_name').textContent = '';
-  $('f_cop_file_name').textContent = '';
-  $('f_orig_file_status').textContent = '';
-  $('f_cop_file_status').textContent = '';
   $('shareRepStatus').textContent = '';
+  $('hashCompareList').innerHTML = '';
   $('hashCompareBox').className = 'hash-check neutral';
-  $('hashCompareBox').textContent = 'Informe os dois hashes acima para comparar automaticamente.';
+  $('hashCompareBox').textContent = 'Adicione ao menos um arquivo nas Seções 4 e 6 para comparar automaticamente.';
 
   $('f_pc_equip_select').value = '';
   $('f_pc_camposContainer').classList.add('hidden-view');
@@ -5886,6 +6430,8 @@ function resetFormFields(){
   renderAnexos();
 
   $('f_metodo_transf').value = 'usb';
+  $('f_alteracoes_tipo').value = 'nenhuma';
+  $('f_alteracoes_descricao').classList.add('hidden-view');
   $('f_proc_descricao').value = transferMethodDescriptions.usb;
   $('f_conclusao').value = 'A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo móvel, e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.';
 
@@ -5958,6 +6504,7 @@ async function concludeTask(){
           reparticaoId: rep.clientId,
           reparticaoNome: rep.nome,
           relatorioNum: $('f_relatorio_num').value || '',
+          processoNum: $('f_processo_num').value || '',
           arquivo: file.name,
           driveLink: result.webViewLink || ''
         }).catch(() => {});
