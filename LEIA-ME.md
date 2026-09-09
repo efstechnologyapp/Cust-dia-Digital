@@ -463,6 +463,49 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Correção: envio ao Drive podia travar "para sempre"
+
+Bug relatado pelo usuário: ao clicar em "✅ Concluir Tarefa", o app
+ficava preso na mensagem "Enviando ao Drive…" indefinidamente, sem
+nunca desistir ou avisar sobre um problema, se a conexão de internet
+travasse ou ficasse muito lenta durante o envio.
+
+**Causa**: as chamadas de rede ao Google Drive (envio de arquivo,
+consulta de nome de pasta) e ao OpenTimestamps não tinham nenhum
+limite de tempo — se a resposta nunca chegasse, o `fetch` ficava
+esperando indefinidamente.
+
+**Correção**: nova função `fetchWithTimeout`, que usa `AbortController`
+para cancelar a chamada automaticamente após um tempo limite (90s para
+envio de arquivo ao Drive, 15s para consulta de nome de pasta, 20s
+para o OpenTimestamps) — se estourar o prazo, a chamada falha com uma
+mensagem clara ("Tempo limite excedido — a conexão travou ou está
+muito lenta..."), em vez de travar a tela para sempre.
+
+**Importante**: o relatório já é salvo no histórico local **antes**
+da tentativa de envio ao Drive (`saveReportToHistory()` roda primeiro,
+de forma síncrona) — então, mesmo que o envio falhe ou trave, o
+relatório não se perde; fica disponível no histórico para reenvio
+manual depois.
+
+## Nova aba na Home: "Relatórios da Repartição"
+
+A Home agora tem duas abas: **"Formulário"** (o que já existia) e
+**"Relatórios da Repartição"** — essa segunda usa a mesma lógica de
+busca da aba "Relatórios" da Gestão do App, mas **limitada aos
+relatórios da repartição em que o usuário está conectado no
+momento** (qualquer usuário comum vê isso, não só administradores).
+
+- Antes de conectar a uma repartição, **a barra de abas nem aparece**
+  — o usuário só vê o botão "🔒 Conecte-se à repartição", sem indício
+  de que existe uma segunda aba. As abas só surgem depois da conexão
+  ser feita.
+- Depois de conectado, busca por nº do relatório, processo/inquérito
+  ou responsável — mesmo padrão da busca administrativa, mas sem
+  campo de repartição na busca (já que só mostra a própria).
+- A lista atualiza sozinha se o usuário trocar de repartição
+  conectada enquanto a aba estiver aberta.
+
 ## Conformidade ampliada com o Manual de POP (MJSP) e novas funcionalidades
 
 Grande leva de melhorias, todas testadas individualmente:
