@@ -339,7 +339,8 @@ function doPost(e) {
         data.usuarioMatricula || '',
         data.usuarioEmail || '',
         new Date(),
-        'pendente'
+        'pendente',
+        data.folderNome || ''
       ]);
       return respond({ ok: true, rowIndex: sheet.getLastRow() });
     }
@@ -361,7 +362,8 @@ function doPost(e) {
           usuarioMatricula: String(r[6]),
           usuarioEmail: String(r[7]),
           dataCadastro: r[8] ? formatDate_(r[8]) : '',
-          status: r[9] ? String(r[9]) : 'pendente'
+          status: r[9] ? String(r[9]) : 'pendente',
+          folderNome: r[10] ? String(r[10]) : ''
         });
       }
       pendentes.reverse();
@@ -379,6 +381,27 @@ function doPost(e) {
       var sheet = getOrCreateReparticoesPendentesSheet();
       sheet.getRange(rowIndex, 10).setValue('confirmada');
       return respond({ ok: true });
+    }
+
+    // atualiza dados de uma repartição já registrada centralmente (ex.:
+    // nome da pasta do Drive editado depois da criação) — encontra a
+    // linha pelo Client ID, já que o rowIndex local pode não ser
+    // conhecido/estar desatualizado no aparelho que está editando
+    if (action === 'update_reparticao_central') {
+      var clientId = data.clientId || '';
+      if (!clientId) return respond({ ok: false, error: 'Client ID não informado.' });
+      var sheet = getOrCreateReparticoesPendentesSheet();
+      var rows = sheet.getDataRange().getValues();
+      var atualizou = false;
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][2]) === clientId) {
+          if (data.nome) sheet.getRange(i + 1, 1).setValue(data.nome);
+          if (data.folderId) sheet.getRange(i + 1, 4).setValue(data.folderId);
+          if (data.folderNome !== undefined) sheet.getRange(i + 1, 11).setValue(data.folderNome);
+          atualizou = true;
+        }
+      }
+      return respond({ ok: true, atualizou: atualizou });
     }
 
     if (action === 'remove_reparticao_pendente') {
@@ -756,12 +779,15 @@ function getOrCreateReparticoesPendentesSheet() {
   var sheet = ss.getSheetByName('ReparticoesPendentes');
   if (!sheet) {
     sheet = ss.insertSheet('ReparticoesPendentes');
-    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status']);
+    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status', 'FolderNome']);
     return sheet;
   }
-  // garante a coluna de status mesmo em planilhas criadas antes desta atualização
+  // garante as colunas mesmo em planilhas criadas antes desta atualização
   if (sheet.getRange(1, 10).getValue() !== 'Status') {
     sheet.getRange(1, 10).setValue('Status');
+  }
+  if (sheet.getRange(1, 11).getValue() !== 'FolderNome') {
+    sheet.getRange(1, 11).setValue('FolderNome');
   }
   return sheet;
 }

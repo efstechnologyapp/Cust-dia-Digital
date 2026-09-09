@@ -463,6 +463,65 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Histórico separado por dispositivo
+
+A tela de histórico de relatórios agora tem duas abas: **"Deste
+Dispositivo"** (relatórios gerados neste aparelho, com abrir/excluir)
+e **"Outros Dispositivos"** (relatórios que você enviou de outros
+aparelhos para a mesma repartição, buscados da central — só leitura,
+com link pro Drive). A aba "Deste Dispositivo" é a padrão ao abrir.
+
+## Barra de sessão e barra de progresso fixas ao rolar
+
+Na Home e no Formulário, a barra de sessão (quem está preenchendo) e
+a barra de progresso do formulário ficam fixas no topo da tela ao
+rolar (`position: sticky`), sempre visíveis. A altura da barra de
+sessão é recalculada automaticamente por um `ResizeObserver` sempre
+que seu conteúdo muda de tamanho (ex.: aparecer/sumir o status
+"Conectado à repartição X"), evitando qualquer sobreposição entre as
+duas barras.
+
+## "📊 Métricas do Sistema" (antes cards separados)
+
+Na aba "Informações Gerais", os cards que antes apareciam separados
+(Repartições, Usuários, Equipamentos de destino, Relatórios
+enviados, Arquivos enviados) foram consolidados em um único card
+"Métricas do Sistema", com as cinco linhas dentro dele.
+
+## Correção: nome da pasta do Drive não aparecia em outros aparelhos
+
+O nome da pasta do Drive salvo ao cadastrar/editar uma repartição
+(campo "Nome dessa pasta no Drive") só ficava salvo **localmente**,
+no aparelho onde foi digitado — nunca era enviado à central. Por
+isso, quando outro aparelho conectava à mesma repartição
+(auto-provisionamento ou conexão manual), a frase de custódia não
+tinha esse nome disponível.
+
+Corrigido: agora o nome da pasta é enviado e atualizado na planilha
+central (nova coluna `FolderNome` em "ReparticoesPendentes") sempre
+que uma repartição é criada ou editada — e qualquer aparelho que
+receber os dados dessa repartição pela central (seja ao logar, ao
+conectar manualmente, ou pelo auto-provisionamento) agora recebe o
+nome da pasta junto.
+
+## Página "Sobre o App"
+
+Novo link **"Sobre o App"** no rodapé da sidebar (mesmo formato
+discreto da informação de versão, logo abaixo dela). Abre uma
+página com o mesmo cabeçalho da tela de login (logo, nome, legenda),
+seguida de uma descrição do que o app faz e do changelog da versão
+atual (mesmo conteúdo do "Resumo da atualização"). O botão "← Voltar"
+retorna à Home com a sidebar já reaberta.
+
+## Numeração de versão
+
+A partir desta atualização, a numeração exibida ("Versão do APP")
+segue o formato **"v. 0.XX"** (ex.: v. 0.85, v. 0.86...) — só
+passará a "v. 1.XX" ao atingir a versão 100. Isso é só o texto
+exibido; o identificador técnico do cache do Service Worker
+continua incrementando normalmente por trás (`custodia-digital-vNN`),
+sem relação direta com esse número mostrado ao usuário.
+
 ## Informação de versão do app
 
 Uma única constante no código (`APP_VERSION_INFO`, perto do topo do

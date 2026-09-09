@@ -101,6 +101,11 @@
     display:flex;
     gap:4px;
     margin: 22px 0 30px;
+    position: sticky;
+    top: var(--session-bar-height, 56px);
+    z-index: 39;
+    background: var(--bg);
+    padding-top: 8px;
   }
   .progress .seg{
     flex:1;
@@ -502,6 +507,8 @@
   /* ---------- histórico ---------- */
   #historyView{ display:none; }
   #historyView.active{ display:block; }
+  #aboutAppView{ display:none; }
+  #aboutAppView.active{ display:block; }
   #connectionsView{ display:none; }
   #connectionsView.active{ display:block; }
   .reparticao-card{
@@ -818,6 +825,9 @@
     border-radius: 10px;
     padding: 10px 16px;
     font-size: 13.5px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
   }
   .session-bar .who{ color: var(--ink); }
   .session-conn-status{
@@ -1315,6 +1325,27 @@
     <button class="sidebar-btn hidden-view" id="openConnectionsBtn" style="margin-top:10px;">🔗 Gestão do App<span class="pending-badge hidden-view" id="sidebarPendingBadge">0</span></button>
     <button class="sidebar-btn danger" id="sidebarLogoutBtn">↩ Sair</button>
     <div id="sidebarVersionInfo" style="margin-top:16px;text-align:center;font-size:10px;color:var(--muted);"></div>
+    <button type="button" class="btn-link" id="openAboutAppBtn" style="display:block;width:100%;text-align:center;margin-top:2px;font-size:10px;color:var(--muted);">Sobre o App</button>
+  </div>
+</div>
+
+<!-- ===== SOBRE O APP ===== -->
+<div id="aboutAppView">
+  <div class="report-toolbar">
+    <button id="aboutAppBackBtn">← Voltar</button>
+  </div>
+  <div class="history-wrap">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div class="logo-badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital"></div>
+      <h2 class="app-brand-name">Custódia Digital</h2>
+      <p class="app-brand-tagline">Extração e verificação de integridade de arquivos digitais</p>
+    </div>
+    <div class="rep-users-section-title">O que o app faz</div>
+    <div class="rep-user-card">
+      Auxilia servidores no preenchimento padronizado de relatórios técnicos de extração de arquivos digitais (celulares, tablets, HD/SSD, computadores, servidores em nuvem, roteadores/modems), com cálculo automático de hash, cadeia de custódia, anexos obrigatórios conforme o tipo de fonte, e envio direto ao Google Drive da repartição responsável.
+    </div>
+    <div class="rep-users-section-title" id="aboutAppUpdateTitle"></div>
+    <div class="rep-user-card" id="aboutAppUpdateContent"></div>
   </div>
 </div>
 
@@ -1340,20 +1371,14 @@
       <div class="rep-users-section-title">📝 Funcionalidades do APP</div>
       <div class="rep-user-card" id="appInfoFuncionalidades">Aguarda descrição de funcionalidade pelo adm.</div>
 
-      <div class="rep-users-section-title">🏛️ Repartições</div>
-      <div class="rep-user-card" id="appInfoReparticoes"></div>
-
-      <div class="rep-users-section-title">👤 Usuários</div>
-      <div class="rep-user-card" id="appInfoUsuarios"></div>
-
-      <div class="rep-users-section-title">💻 Equipamentos de destino</div>
-      <div class="rep-user-card" id="appInfoEquipamentos"></div>
-
-      <div class="rep-users-section-title">📤 Relatórios enviados</div>
-      <div class="rep-user-card" id="appInfoRelatorios"></div>
-
-      <div class="rep-users-section-title">📎 Arquivos enviados</div>
-      <div class="rep-user-card" id="appInfoArquivos"></div>
+      <div class="rep-users-section-title">📊 Métricas do Sistema</div>
+      <div class="rep-user-card">
+        <div><b>Repartições:</b> <span id="appInfoReparticoes"></span></div>
+        <div><b>Usuários:</b> <span id="appInfoUsuarios"></span></div>
+        <div><b>Equipamentos de destino:</b> <span id="appInfoEquipamentos"></span></div>
+        <div><b>Relatórios enviados:</b> <span id="appInfoRelatorios"></span></div>
+        <div><b>Arquivos enviados:</b> <span id="appInfoArquivos"></span></div>
+      </div>
     </div>
 
     <div class="hidden-view" id="connTabSistema">
@@ -2068,9 +2093,20 @@
   </div>
   <div class="history-wrap">
     <h2 class="history-title">Histórico de relatórios</h2>
-    <p class="history-sub">Relatórios gerados por você neste aparelho.</p>
-    <div id="historyList"></div>
-    <p class="history-empty hidden-view" id="historyEmpty">Nenhum relatório gerado ainda.</p>
+    <div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line);">
+      <button type="button" class="reg-tab-btn active" id="historyTabBtnLocal" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--navy-dark);border-bottom:2px solid var(--navy-dark);cursor:pointer;">Deste Dispositivo</button>
+      <button type="button" class="reg-tab-btn" id="historyTabBtnOutros" style="flex:1;background:none;border:none;padding:9px 4px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Outros Dispositivos</button>
+    </div>
+    <div id="historyTabLocal">
+      <p class="history-sub">Relatórios gerados por você neste aparelho.</p>
+      <div id="historyList"></div>
+      <p class="history-empty hidden-view" id="historyEmpty">Nenhum relatório gerado ainda.</p>
+    </div>
+    <div class="hidden-view" id="historyTabOutros">
+      <p class="history-sub">Relatórios enviados por você a partir de outros aparelhos.</p>
+      <div id="historyListOutros"></div>
+      <p class="history-empty hidden-view" id="historyEmptyOutros">Nenhum relatório enviado de outro aparelho ainda.</p>
+    </div>
   </div>
 </div>
 
@@ -2085,6 +2121,7 @@ function showView(name){
   $('reportView').classList.remove('active');
   $('historyView').classList.remove('active');
   $('connectionsView').classList.remove('active');
+  $('aboutAppView').classList.remove('active');
   $('sessionBar').classList.add('hidden-view');
 
   if(name === 'home'){
@@ -2099,6 +2136,8 @@ function showView(name){
     $('historyView').classList.add('active');
   } else if(name === 'connections'){
     $('connectionsView').classList.add('active');
+  } else if(name === 'about'){
+    $('aboutAppView').classList.add('active');
   } else if(name === 'login'){
     $('loginView').classList.remove('hidden-view');
   }
@@ -2437,7 +2476,7 @@ async function unconfirmReparticao(id){
   try {
     const data = await callAppsScript({
       action: 'register_reparticao_pendente',
-      nome: rep.nome, email: rep.email, clientId: rep.clientId, folderId: rep.folderId
+      nome: rep.nome, email: rep.email, clientId: rep.clientId, folderId: rep.folderId, folderNome: rep.folderNome || ''
     });
     if(data.rowIndex){
       const l2 = loadReparticoes();
@@ -2701,7 +2740,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   // verdade usando ela, o que a promove automaticamente a "cadastrada"
   try {
     const data = await callAppsScript({
-      action: 'register_reparticao_pendente', nome, email, clientId, folderId,
+      action: 'register_reparticao_pendente', nome, email, clientId, folderId, folderNome,
       // registra também quem fez o cadastro (o administrador), para
       // aparecer tanto no card de pendentes quanto no modal da repartição
       usuarioNome: currentUser ? currentUser.nome : '',
@@ -2757,6 +2796,9 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
     gisTokenClient = null;
     setDriveConnectedFlag(false);
     updateDriveStatusUI(false);
+    // propaga a edição (principalmente o nome da pasta) para a central,
+    // para que outros aparelhos também passem a ver a informação
+    callAppsScript({ action: 'update_reparticao_central', clientId, nome, folderId, folderNome }).catch(() => {});
   }
   renderReparticoesManageList();
   renderRepSelectDropdown();
@@ -2886,7 +2928,7 @@ function adicionarReparticaoConfirmadaLocalmente(p, btnEl){
     list[idx].nome = p.nome; list[idx].email = p.email;
     saveReparticoesList(list);
   } else {
-    list.push({ id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, status: 'confirmada', centralRowIndex: null });
+    list.push({ id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, folderNome: p.folderNome || '', status: 'confirmada', centralRowIndex: null });
     saveReparticoesList(list);
   }
   renderRepSelectDropdown();
@@ -2915,9 +2957,10 @@ async function conectarReparticaoPendente(p, btnEl){
       list[idx].status = 'confirmada';
       list[idx].nome = p.nome; list[idx].email = p.email;
       list[idx].clientId = p.clientId; list[idx].folderId = p.folderId;
+      if(p.folderNome) list[idx].folderNome = p.folderNome;
       localRep = list[idx];
     } else {
-      localRep = { id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, status: 'confirmada', centralRowIndex: null };
+      localRep = { id: 'rep-' + Date.now(), nome: p.nome, email: p.email, clientId: p.clientId, folderId: p.folderId, folderNome: p.folderNome || '', status: 'confirmada', centralRowIndex: null };
       list.push(localRep);
     }
     saveReparticoesList(list);
@@ -2976,6 +3019,17 @@ async function removeReparticaoPendente(rowIndex){
 
 $('refreshReparticoesPendentesBtn').addEventListener('click', renderReparticoesPendentesList);
 
+$('openAboutAppBtn').addEventListener('click', () => {
+  $('sidebarOverlay').classList.remove('open');
+  $('aboutAppUpdateTitle').textContent = `Atualizações a partir da versão ${APP_VERSION_INFO.numero} (${APP_VERSION_INFO.data})`;
+  $('aboutAppUpdateContent').innerHTML = APP_VERSION_INFO.resumoHtml;
+  showView('about');
+});
+$('aboutAppBackBtn').addEventListener('click', () => {
+  showView('home');
+  $('sidebarOverlay').classList.add('open');
+});
+
 $('openConnectionsBtn').addEventListener('click', () => {
   if(!isConnectionsAdmin()) return; // proteção defensiva — o botão já fica oculto para os demais
   $('sidebarOverlay').classList.remove('open');
@@ -3032,10 +3086,37 @@ $('connTabBtnUsuarios').addEventListener('click', () => switchConnTab('usuarios'
 // a cada nova versão publicada (usada tanto na sidebar quanto na aba
 // "Informações Gerais")
 const APP_VERSION_INFO = {
-  numero: 'v85',
+  numero: 'v. 0.85',
   dataHora: '08/09/2026, às 23h24',
   data: '08/09/2026',
-  resumo: 'Informação de versão do app adicionada ao card "Dados do app" (Gestão do App) e ao rodapé da sidebar, com data da última atualização e resumo do que mudou.'
+  resumoHtml: `
+    <p style="margin:4px 0;"><b>🔐 Gestão do App</b> (antes "Conexões do Sistema")</p>
+    <ul style="margin:2px 0 8px;padding-left:16px;">
+      <li>Renomeada, com 3 abas: Informações Gerais (nova — dados do app, funcionalidades, contadores de repartições/usuários/equipamentos/relatórios/arquivos), Gestão de Conexões, Usuários cadastrados</li>
+      <li>Bolinhas vermelhas de pendência na sidebar e em cada aba, sinalizando repartições sem conexão e usuários sem habilitação, em tempo real</li>
+      <li>Histórico de acesso filtrado por ato específico (login, logout, edição de cadastro com campo alterado, conexão/adição/remoção de repartição, envio/exclusão de relatório) — só isso é registrado, mais nada</li>
+      <li>Modal de usuário: sobreposição corrigida, exclusão suave (não apaga, só marca), card de equipamentos com botão de remover</li>
+    </ul>
+    <p style="margin:4px 0;"><b>💻 Equipamentos cadastrados por repartição</b></p>
+    <ul style="margin:2px 0 8px;padding-left:16px;">
+      <li>Seção 5 do formulário passou a ter cadastro/reaproveitamento de PCs por repartição (não mais formulário livre)</li>
+      <li>Card correspondente no modal de edição de repartição</li>
+    </ul>
+    <p style="margin:4px 0;"><b>📝 Formulário — reestruturação completa</b></p>
+    <ul style="margin:2px 0 8px;padding-left:16px;">
+      <li>9 seções únicas (uma por vez, com "Próxima seção"), renumeradas e renomeadas: Inicialização do Procedimento de Extração (com aviso de criptografia + checklist obrigatório), Identificação Geral, Identificação da Fonte de Extração (múltiplos tipos: celular, tablet, HD/SSD, computador, nuvem, roteador/modem), Procedimento de Extração e Identificação do Arquivo, Identificação do Computador de Destino, Checagem de Integridade (PC), Análise de Integridade, Anexos (obrigatórios condicionados ao tipo de fonte), Cadeia de Custódia</li>
+      <li>Campos obrigatórios com bloqueio de avanço em praticamente todas as seções, cada um com mensagem específica</li>
+      <li>Botão "✏️ Retificar formulário" no relatório gerado (sem mexer no "Concluir Tarefa")</li>
+      <li>Relatório final não referencia mais a Seção 1 (é só checklist de uso)</li>
+      <li>Nomenclatura de arquivos com iniciais do usuário</li>
+    </ul>
+    <p style="margin:4px 0;"><b>🏢 Repartições e conexões</b></p>
+    <ul style="margin:2px 0 0;padding-left:16px;">
+      <li>Sistema de Client ID estável entre aparelhos (corrigindo vários bugs de duplicação)</li>
+      <li>Nome da pasta do Drive salvo manualmente (evitando depender de permissão que sempre falha)</li>
+      <li>Manual de cadastro (sidebar + PDF na tela de login)</li>
+    </ul>
+  `
 };
 
 async function renderAppInfoTab(){
@@ -3051,9 +3132,9 @@ async function renderAppInfoTab(){
     <div><b>E-mail do instituidor:</b> efstechnology.app@gmail.com</div>
     <div><b>Administradores:</b> <span id="appInfoAdmins">carregando…</span></div>
     <div><b>Conexões com outros sistemas:</b> Google Drive (armazenamento de arquivos), Google Cloud/OAuth (autenticação por repartição)</div>
-    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5;">
-      <b>Versão do APP:</b> ${esc(APP_VERSION_INFO.numero)} (${esc(APP_VERSION_INFO.numero)}, atualizada em ${esc(APP_VERSION_INFO.dataHora)}) - resumo da atualização: ${esc(APP_VERSION_INFO.resumo)}
-    </div>
+    <div><b>Versão do APP:</b> ${esc(APP_VERSION_INFO.numero)} (atualizada em ${esc(APP_VERSION_INFO.dataHora)})</div>
+    <div><b>Resumo da atualização:</b></div>
+    <div style="font-size:10px;color:var(--muted);line-height:1.5;">${APP_VERSION_INFO.resumoHtml}</div>
   `;
 
   try {
@@ -3071,11 +3152,11 @@ async function renderAppInfoTab(){
     });
     $('appInfoAdmins').textContent = admins.join('; ');
 
-    $('appInfoReparticoes').innerHTML = `<div><b>Quantidade cadastrada:</b> ${statsData.reparticoesCount}</div>`;
-    $('appInfoUsuarios').innerHTML = `<div><b>Quantidade cadastrada:</b> ${statsData.usuariosCount}</div>`;
-    $('appInfoEquipamentos').innerHTML = `<div><b>Quantidade cadastrada:</b> ${statsData.equipamentosCount}</div>`;
-    $('appInfoRelatorios').innerHTML = `<div><b>Quantidade enviada:</b> ${statsData.relatoriosCount}</div>`;
-    $('appInfoArquivos').innerHTML = `<div><b>Quantidade enviada:</b> ${statsData.arquivosCount}</div>`;
+    $('appInfoReparticoes').textContent = statsData.reparticoesCount;
+    $('appInfoUsuarios').textContent = statsData.usuariosCount;
+    $('appInfoEquipamentos').textContent = statsData.equipamentosCount;
+    $('appInfoRelatorios').textContent = statsData.relatoriosCount;
+    $('appInfoArquivos').textContent = statsData.arquivosCount;
   } catch(err){
     statusEl.textContent = 'Não foi possível carregar as estatísticas: ' + err.message;
     statusEl.className = 'loc-status err';
@@ -3218,6 +3299,7 @@ function updateDriveStatusUI(connected){
   } else {
     connStatusEl.classList.add('hidden-view');
   }
+  updateSessionBarHeightVar();
 }
 
 function updateHomeStartButtonState(connected){
@@ -4048,9 +4130,10 @@ async function conectarMinhaReparticaoPendente(r, btnEl){
     if(idxLocal >= 0){
       list[idxLocal].status = 'confirmada';
       list[idxLocal].nome = match.nome; list[idxLocal].email = match.email;
+      if(match.folderNome) list[idxLocal].folderNome = match.folderNome;
       localRep = list[idxLocal];
     } else {
-      localRep = { id: 'rep-' + Date.now(), nome: match.nome, email: match.email, clientId: match.clientId, folderId: match.folderId, status: 'confirmada', centralRowIndex: null };
+      localRep = { id: 'rep-' + Date.now(), nome: match.nome, email: match.email, clientId: match.clientId, folderId: match.folderId, folderNome: match.folderNome || '', status: 'confirmada', centralRowIndex: null };
       list.push(localRep);
     }
     saveReparticoesList(list);
@@ -4567,6 +4650,7 @@ $('registerBtn').addEventListener('click', () => {
         email: pendingNewReparticaoData.email,
         clientId: pendingNewReparticaoData.clientId,
         folderId: pendingNewReparticaoData.folderId,
+        folderNome: pendingNewReparticaoData.folderNome || '',
         usuarioNome: nome,
         usuarioCargo: cargo,
         usuarioMatricula: matricula,
@@ -4634,8 +4718,20 @@ function isConnectionsAdmin(){
   return allowlist.includes(currentUser.email.trim().toLowerCase());
 }
 
+function updateSessionBarHeightVar(){
+  const h = $('sessionBar').offsetHeight;
+  if(h > 0) document.documentElement.style.setProperty('--session-bar-height', h + 'px');
+}
+// mantém o valor sempre em dia automaticamente, sem depender de
+// lembrar de chamar a função manualmente sempre que o conteúdo da
+// barra mudar de altura (ex.: aparecer/sumir o status de conexão)
+if(window.ResizeObserver){
+  new ResizeObserver(updateSessionBarHeightVar).observe($('sessionBar'));
+}
+
 function refreshUserUI(){
   if(!currentUser) return;
+  updateSessionBarHeightVar();
   $('sessionNome').textContent = currentUser.nome;
   $('sessionCargo').textContent = currentUser.cargo || '';
   $('sessionMatricula').textContent = 'Matrícula ' + currentUser.matricula;
@@ -4780,7 +4876,7 @@ function enterApp(){
           if(!list.some(rp => rp.clientId === r.reparticaoId)){
             const match = (pendentesCentral || []).find(p => p.clientId === r.reparticaoId);
             if(match){
-              list.push({ id: 'rep-' + Date.now() + '-' + Math.random().toString(36).slice(2,6), nome: match.nome, email: match.email, clientId: match.clientId, folderId: match.folderId, status: 'confirmada', centralRowIndex: null });
+              list.push({ id: 'rep-' + Date.now() + '-' + Math.random().toString(36).slice(2,6), nome: match.nome, email: match.email, clientId: match.clientId, folderId: match.folderId, folderNome: match.folderNome || '', status: 'confirmada', centralRowIndex: null });
               mudouLocal = true;
             }
           }
@@ -5631,10 +5727,26 @@ function markHistoryRecordDriveSent(id, driveLink){
   }
 }
 
+function switchHistoryTab(tab){
+  const isLocal = tab === 'local';
+  $('historyTabLocal').classList.toggle('hidden-view', !isLocal);
+  $('historyTabOutros').classList.toggle('hidden-view', isLocal);
+  $('historyTabBtnLocal').style.borderBottomColor = isLocal ? 'var(--navy-dark)' : 'transparent';
+  $('historyTabBtnLocal').style.color = isLocal ? 'var(--navy-dark)' : 'var(--muted)';
+  $('historyTabBtnOutros').style.borderBottomColor = !isLocal ? 'var(--navy-dark)' : 'transparent';
+  $('historyTabBtnOutros').style.color = !isLocal ? 'var(--navy-dark)' : 'var(--muted)';
+}
+$('historyTabBtnLocal').addEventListener('click', () => switchHistoryTab('local'));
+$('historyTabBtnOutros').addEventListener('click', () => switchHistoryTab('outros'));
+
 async function renderHistoryList(){
   const container = $('historyList');
   const emptyMsg = $('historyEmpty');
+  const containerOutros = $('historyListOutros');
+  const emptyMsgOutros = $('historyEmptyOutros');
   container.innerHTML = '';
+  containerOutros.innerHTML = '';
+  switchHistoryTab('local');
   const rep = getSelectedReparticao();
   const all = loadHistory();
   // mostra só os relatórios enviados à repartição atualmente conectada
@@ -5656,11 +5768,8 @@ async function renderHistoryList(){
     } catch(e){ /* falha silenciosa: mostra ao menos o histórico local */ }
   }
 
-  if(mine.length === 0 && centralOnly.length === 0){
-    emptyMsg.classList.remove('hidden-view');
-    return;
-  }
-  emptyMsg.classList.add('hidden-view');
+  emptyMsg.classList.toggle('hidden-view', mine.length > 0);
+  emptyMsgOutros.classList.toggle('hidden-view', centralOnly.length > 0);
 
   mine.forEach(record => {
     const badgeClass = record.hashStatus === 'ok' ? 'ok' : (record.hashStatus === 'warn' ? 'warn' : 'neutral');
@@ -5715,7 +5824,7 @@ async function renderHistoryList(){
       </div>
       <div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>
     `;
-    container.appendChild(card);
+    containerOutros.appendChild(card);
   });
 }
 
