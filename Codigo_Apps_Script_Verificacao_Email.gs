@@ -414,6 +414,25 @@ function doPost(e) {
           atualizou = true;
         }
       }
+      // se não existia nenhuma linha para esse Client ID — caso da
+      // repartição padrão de fábrica (Servidor EFS Technology), que
+      // nunca passou pelo cadastro central — cria a linha agora, já
+      // como "confirmada", em vez de silenciosamente não salvar nada
+      if (!atualizou) {
+        sheet.appendRow([
+          data.nome || '',
+          data.email || '',
+          clientId,
+          data.folderId || '',
+          '', '', '', '',
+          new Date(),
+          'confirmada',
+          data.folderNome || '',
+          data.aiProvider || '',
+          data.aiApiKey || ''
+        ]);
+        atualizou = true;
+      }
       return respond({ ok: true, atualizou: atualizou });
     }
 

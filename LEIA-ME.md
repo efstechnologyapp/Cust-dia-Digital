@@ -463,6 +463,28 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Correção: chave de IA da repartição EFS "sumia" ao salvar novamente
+
+Bug relatado pelo usuário: mesmo depois de ver o card "🤖 IA
+cadastrada" confirmar o salvamento, ao reabrir o modal mais tarde e
+salvar de novo, aparecia "Nenhuma IA cadastrada ainda" — como se o
+cadastro anterior nunca tivesse existido.
+
+**Causa raiz**: exatamente o mesmo problema de fundo que já
+corrigimos antes para o nome da pasta do Drive — a repartição
+"Servidor EFS Technology" é o padrão de fábrica do app, baked-in
+desde o início, e **nunca passou pelo cadastro central** de
+repartições. A ação `update_reparticao_central` só sabia **atualizar**
+uma linha já existente na planilha — como não existia nenhuma linha
+para o Client ID do EFS, o salvamento "funcionava" (sem erro), mas
+não gravava nada de verdade em lugar nenhum.
+
+**Correção**: a ação agora funciona como um "upsert" — se não
+encontrar uma linha com aquele Client ID, **cria uma nova**, com os
+dados enviados (nome, pasta, provedor de IA, chave), já marcada como
+"confirmada". Repartições que já tinham linha continuam só sendo
+atualizadas normalmente, sem duplicar.
+
 ## Correção: cadastro de IA na repartição sem confirmação visual
 
 Bug relatado pelo usuário: ao salvar o provedor/chave de IA no modal
