@@ -1376,8 +1376,8 @@
     <div class="hidden-view" id="minutaChatPanel" style="border:1px solid var(--line);border-radius:8px;margin-top:12px;padding:10px;background:#fff;">
       <div class="hint" style="margin:0 0 8px;">Chat com a IA institucional — o que você enviar aqui pode incluir qualquer informação necessária (é o mesmo serviço já contratado pela repartição).</div>
       <div id="minutaChatMessages" style="max-height:240px;overflow-y:auto;margin-bottom:8px;"></div>
-      <div style="display:flex;gap:6px;">
-        <textarea id="minutaChatInput" placeholder="Digite sua mensagem para a IA…" style="flex:1;min-height:44px;"></textarea>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <textarea id="minutaChatInput" placeholder="Digite sua mensagem para a IA…" style="width:100%;min-height:70px;"></textarea>
         <button type="button" class="btn-primary" id="minutaChatSendBtn" style="align-self:flex-end;">Enviar</button>
       </div>
       <div class="loc-status" id="minutaChatStatus"></div>
@@ -1467,9 +1467,6 @@
       <div class="rep-users-section-title">📝 Funcionalidades do APP</div>
       <div class="rep-user-card" id="appInfoFuncionalidades">Aguarda descrição de funcionalidade pelo adm.</div>
 
-      <div class="rep-users-section-title">🕓 Histórico de versões</div>
-      <div id="appInfoVersionHistory"></div>
-
       <div class="rep-users-section-title">📊 Métricas do Sistema</div>
       <div class="rep-user-card">
         <div><b>Repartições:</b> <span id="appInfoReparticoes"></span></div>
@@ -1478,6 +1475,9 @@
         <div><b>Relatórios enviados:</b> <span id="appInfoRelatorios"></span></div>
         <div><b>Arquivos enviados:</b> <span id="appInfoArquivos"></span></div>
       </div>
+
+      <div class="rep-users-section-title">🕓 Histórico de versões</div>
+      <div id="appInfoVersionHistory"></div>
     </div>
 
     <div class="hidden-view" id="connTabSistema">
@@ -1582,7 +1582,7 @@
     <button class="sidebar-close" id="closeVersionDetailBtn">✕</button>
     <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0 0 4px;" id="versionDetailTitle"></h3>
     <div class="hint" style="margin:0 0 14px;" id="versionDetailData"></div>
-    <div id="versionDetailContent"></div>
+    <div id="versionDetailContent" style="font-size:9px;line-height:1.5;"></div>
   </div>
 </div>
 
@@ -3345,7 +3345,7 @@ function renderAllReportsList(termo){
       <div class="rep-user-detail">Responsável: ${esc(r.nome)} (${esc(r.email)})</div>
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
       ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
-      ${(r.arquivosEnviados || []).filter(a => a.driveLink).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`).join('')}
+      ${buildFileDisplayLabels((r.arquivosEnviados || []).filter(a => a.driveLink)).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.label)}</a></div>`).join('')}
     </div>
   `).join('');
 }
@@ -3827,7 +3827,7 @@ function renderHomeReportsList(termo){
       <div class="rep-user-detail">Responsável: ${esc(r.nome)}</div>
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
       ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
-      ${(r.arquivosEnviados || []).filter(a => a.driveLink).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`).join('')}
+      ${buildFileDisplayLabels((r.arquivosEnviados || []).filter(a => a.driveLink)).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.label)}</a></div>`).join('')}
       <div class="field" style="margin-top:8px;margin-bottom:0;">
         <select data-tipo-minuta-idx="${idx}" style="font-size:12px;">
           <option value="" selected>Selecione o tipo de relatório de análise…</option>
@@ -4079,6 +4079,38 @@ function buildStructuredFileName(tipoLabel, relatorioNum, originalName){
 function renameFileStructured(file, tipoLabel, relatorioNum){
   const newName = buildStructuredFileName(tipoLabel, relatorioNum, file.name);
   return new File([file], newName, { type: file.type });
+}
+
+// rótulos exibidos nos cards de relatório (histórico e buscas) — em
+// vez do nome específico do arquivo, mostra a classe a que ele
+// pertence, extraída do código embutido no próprio nome do arquivo
+// (ver buildStructuredFileName). Tipos que podem se repetir no mesmo
+// relatório (arquivos evidência, anexos) ganham numeração (1, 2, 3…)
+const FILE_CODE_LABELS = {
+  'Rel.CIA': 'Rel de Ext, Id e Armaz',
+  'ArqEv': 'Arqv Evidência',
+  'ArqAnex': 'Arqv Anexo',
+  'Rel.MDados': 'Rel Metadados',
+  'Rel.AnArqEv': 'Rel Análise Arq Evidenc'
+};
+const FILE_CODES_NUMERADOS = ['ArqEv', 'ArqAnex'];
+function parseFileCode(nomeArquivo){
+  const partes = (nomeArquivo || '').split(' - ');
+  return partes.length >= 2 ? partes[1] : '';
+}
+function buildFileDisplayLabels(arquivosEnviados){
+  const contadores = {};
+  return (arquivosEnviados || []).map(a => {
+    const codigo = parseFileCode(a.arquivo);
+    const labelBase = FILE_CODE_LABELS[codigo];
+    if(!labelBase) return { label: a.arquivo, driveLink: a.driveLink }; // arquivo antigo, sem o código — mostra como estava
+    let label = labelBase;
+    if(FILE_CODES_NUMERADOS.includes(codigo)){
+      contadores[codigo] = (contadores[codigo] || 0) + 1;
+      label = `${labelBase} ${contadores[codigo]}`;
+    }
+    return { label, driveLink: a.driveLink };
+  });
 }
 
 function renameFileWithInitials(file){
@@ -6928,9 +6960,9 @@ function buildLocalHistoryCard(record){
     ? `<div><a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>`
     : '';
   const evidenceLinksHtml = (record.arquivosEnviados && record.arquivosEnviados.length)
-    ? record.arquivosEnviados.map(a => a.driveLink
-        ? `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`
-        : '').join('')
+    ? buildFileDisplayLabels(record.arquivosEnviados.filter(a => a.driveLink)).map(a =>
+        `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.label)}</a></div>`
+      ).join('')
     : (record.arquivoDigitalDriveLink // compatibilidade com registros salvos antes desta correção
         ? `<div><a href="${esc(record.arquivoDigitalDriveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir arquivo digital no Drive</a></div>`
         : '');
@@ -6960,9 +6992,8 @@ function buildLocalHistoryCard(record){
 }
 
 function buildCentralHistoryCard(r){
-  const arquivosLinksHtml = (r.arquivosEnviados || [])
-    .filter(a => a.driveLink)
-    .map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`)
+  const arquivosLinksHtml = buildFileDisplayLabels((r.arquivosEnviados || []).filter(a => a.driveLink))
+    .map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.label)}</a></div>`)
     .join('');
   const card = document.createElement('div');
   card.className = 'history-card';
@@ -7041,10 +7072,6 @@ function resetFormFields(){
   $('f_alteracoes_descricao').classList.add('hidden-view');
   $('f_proc_descricao').value = transferMethodDescriptions.usb;
   $('f_conclusao').value = 'A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo móvel, e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.';
-
-  // resincroniza os seletores em cascata de ferramenta de hash
-  $('f_orig_ferramenta_tool').dispatchEvent(new Event('change'));
-  $('f_cop_ferramenta_tool').dispatchEvent(new Event('change'));
 
   if(currentUser){
     const cargoTxt = currentUser.cargo ? `, ${currentUser.cargo}` : '';

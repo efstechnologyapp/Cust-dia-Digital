@@ -463,6 +463,57 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Ajustes visuais: ordem das seções e fonte do modal de versão
+
+- **"Histórico de versões"** passou a ser a **última** seção da aba
+  "Informações Gerais" (antes ficava entre "Funcionalidades" e
+  "Métricas").
+- Fonte do conteúdo dentro do **modal de detalhes de uma versão**
+  reduzida (12px), para ficar mais compacta.
+
+## Correção: "Concluir Tarefa" travava em "Enviando…", não voltava pra Home
+
+Bug relatado pelo usuário: os arquivos eram enviados e o histórico
+era atualizado corretamente, mas o botão ficava preso mostrando
+"Enviando ao Drive…" para sempre, sem nunca voltar para a Home.
+
+**Causa raiz**: resquício da reestruturação para múltiplos arquivos
+(Seções 4 e 6) — a função `resetFormFields()` ainda tentava
+resincronizar dois seletores de "ferramenta de hash" que **não
+existem mais** desde aquela mudança (`f_orig_ferramenta_tool` e
+`f_cop_ferramenta_tool`, substituídos por campos dinâmicos por
+entrada). Chamar `.dispatchEvent()` num elemento inexistente
+(`null`) lança um erro — e como isso acontecia **depois** do envio
+bem-sucedido ao Drive, mas **fora** do bloco de tratamento de erro
+da função, o erro interrompia a função no meio, antes das linhas que
+resetam o botão e voltam para a Home.
+
+**Correção**: removidas as duas linhas obsoletas (o reset das
+ferramentas de hash já é feito corretamente por
+`origArquivosManager.reset()`/`copArquivosManager.reset()`, que
+fazem parte da mesma função, logo acima).
+
+**Confirmação**: reproduzi o bug de propósito (reintroduzindo as
+linhas antigas) e confirmei o mesmo sintoma exato relatado pelo
+usuário, depois confirmei que a correção resolve.
+
+## Ajustes no editor de Minuta e nos cards de relatório
+
+- **Chat da IA no editor**: campo de mensagem e botão "Enviar"
+  estavam lado a lado, espremendo o campo de texto — agora o campo
+  fica em cima, ocupando a largura toda, e o botão embaixo.
+- **Cards de relatório (histórico e "Relatórios da Repartição")**:
+  os arquivos deixaram de ser mostrados pelo nome específico e
+  passaram a ser mostrados pela **classe** a que pertencem, extraída
+  do código embutido no nome do arquivo:
+  - `Rel de Ext, Id e Armaz` (o PDF do relatório)
+  - `Arqv Evidência 1`, `Arqv Evidência 2`... (arquivos da Seção 6, numerados)
+  - `Arqv Anexo 1`, `Arqv Anexo 2`... (anexos da Seção 8, numerados)
+  - `Rel Metadados` (minuta de metadados)
+  - `Rel Análise Arq Evidenc` (minuta de análise de arquivos evidência)
+  - Arquivos enviados **antes** desta convenção (sem o código no
+    nome) continuam mostrando o nome original, por compatibilidade.
+
 ## Nomenclatura padronizada de arquivos + novo seletor de tipo de minuta
 
 **Todos** os arquivos enviados ao Drive agora seguem uma convenção
