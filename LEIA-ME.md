@@ -463,7 +463,54 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
-## Integração com IA — análise de metadados do relatório
+## Integração com IA — multi-provedor + Minuta IA (evolução do recurso anterior)
+
+O recurso de IA foi ampliado e reorganizado:
+
+**Multi-provedor institucional**: em vez de uma chave fixa da
+Anthropic, o administrador agora escolhe, na Gestão do App >
+Informações Gerais, qual provedor a instituição contratou —
+**Anthropic (Claude), Google (Gemini), OpenAI (ChatGPT) ou
+DeepSeek** — e cadastra a chave correspondente. Reflete o modelo real
+de contratação de IA em órgãos públicos: a instituição contrata o
+provedor via API, os usuários não logam individualmente em contas de
+IA pessoais. Uma função de abstração no Apps Script
+(`callAIProvider_`) traduz o mesmo formato de mensagens para a API
+de qualquer um dos 4 provedores.
+
+**"📝 Minutar Relatórios de Análises"** substitui o antigo botão
+"Analisar com IA" nos cards da aba "Relatórios da Repartição". Ao
+clicar, o usuário escolhe entre dois tipos de minuta:
+
+- **Relatório de Metadados**: abre um editor de texto já preenchido
+  com a análise automática de metadados do relatório (reaproveitando
+  a mesma lógica de antes), pronta para revisão/edição pelo usuário.
+- **Relatório de Análise Documental**: abre um editor em branco, para
+  o usuário redigir livremente com apoio da IA.
+
+O editor tem uma barra de formatação básica (negrito, itálico,
+sublinhado, listas) e um botão **"🤖 IA"** que abre um painel de chat
+lateral. Na primeira vez, aparece uma **tela de consentimento
+institucional** (lembrada depois, via localStorage) — como é a IA
+contratada pela instituição, o chat é livre, sem a restrição de
+"só metadados" que valia para o botão antigo. Cada resposta da IA
+tem um botão "➕ Inserir no documento", que cola o texto no editor.
+
+**Salvar**: sempre disponível. Envia o conteúdo do editor como
+arquivo (`.html`) para o Drive da repartição vinculada, nomeado como
+**"Relatório de metadados - {número}"** ou **"Relatório de análise
+documental - {número}"**, e reaproveita o mesmo mecanismo de
+`log_arquivo_enviado` já usado para os arquivos da Seção 9 — por
+isso, o link aparece automaticamente no card do relatório
+correspondente, junto com os demais arquivos, sem precisar de UI
+nova para isso.
+
+**⚠️ Configuração obrigatória**: cadastrar a chave de API do
+provedor escolhido em Gestão do App > Informações Gerais > "🤖 IA
+Institucional". Sem isso, tanto o "Relatório de Metadados" quanto o
+chat de IA retornam erro claro.
+
+## Integração com IA — análise de metadados do relatório (histórico)
 
 Novo botão **"🤖 Analisar com IA"** em cada card da aba "Relatórios da
 Repartição" (Home). Escopo deliberadamente limitado: a IA analisa

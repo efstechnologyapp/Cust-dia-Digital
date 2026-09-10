@@ -1331,6 +1331,48 @@
   </div>
 </div>
 
+<!-- ===== EDITOR DE MINUTA (Minutar Relatórios de Análises) ===== -->
+<div id="minutaView" style="position:fixed;inset:0;background:var(--bg);z-index:9998;overflow-y:auto;display:none;">
+  <div class="report-toolbar">
+    <button id="minutaBackBtn">← Voltar</button>
+    <button class="btn-primary" id="minutaSaveBtn">💾 Salvar</button>
+  </div>
+  <div style="max-width:760px;margin:0 auto;padding:0 16px 24px;">
+    <h2 class="history-title" id="minutaTitle">Relatório de Metadados</h2>
+    <p class="history-sub" id="minutaSubtitle"></p>
+
+    <div id="minutaConsentBox" class="hidden-view" style="background:#FBF6E9;border:1px solid #E8D8A6;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12.5px;line-height:1.5;">
+      Você está prestes a usar o serviço de IA institucional (contratado pela repartição) para auxiliar na redação. O texto deste documento e as mensagens que você enviar serão encaminhados a esse serviço.
+      <div style="margin-top:8px;">
+        <button type="button" class="btn-primary" id="minutaConsentAcceptBtn" style="font-size:12px;">Aceitar e continuar</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:4px;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px 8px 0 0;padding:6px;background:#F8F9FB;">
+      <button type="button" class="btn-attach" data-cmd="bold" style="font-weight:bold;padding:4px 9px;">B</button>
+      <button type="button" class="btn-attach" data-cmd="italic" style="font-style:italic;padding:4px 9px;">I</button>
+      <button type="button" class="btn-attach" data-cmd="underline" style="text-decoration:underline;padding:4px 9px;">S</button>
+      <button type="button" class="btn-attach" data-cmd="insertUnorderedList" style="padding:4px 9px;">• Lista</button>
+      <button type="button" class="btn-attach" data-cmd="insertOrderedList" style="padding:4px 9px;">1. Lista</button>
+      <span style="flex:1;"></span>
+      <button type="button" class="btn-attach" id="minutaAiBtn" style="padding:4px 9px;">🤖 IA</button>
+    </div>
+    <div id="minutaEditor" contenteditable="true" style="border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:14px;min-height:300px;background:#fff;font-size:13.5px;line-height:1.6;"></div>
+
+    <div class="hidden-view" id="minutaChatPanel" style="border:1px solid var(--line);border-radius:8px;margin-top:12px;padding:10px;background:#fff;">
+      <div class="hint" style="margin:0 0 8px;">Chat com a IA institucional — o que você enviar aqui pode incluir qualquer informação necessária (é o mesmo serviço já contratado pela repartição).</div>
+      <div id="minutaChatMessages" style="max-height:240px;overflow-y:auto;margin-bottom:8px;"></div>
+      <div style="display:flex;gap:6px;">
+        <textarea id="minutaChatInput" placeholder="Digite sua mensagem para a IA…" style="flex:1;min-height:44px;"></textarea>
+        <button type="button" class="btn-primary" id="minutaChatSendBtn" style="align-self:flex-end;">Enviar</button>
+      </div>
+      <div class="loc-status" id="minutaChatStatus"></div>
+    </div>
+
+    <div class="loc-status" id="minutaSaveStatus" style="margin-top:10px;"></div>
+  </div>
+</div>
+
 <!-- ===== VERIFICAÇÃO PÚBLICA (acessível sem login, via QR Code do relatório) ===== -->
 <div id="verifyView" class="hidden-view" style="position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;">
   <div class="history-wrap" style="max-width:480px;margin:0 auto;padding:20px 16px;">
@@ -1418,6 +1460,27 @@
         <div><b>Equipamentos de destino:</b> <span id="appInfoEquipamentos"></span></div>
         <div><b>Relatórios enviados:</b> <span id="appInfoRelatorios"></span></div>
         <div><b>Arquivos enviados:</b> <span id="appInfoArquivos"></span></div>
+      </div>
+
+      <div class="rep-users-section-title">🤖 IA Institucional</div>
+      <div class="rep-user-card">
+        <div class="hint" style="margin:0 0 8px;">Provedor de IA contratado pela instituição, usado por todos os usuários no app (análise de metadados e Minuta IA). A chave fica só no servidor, nunca é exposta.</div>
+        <div class="field">
+          <label>Provedor ativo</label>
+          <select id="aiProviderSelect">
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="gemini">Google (Gemini)</option>
+            <option value="openai">OpenAI (ChatGPT)</option>
+            <option value="deepseek">DeepSeek</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Chave de API</label>
+          <input type="password" id="aiApiKeyInput" placeholder="Cole aqui para definir/atualizar a chave">
+          <div class="hint" id="aiKeyStatusHint"></div>
+        </div>
+        <button type="button" class="btn-attach" id="saveAiConfigBtn">💾 Salvar configuração</button>
+        <div class="loc-status" id="aiConfigStatus"></div>
       </div>
     </div>
 
@@ -3247,7 +3310,32 @@ async function renderAppInfoTab(){
     statusEl.textContent = 'Não foi possível carregar as estatísticas: ' + err.message;
     statusEl.className = 'loc-status err';
   }
+
+  try {
+    const aiConfig = await callAppsScript({ action: 'get_ai_config' });
+    if(aiConfig.provider) $('aiProviderSelect').value = aiConfig.provider;
+    $('aiKeyStatusHint').textContent = aiConfig.temChave ? '✓ Uma chave já está configurada.' : 'Nenhuma chave configurada ainda.';
+  } catch(e){ /* falha silenciosa — não é crítico para o resto da aba */ }
 }
+$('saveAiConfigBtn').addEventListener('click', async () => {
+  const statusEl = $('aiConfigStatus');
+  statusEl.textContent = 'Salvando…';
+  statusEl.className = 'loc-status';
+  try {
+    await callAppsScript({
+      action: 'set_ai_config',
+      provider: $('aiProviderSelect').value,
+      apiKey: $('aiApiKeyInput').value.trim()
+    });
+    $('aiApiKeyInput').value = '';
+    statusEl.textContent = '✓ Configuração salva.';
+    statusEl.className = 'loc-status ok';
+    $('aiKeyStatusHint').textContent = '✓ Uma chave já está configurada.';
+  } catch(err){
+    statusEl.textContent = 'Não foi possível salvar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+});
 
 async function renderAllUsersList(){
   const statusEl = $('allUsersStatus');
@@ -3412,6 +3500,151 @@ async function loadHomeReportsForSearch(){
     statusEl.className = 'loc-status err';
   }
 }
+// ---------- editor de Minuta IA ----------
+let minutaContext = null; // { relatorioNum, processoNum, reparticaoId, tipo }
+let minutaChatHistory = [];
+
+function openMinutaChooser(r){
+  const tipo = confirm('Clique OK para "Relatório de Metadados", ou Cancelar para "Relatório de Análise Documental".') ? 'metadados' : 'documental';
+  openMinutaEditor(r, tipo);
+}
+
+async function openMinutaEditor(r, tipo){
+  minutaContext = { relatorioNum: r.relatorioNum, processoNum: r.processoNum, reparticaoId: r.reparticaoId, tipo };
+  minutaChatHistory = [];
+  $('minutaEditor').innerHTML = '';
+  $('minutaChatMessages').innerHTML = '';
+  $('minutaChatPanel').classList.add('hidden-view');
+  $('minutaSaveStatus').textContent = '';
+  const consentJaAceito = localStorage.getItem('minuta_ia_consent') === '1';
+  $('minutaConsentBox').classList.toggle('hidden-view', consentJaAceito);
+
+  if(tipo === 'metadados'){
+    $('minutaTitle').textContent = 'Relatório de Metadados';
+    $('minutaSubtitle').textContent = `Relatório ${r.relatorioNum || ''}${r.processoNum ? ' — Processo ' + r.processoNum : ''}`;
+    $('minutaEditor').innerHTML = '<p><i>Carregando análise inicial da IA…</i></p>';
+    $('minutaView').style.display = 'block';
+    try {
+      const data = await callAppsScript({
+        action: 'analyze_report_metadata',
+        relatorioNum: r.relatorioNum, reparticaoId: r.reparticaoId,
+        email: currentUser ? currentUser.email : ''
+      });
+      $('minutaEditor').innerHTML = `<p>${esc(data.analise).replace(/\n/g, '<br>')}</p>`;
+    } catch(err){
+      $('minutaEditor').innerHTML = `<p><i>Não foi possível carregar a análise automática: ${esc(err.message)}. Redija manualmente ou tente novamente.</i></p>`;
+    }
+  } else {
+    $('minutaTitle').textContent = 'Relatório de Análise Documental';
+    $('minutaSubtitle').textContent = `Relatório ${r.relatorioNum || ''}${r.processoNum ? ' — Processo ' + r.processoNum : ''}`;
+    $('minutaEditor').innerHTML = '<p></p>';
+    $('minutaView').style.display = 'block';
+  }
+}
+
+$('minutaBackBtn').addEventListener('click', () => {
+  $('minutaView').style.display = 'none';
+});
+
+// barra de formatação básica
+document.querySelectorAll('#minutaView [data-cmd]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $('minutaEditor').focus();
+    document.execCommand(btn.dataset.cmd, false, null);
+  });
+});
+
+$('minutaAiBtn').addEventListener('click', () => {
+  const consentJaAceito = localStorage.getItem('minuta_ia_consent') === '1';
+  if(!consentJaAceito){
+    $('minutaConsentBox').classList.remove('hidden-view');
+    return;
+  }
+  $('minutaChatPanel').classList.toggle('hidden-view');
+});
+$('minutaConsentAcceptBtn').addEventListener('click', () => {
+  localStorage.setItem('minuta_ia_consent', '1');
+  $('minutaConsentBox').classList.add('hidden-view');
+  $('minutaChatPanel').classList.remove('hidden-view');
+});
+
+function appendMinutaChatBubble(role, texto){
+  const div = document.createElement('div');
+  div.style.cssText = `margin-bottom:8px;padding:8px 10px;border-radius:8px;font-size:13px;white-space:pre-wrap;${role === 'user' ? 'background:#EAF0FA;margin-left:20px;' : 'background:#F2F4F7;margin-right:20px;'}`;
+  div.textContent = texto;
+  if(role !== 'user'){
+    const insertBtn = document.createElement('button');
+    insertBtn.type = 'button';
+    insertBtn.className = 'btn-link';
+    insertBtn.textContent = '➕ Inserir no documento';
+    insertBtn.style.cssText = 'display:block;margin-top:6px;font-size:11px;';
+    insertBtn.addEventListener('click', () => {
+      $('minutaEditor').innerHTML += `<p>${esc(texto).replace(/\n/g, '<br>')}</p>`;
+    });
+    div.appendChild(insertBtn);
+  }
+  $('minutaChatMessages').appendChild(div);
+  $('minutaChatMessages').scrollTop = $('minutaChatMessages').scrollHeight;
+}
+
+$('minutaChatSendBtn').addEventListener('click', async () => {
+  const texto = $('minutaChatInput').value.trim();
+  if(!texto) return;
+  appendMinutaChatBubble('user', texto);
+  minutaChatHistory.push({ role: 'user', content: texto });
+  $('minutaChatInput').value = '';
+  const statusEl = $('minutaChatStatus');
+  statusEl.textContent = 'A IA está redigindo…';
+  statusEl.className = 'loc-status';
+  try {
+    const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory });
+    minutaChatHistory.push({ role: 'assistant', content: data.resposta });
+    appendMinutaChatBubble('assistant', data.resposta);
+    statusEl.textContent = '';
+    logUserAction('uso de Minuta IA', minutaContext ? minutaContext.relatorioNum : '');
+  } catch(err){
+    statusEl.textContent = 'Não foi possível obter resposta: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+});
+
+$('minutaSaveBtn').addEventListener('click', async () => {
+  if(!minutaContext) return;
+  const rep = getSelectedReparticao();
+  const statusEl = $('minutaSaveStatus');
+  if(!rep || !rep.folderId){
+    statusEl.textContent = 'Nenhuma repartição conectada com pasta configurada — não é possível salvar.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const tipoLabel = minutaContext.tipo === 'metadados' ? 'Relatório de metadados' : 'Relatório de análise documental';
+  const nomeArquivo = `${tipoLabel} - ${minutaContext.relatorioNum || 'sem numero'}.html`;
+  const conteudoHtml = `<html><head><meta charset="utf-8"></head><body>${$('minutaEditor').innerHTML}</body></html>`;
+  const file = new File([conteudoHtml], nomeArquivo, { type: 'text/html' });
+  statusEl.textContent = 'Salvando no Drive…';
+  statusEl.className = 'loc-status';
+  try {
+    const fileComIniciais = renameFileWithInitials(file);
+    const result = await uploadFileToDrive(fileComIniciais, rep.folderId, rep.clientId, statusEl);
+    if(currentUser && currentUser.email){
+      await callAppsScript({
+        action: 'log_arquivo_enviado',
+        email: currentUser.email, reparticaoId: minutaContext.reparticaoId,
+        arquivo: fileComIniciais.name, driveLink: result.webViewLink || '',
+        relatorioNum: minutaContext.relatorioNum || '', processoNum: minutaContext.processoNum || ''
+      });
+    }
+    statusEl.textContent = '✓ Salvo com sucesso no Drive da repartição.';
+    statusEl.className = 'loc-status ok';
+    logUserAction('salvou ' + tipoLabel.toLowerCase(), minutaContext.relatorioNum);
+    // atualiza a lista de relatórios da Home, para o novo link já aparecer no card
+    loadHomeReportsForSearch();
+  } catch(err){
+    statusEl.textContent = 'Não foi possível salvar: ' + err.message;
+    statusEl.className = 'loc-status err';
+  }
+});
+
 function renderHomeReportsList(termo){
   const listEl = $('homeReportsList');
   const t = (termo || '').trim().toLowerCase();
@@ -3431,39 +3664,14 @@ function renderHomeReportsList(termo){
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
       ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
       ${(r.arquivosEnviados || []).filter(a => a.driveLink).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`).join('')}
-      <button type="button" class="btn-attach" data-analyze-idx="${idx}" style="margin-top:8px;font-size:11px;">🤖 Analisar com IA</button>
-      <div class="loc-status" id="homeAnaliseStatus_${idx}"></div>
-      <div class="rep-user-detail hidden-view" id="homeAnaliseResult_${idx}" style="white-space:pre-wrap;margin-top:4px;"></div>
-      <div class="hint" style="font-size:9px;margin-top:2px;">Análise automática de conformidade e completude, baseada apenas nos dados deste relatório. Não acessa o conteúdo extraído do dispositivo. Não substitui revisão humana.</div>
+      <button type="button" class="btn-attach" data-minutar-idx="${idx}" style="margin-top:8px;font-size:11px;">📝 Minutar Relatórios de Análises</button>
     </div>
   `).join('');
 
-  listEl.querySelectorAll('[data-analyze-idx]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const idx = Number(btn.dataset.analyzeIdx);
-      const r = filtrados[idx];
-      const statusEl = $(`homeAnaliseStatus_${idx}`);
-      const resultEl = $(`homeAnaliseResult_${idx}`);
-      btn.disabled = true;
-      statusEl.textContent = 'Analisando…';
-      statusEl.className = 'loc-status';
-      try {
-        const data = await callAppsScript({
-          action: 'analyze_report_metadata',
-          relatorioNum: r.relatorioNum, reparticaoId: r.reparticaoId,
-          email: currentUser ? currentUser.email : ''
-        });
-        resultEl.textContent = data.analise;
-        resultEl.classList.remove('hidden-view');
-        statusEl.textContent = data.cache ? `Análise já feita anteriormente (${data.dataAnalise})` : `Análise concluída (${data.dataAnalise})`;
-        statusEl.className = 'loc-status ok';
-        logUserAction('análise de relatório por IA', r.relatorioNum);
-      } catch(err){
-        statusEl.textContent = 'Não foi possível analisar: ' + err.message;
-        statusEl.className = 'loc-status err';
-      } finally {
-        btn.disabled = false;
-      }
+  listEl.querySelectorAll('[data-minutar-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.minutarIdx);
+      openMinutaChooser(filtrados[idx]);
     });
   });
 }

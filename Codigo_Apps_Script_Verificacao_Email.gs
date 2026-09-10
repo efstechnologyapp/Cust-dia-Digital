@@ -698,11 +698,7 @@ function doPost(e) {
         return respond({ ok: false, error: 'Não foram encontrados metadados salvos para este relatório (relatórios enviados antes desta funcionalidade não têm esse dado).' });
       }
 
-      // 3) chama a API da Anthropic
-      var apiKey = PropertiesService.getScriptProperties().getProperty('ANTHROPIC_API_KEY');
-      if (!apiKey) {
-        return respond({ ok: false, error: 'Chave de API da Anthropic não configurada no servidor (ANTHROPIC_API_KEY).' });
-      }
+      // 3) chama o provedor de IA institucional configurado
       var prompt = 'Você está analisando os METADADOS de um relatório técnico de extração forense de arquivo digital (não o conteúdo extraído em si — só a documentação do procedimento). ' +
         'Com base SOMENTE nos dados abaixo, responda em português, em até 6 linhas, cobrindo: ' +
         '(1) um resumo objetivo do procedimento documentado; ' +
@@ -711,29 +707,48 @@ function doPost(e) {
         'Não emita julgamento sobre crimes, indícios ou conteúdo — isso é atribuição exclusiva da autoridade responsável, não sua.\n\n' +
         'DADOS DO RELATÓRIO:\n' + metadataText;
 
-      var payload = {
-        model: 'claude-sonnet-4-6',
-        max_tokens: 500,
-        messages: [{ role: 'user', content: prompt }]
-      };
-      var options = {
-        method: 'post',
-        contentType: 'application/json',
-        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-        payload: JSON.stringify(payload),
-        muteHttpExceptions: true
-      };
-      var response = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', options);
-      if (response.getResponseCode() !== 200) {
-        return respond({ ok: false, error: 'Erro na API da Anthropic (HTTP ' + response.getResponseCode() + '): ' + response.getContentText().slice(0, 300) });
+      var analise;
+      try {
+        analise = callAIProvider_([{ role: 'user', content: prompt }], 500) || 'Sem resposta da IA.';
+      } catch (aiErr) {
+        return respond({ ok: false, error: aiErr.message });
       }
-      var result = JSON.parse(response.getContentText());
-      var analise = (result.content && result.content[0] && result.content[0].text) ? result.content[0].text : 'Sem resposta da IA.';
 
       // 4) guarda em cache, para não reanalisar (e não gastar de novo) o mesmo relatório
       cacheSheet.appendRow([relatorioNum, reparticaoId, analise, new Date(), (data.email || '').trim().toLowerCase()]);
 
       return respond({ ok: true, analise: analise, dataAnalise: formatDate_(new Date()), cache: false });
+    }
+
+    // ---------- chat livre com a IA institucional (editor de Minuta IA) ----------
+    // ao contrário da análise de metadados, aqui o usuário pode digitar
+    // qualquer coisa — por isso só faz sentido com a IA institucional,
+    // contratada pela repartição, nunca com uma chave pessoal
+    if (action === 'ai_chat') {
+      var mensagens = data.messages || [];
+      if (!mensagens.length) return respond({ ok: false, error: 'Nenhuma mensagem enviada.' });
+      try {
+        var resposta = callAIProvider_(mensagens, 1500) || 'Sem resposta da IA.';
+        return respond({ ok: true, resposta: resposta });
+      } catch (aiErr) {
+        return respond({ ok: false, error: aiErr.message });
+      }
+    }
+
+    // ---------- configuração do provedor de IA institucional (admin) ----------
+    if (action === 'get_ai_config') {
+      var props = PropertiesService.getScriptProperties();
+      return respond({
+        ok: true,
+        provider: props.getProperty('AI_PROVIDER') || '',
+        temChave: !!props.getProperty('AI_API_KEY')
+      });
+    }
+    if (action === 'set_ai_config') {
+      var props = PropertiesService.getScriptProperties();
+      if (data.provider) props.setProperty('AI_PROVIDER', String(data.provider).toLowerCase());
+      if (data.apiKey) props.setProperty('AI_API_KEY', String(data.apiKey));
+      return respond({ ok: true });
     }
 
     return respond({ ok: false, error: 'Ação inválida.' });
@@ -903,6 +918,74 @@ function getOrCreateReportsSheet() {
     sheet.getRange(1, 10).setValue('MetadataText');
   }
   return sheet;
+}
+
+// ---------- camada de abstração multi-provedor de IA ----------
+// o administrador escolhe, na Gestão do App, qual provedor a
+// instituição contratou (Propriedade "AI_PROVIDER": anthropic |
+// gemini | openai | deepseek), e cadastra a chave correspondente
+// (Propriedade "AI_API_KEY") — nunca fica exposta ao navegador
+function callAIProvider_(messages, maxTokens){
+  var props = PropertiesService.getScriptProperties();
+  var provider = (props.getProperty('AI_PROVIDER') || 'anthropic').toLowerCase();
+  var apiKey = props.getProperty('AI_API_KEY');
+  if (!apiKey) {
+    throw new Error('Nenhuma chave de IA configurada no servidor (Propriedade "AI_API_KEY"). Peça ao administrador para configurar em Gestão do App > Informações Gerais.');
+  }
+
+  if (provider === 'anthropic') {
+    var payload = { model: 'claude-sonnet-4-6', max_tokens: maxTokens, messages: messages };
+    var res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+      method: 'post', contentType: 'application/json',
+      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      payload: JSON.stringify(payload), muteHttpExceptions: true
+    });
+    if (res.getResponseCode() !== 200) throw new Error('Erro na API da Anthropic (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 300));
+    var data = JSON.parse(res.getContentText());
+    return (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '';
+  }
+
+  if (provider === 'gemini') {
+    var contents = messages.map(function(m){
+      return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] };
+    });
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+    var res = UrlFetchApp.fetch(url, {
+      method: 'post', contentType: 'application/json',
+      payload: JSON.stringify({ contents: contents, generationConfig: { maxOutputTokens: maxTokens } }),
+      muteHttpExceptions: true
+    });
+    if (res.getResponseCode() !== 200) throw new Error('Erro na API do Gemini (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 300));
+    var data = JSON.parse(res.getContentText());
+    var cand = data.candidates && data.candidates[0];
+    return (cand && cand.content && cand.content.parts && cand.content.parts[0]) ? cand.content.parts[0].text : '';
+  }
+
+  if (provider === 'openai') {
+    var res = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'post', contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + apiKey },
+      payload: JSON.stringify({ model: 'gpt-4o', max_tokens: maxTokens, messages: messages }),
+      muteHttpExceptions: true
+    });
+    if (res.getResponseCode() !== 200) throw new Error('Erro na API da OpenAI (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 300));
+    var data = JSON.parse(res.getContentText());
+    return (data.choices && data.choices[0] && data.choices[0].message) ? data.choices[0].message.content : '';
+  }
+
+  if (provider === 'deepseek') {
+    var res = UrlFetchApp.fetch('https://api.deepseek.com/chat/completions', {
+      method: 'post', contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + apiKey },
+      payload: JSON.stringify({ model: 'deepseek-chat', max_tokens: maxTokens, messages: messages }),
+      muteHttpExceptions: true
+    });
+    if (res.getResponseCode() !== 200) throw new Error('Erro na API da DeepSeek (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 300));
+    var data = JSON.parse(res.getContentText());
+    return (data.choices && data.choices[0] && data.choices[0].message) ? data.choices[0].message.content : '';
+  }
+
+  throw new Error('Provedor de IA desconhecido: ' + provider);
 }
 
 function getOrCreateAnaliseIASheet() {
