@@ -2680,12 +2680,30 @@ async function renderRepAiStatusCard(clientId){
     if(central && central.aiProvider){
       $('repEditAiProvider').value = central.aiProvider;
       if(central.aiTemChave) $('repEditAiKeyHint').textContent = '✓ Uma chave já está configurada para esta repartição. Usada nos recursos de IA — fica só no servidor, nunca é exposta.';
+      const cadastradoPorTexto = central.aiCadastradoPorNome
+        ? `Cadastrado por ${esc(central.aiCadastradoPorNome)}${central.aiCadastradoPorCargo ? ' (' + esc(central.aiCadastradoPorCargo) + ')' : ''}, em ${esc(central.aiCadastradoEm)}`
+        : '';
       cardEl.innerHTML = `
         <div class="rep-user-card">
-          <div class="rep-user-nome">${esc(AI_PROVIDER_LABELS[central.aiProvider] || central.aiProvider)}</div>
+          <div class="reparticao-card-top" style="margin-bottom:0;">
+            <div class="rep-user-nome">${esc(AI_PROVIDER_LABELS[central.aiProvider] || central.aiProvider)}</div>
+            <button type="button" class="copy-email-btn" id="removeAiConfigBtn" title="Remover IA cadastrada" aria-label="Remover IA cadastrada" style="font-size:15px;color:#B23B3B;">✕</button>
+          </div>
           <div class="rep-user-detail">${central.aiTemChave ? '✓ Chave de API configurada' : '⚠ Provedor selecionado, mas sem chave configurada ainda'}</div>
+          ${cadastradoPorTexto ? `<div class="rep-user-detail">${cadastradoPorTexto}</div>` : ''}
         </div>
       `;
+      $('removeAiConfigBtn').addEventListener('click', async () => {
+        if(!confirm('Remover a IA cadastrada para esta repartição?')) return;
+        try {
+          await callAppsScript({ action: 'remove_ai_config', clientId });
+          $('repEditAiProvider').value = '';
+          $('repEditAiKeyHint').textContent = 'Usada nos recursos de IA (análise de relatórios, Minuta IA) só por esta repartição. Fica só no servidor, nunca é exposta.';
+          renderRepAiStatusCard(clientId);
+        } catch(err){
+          alert('Não foi possível remover: ' + err.message);
+        }
+      });
     } else {
       cardEl.innerHTML = '<div class="rep-users-empty">Nenhuma IA cadastrada ainda para esta repartição.</div>';
     }
@@ -2984,7 +3002,10 @@ $('saveReparticaoEditBtn').addEventListener('click', async () => {
     // central — assim, QUALQUER usuário desta repartição, em qualquer
     // aparelho, passa a usar a mesma configuração automaticamente,
     // sem precisar configurar nada localmente
-    await callAppsScript({ action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey });
+    await callAppsScript({
+      action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey,
+      usuarioNome: currentUser ? currentUser.nome : '', usuarioCargo: currentUser ? currentUser.cargo : ''
+    });
     $('repEditAiApiKey').value = '';
     let msg = '✓ Dados da repartição salvos.';
     if(aiProvider && aiApiKey){

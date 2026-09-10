@@ -463,6 +463,20 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Card de IA cadastrada: dados de quem cadastrou + remoção
+
+Duas melhorias no card "🤖 IA cadastrada" (modal "Editar repartição"):
+
+- Agora mostra **quem cadastrou** (nome e cargo) e **quando** —
+  novas colunas `AiCadastradoPorNome`, `AiCadastradoPorCargo`,
+  `AiCadastradoEm` na planilha central, preenchidas automaticamente
+  a partir do usuário logado sempre que o provedor/chave é
+  configurado ou alterado.
+- Botão **✕ (remover)** no canto do card, no mesmo padrão visual do
+  card de equipamentos — remove só a configuração de IA daquela
+  repartição (mantém o resto dos dados intactos), com confirmação
+  antes de remover.
+
 ## Correção: chave de IA da repartição EFS "sumia" ao salvar novamente
 
 Bug relatado pelo usuário: mesmo depois de ver o card "🤖 IA

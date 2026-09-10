@@ -374,7 +374,10 @@ function doPost(e) {
           status: r[9] ? String(r[9]) : 'pendente',
           folderNome: r[10] ? String(r[10]) : '',
           aiProvider: r[11] ? String(r[11]) : '',
-          aiTemChave: !!(r[12] && String(r[12]))
+          aiTemChave: !!(r[12] && String(r[12])),
+          aiCadastradoPorNome: r[13] ? String(r[13]) : '',
+          aiCadastradoPorCargo: r[14] ? String(r[14]) : '',
+          aiCadastradoEm: r[15] ? formatDate_(r[15]) : ''
         });
       }
       pendentes.reverse();
@@ -404,6 +407,7 @@ function doPost(e) {
       var sheet = getOrCreateReparticoesPendentesSheet();
       var rows = sheet.getDataRange().getValues();
       var atualizou = false;
+      var mexeuNaIa = data.aiProvider !== undefined || data.aiApiKey;
       for (var i = 1; i < rows.length; i++) {
         if (String(rows[i][2]) === clientId) {
           if (data.nome) sheet.getRange(i + 1, 1).setValue(data.nome);
@@ -411,6 +415,11 @@ function doPost(e) {
           if (data.folderNome !== undefined) sheet.getRange(i + 1, 11).setValue(data.folderNome);
           if (data.aiProvider !== undefined) sheet.getRange(i + 1, 12).setValue(data.aiProvider);
           if (data.aiApiKey) sheet.getRange(i + 1, 13).setValue(data.aiApiKey);
+          if (mexeuNaIa) {
+            sheet.getRange(i + 1, 14).setValue(data.usuarioNome || '');
+            sheet.getRange(i + 1, 15).setValue(data.usuarioCargo || '');
+            sheet.getRange(i + 1, 16).setValue(new Date());
+          }
           atualizou = true;
         }
       }
@@ -429,11 +438,30 @@ function doPost(e) {
           'confirmada',
           data.folderNome || '',
           data.aiProvider || '',
-          data.aiApiKey || ''
+          data.aiApiKey || '',
+          mexeuNaIa ? (data.usuarioNome || '') : '',
+          mexeuNaIa ? (data.usuarioCargo || '') : '',
+          mexeuNaIa ? new Date() : ''
         ]);
         atualizou = true;
       }
       return respond({ ok: true, atualizou: atualizou });
+    }
+
+    // remove só a configuração de IA de uma repartição (mantém o
+    // resto dos dados intactos)
+    if (action === 'remove_ai_config') {
+      var clientId = data.clientId || '';
+      if (!clientId) return respond({ ok: false, error: 'Client ID não informado.' });
+      var sheet = getOrCreateReparticoesPendentesSheet();
+      var rows = sheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][2]) === clientId) {
+          sheet.getRange(i + 1, 12, 1, 5).setValues([['', '', '', '', '']]);
+          return respond({ ok: true });
+        }
+      }
+      return respond({ ok: false, error: 'Repartição não encontrada na central.' });
     }
 
     if (action === 'remove_reparticao_pendente') {
@@ -1046,7 +1074,7 @@ function getOrCreateReparticoesPendentesSheet() {
   var sheet = ss.getSheetByName('ReparticoesPendentes');
   if (!sheet) {
     sheet = ss.insertSheet('ReparticoesPendentes');
-    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status', 'FolderNome', 'AiProvider', 'AiApiKey']);
+    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status', 'FolderNome', 'AiProvider', 'AiApiKey', 'AiCadastradoPorNome', 'AiCadastradoPorCargo', 'AiCadastradoEm']);
     return sheet;
   }
   // garante as colunas mesmo em planilhas criadas antes desta atualização
@@ -1061,6 +1089,15 @@ function getOrCreateReparticoesPendentesSheet() {
   }
   if (sheet.getRange(1, 13).getValue() !== 'AiApiKey') {
     sheet.getRange(1, 13).setValue('AiApiKey');
+  }
+  if (sheet.getRange(1, 14).getValue() !== 'AiCadastradoPorNome') {
+    sheet.getRange(1, 14).setValue('AiCadastradoPorNome');
+  }
+  if (sheet.getRange(1, 15).getValue() !== 'AiCadastradoPorCargo') {
+    sheet.getRange(1, 15).setValue('AiCadastradoPorCargo');
+  }
+  if (sheet.getRange(1, 16).getValue() !== 'AiCadastradoEm') {
+    sheet.getRange(1, 16).setValue('AiCadastradoEm');
   }
   return sheet;
 }
