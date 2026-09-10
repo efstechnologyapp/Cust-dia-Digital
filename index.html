@@ -3161,7 +3161,8 @@ function renderAllReportsList(termo){
       <div class="rep-user-detail">Repartição: ${esc(r.reparticaoNome || r.reparticaoId)}</div>
       <div class="rep-user-detail">Responsável: ${esc(r.nome)} (${esc(r.email)})</div>
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
-      ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>` : ''}
+      ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
+      ${(r.arquivosEnviados || []).filter(a => a.driveLink).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`).join('')}
     </div>
   `).join('');
 }
@@ -3428,7 +3429,8 @@ function renderHomeReportsList(termo){
       <div class="rep-user-nome">${esc(r.relatorioNum || 'Sem número')}${r.processoNum ? ' — Processo ' + esc(r.processoNum) : ''}</div>
       <div class="rep-user-detail">Responsável: ${esc(r.nome)}</div>
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
-      ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>` : ''}
+      ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
+      ${(r.arquivosEnviados || []).filter(a => a.driveLink).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`).join('')}
     </div>
   `).join('');
 }
@@ -3649,7 +3651,8 @@ function renameFileWithInitials(file){
   return new File([file], prefix + file.name, { type: file.type });
 }
 
-let lastEvidenceDriveLink = null; // link do Drive do último arquivo evidência enviado (Seção 9), consumido ao concluir a tarefa
+let lastEvidenceDriveLink = null; // link do Drive do último arquivo evidência enviado (Seção 9) — mantido para as validações existentes
+let allEvidenceLinks = []; // { arquivo, driveLink } de TODOS os arquivos evidência enviados nesta seção, na ordem em que foram enviados
 
 async function handleCustodyShare(){
   const entradasCop = copArquivosManager.getEntries().filter(e => e.file);
@@ -3679,11 +3682,13 @@ async function handleCustodyShare(){
         statusEl.className = 'loc-status';
         const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
         lastEvidenceDriveLink = result.webViewLink || null;
+        allEvidenceLinks.push({ arquivo: file.name, driveLink: lastEvidenceDriveLink || '' });
         if(currentUser && currentUser.email){
           callAppsScript({
             action: 'log_arquivo_enviado',
             email: currentUser.email, reparticaoId: rep.clientId,
-            arquivo: file.name, driveLink: lastEvidenceDriveLink || ''
+            arquivo: file.name, driveLink: lastEvidenceDriveLink || '',
+            relatorioNum: $('f_relatorio_num').value || '', processoNum: $('f_processo_num').value || ''
           }).catch(() => {});
         }
         const sentence = buildCustodySentence(file.name, `da ${rep.nome}`, folderName || rep.folderId);
@@ -3700,11 +3705,13 @@ async function handleCustodyShare(){
         statusEl.textContent = `Enviando anexo ${enviados} de ${total} (${file.name})…`;
         statusEl.className = 'loc-status';
         const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
+        allEvidenceLinks.push({ arquivo: file.name, driveLink: result.webViewLink || '' });
         if(currentUser && currentUser.email){
           callAppsScript({
             action: 'log_arquivo_enviado',
             email: currentUser.email, reparticaoId: rep.clientId,
-            arquivo: file.name, driveLink: result.webViewLink || ''
+            arquivo: file.name, driveLink: result.webViewLink || '',
+            relatorioNum: $('f_relatorio_num').value || '', processoNum: $('f_processo_num').value || ''
           }).catch(() => {});
         }
       }
@@ -6344,9 +6351,11 @@ function saveReportToHistory(){
     html: $('reportPaper').innerHTML,
     enviadoDrive: false,
     driveLink: '',
-    arquivoDigitalDriveLink: lastEvidenceDriveLink || ''
+    arquivoDigitalDriveLink: lastEvidenceDriveLink || '', // mantido por compatibilidade com registros antigos
+    arquivosEnviados: allEvidenceLinks.slice()
   };
   lastEvidenceDriveLink = null; // consumido — não vaza para o próximo relatório
+  allEvidenceLinks = [];
   const list = loadHistory();
   list.unshift(record);
   saveHistoryList(list.slice(0, 200)); // limite de segurança para não crescer sem controle
@@ -6447,9 +6456,13 @@ function buildLocalHistoryCard(record){
   const driveLinkHtml = record.driveLink
     ? `<div><a href="${esc(record.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>`
     : '';
-  const evidenceLinkHtml = record.arquivoDigitalDriveLink
-    ? `<div><a href="${esc(record.arquivoDigitalDriveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir arquivo digital no Drive</a></div>`
-    : '';
+  const evidenceLinksHtml = (record.arquivosEnviados && record.arquivosEnviados.length)
+    ? record.arquivosEnviados.map(a => a.driveLink
+        ? `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`
+        : '').join('')
+    : (record.arquivoDigitalDriveLink // compatibilidade com registros salvos antes desta correção
+        ? `<div><a href="${esc(record.arquivoDigitalDriveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir arquivo digital no Drive</a></div>`
+        : '');
 
   const card = document.createElement('div');
   card.className = 'history-card';
@@ -6464,7 +6477,7 @@ function buildLocalHistoryCard(record){
       ${driveBadge}
     </div>
     ${driveLinkHtml}
-    ${evidenceLinkHtml}
+    ${evidenceLinksHtml}
     <div class="history-card-actions">
       <button data-action="open">Abrir</button>
       <button data-action="delete" class="danger">Excluir</button>
@@ -6476,6 +6489,10 @@ function buildLocalHistoryCard(record){
 }
 
 function buildCentralHistoryCard(r){
+  const arquivosLinksHtml = (r.arquivosEnviados || [])
+    .filter(a => a.driveLink)
+    .map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`)
+    .join('');
   const card = document.createElement('div');
   card.className = 'history-card';
   card.innerHTML = `
@@ -6487,7 +6504,8 @@ function buildCentralHistoryCard(r){
     <div style="margin:4px 0;">
       <span class="history-badge ok">☁️ Enviado ao Drive</span>
     </div>
-    <div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir no Drive</a></div>
+    <div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>
+    ${arquivosLinksHtml}
   `;
   return card;
 }
@@ -6527,6 +6545,7 @@ function resetFormFields(){
   origArquivosManager.reset();
   copArquivosManager.reset();
   lastEvidenceDriveLink = null;
+  allEvidenceLinks = [];
   $('shareRepStatus').textContent = '';
   $('hashCompareList').innerHTML = '';
   $('hashCompareBox').className = 'hash-check neutral';

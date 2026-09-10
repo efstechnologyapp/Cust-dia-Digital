@@ -463,6 +463,31 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Correção: cards de relatório não mostravam todos os arquivos enviados
+
+Bug relatado pelo usuário: os cards de relatório (histórico e
+"Relatórios da Repartição") mostravam só o link do PDF do relatório
+— nunca os links dos arquivos evidência (cópia da Seção 6 + fotos da
+Seção 8) enviados junto.
+
+**Causa**: existem duas planilhas centrais separadas — "Relatorios"
+(o PDF) e "ArquivosEnviados" (os arquivos evidência) — e elas nunca
+tinham um campo em comum para ligar uma à outra.
+
+**Correção**: os envios de arquivo evidência agora também registram
+o número do relatório e do processo; uma nova função no Apps Script
+(`buildArquivosEnviadosIndex_`) agrupa a planilha de arquivos por
+relatório, e as ações `list_reports`/`list_all_reports` passam a
+devolver, junto de cada relatório, a lista completa de arquivos
+enviados com ele. Os 4 lugares que mostram cards de relatório
+(histórico local, histórico "outros dispositivos", busca da Gestão
+do App, busca da Home) agora exibem o link de **cada** arquivo
+enviado, não só o do PDF.
+
+Registros de arquivos enviados **antes** desta correção não têm
+essa ligação (não é possível recuperar retroativamente) — só os
+enviados a partir de agora aparecem agrupados corretamente.
+
 ## Bloco de assinatura + QR Code reorganizados
 
 Reformulado como um retângulo único, bem discreto, no final do

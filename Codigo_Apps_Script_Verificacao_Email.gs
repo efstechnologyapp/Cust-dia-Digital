@@ -310,18 +310,22 @@ function doPost(e) {
       if (!email) return respond({ ok: true, relatorios: [] });
       var sheet = getOrCreateReportsSheet();
       var rows = sheet.getDataRange().getValues();
+      var arquivosIndex = buildArquivosEnviadosIndex_();
       var relatorios = [];
       for (var i = 1; i < rows.length; i++) {
         var r = rows[i];
         if (String(r[0]).toLowerCase() !== email) continue;
+        var relatorioNum = String(r[3]);
+        var reparticaoId = String(r[2]);
         relatorios.push({
-          relatorioNum: String(r[3]),
+          relatorioNum: relatorioNum,
           arquivo: String(r[4]),
           driveLink: String(r[5]),
           dataEnvio: r[6] ? formatDate_(r[6]) : '',
-          reparticaoId: String(r[2]),
+          reparticaoId: reparticaoId,
           reparticaoNome: r[7] ? String(r[7]) : '',
-          processoNum: r[8] ? String(r[8]) : ''
+          processoNum: r[8] ? String(r[8]) : '',
+          arquivosEnviados: arquivosIndex[relatorioNum + '|' + reparticaoId] || []
         });
       }
       relatorios.reverse(); // mais recentes primeiro
@@ -553,7 +557,9 @@ function doPost(e) {
         data.reparticaoId || '',
         data.arquivo || '',
         data.driveLink || '',
-        new Date()
+        new Date(),
+        data.relatorioNum || '',
+        data.processoNum || ''
       ]);
       return respond({ ok: true });
     }
@@ -637,19 +643,23 @@ function doPost(e) {
     if (action === 'list_all_reports') {
       var sheet = getOrCreateReportsSheet();
       var rows = sheet.getDataRange().getValues();
+      var arquivosIndex = buildArquivosEnviadosIndex_();
       var relatorios = [];
       for (var i = 1; i < rows.length; i++) {
         var r = rows[i];
+        var relatorioNum = String(r[3]);
+        var reparticaoId = String(r[2]);
         relatorios.push({
           email: String(r[0]),
           nome: String(r[1]),
-          reparticaoId: String(r[2]),
-          relatorioNum: String(r[3]),
+          reparticaoId: reparticaoId,
+          relatorioNum: relatorioNum,
           arquivo: String(r[4]),
           driveLink: String(r[5]),
           dataEnvio: r[6] ? formatDate_(r[6]) : '',
           reparticaoNome: r[7] ? String(r[7]) : '',
-          processoNum: r[8] ? String(r[8]) : ''
+          processoNum: r[8] ? String(r[8]) : '',
+          arquivosEnviados: arquivosIndex[relatorioNum + '|' + reparticaoId] || []
         });
       }
       relatorios.reverse();
@@ -743,6 +753,30 @@ function getOrCreateEquipamentosSheet() {
   return sheet;
 }
 
+// agrupa a planilha "ArquivosEnviados" por relatório (chave
+// "RelatorioNum|ReparticaoId"), para anexar a cada relatório os
+// links de todos os arquivos evidência enviados junto com ele —
+// lida a planilha inteira uma única vez, não uma vez por relatório
+function buildArquivosEnviadosIndex_(){
+  var sheet = getOrCreateArquivosEnviadosSheet();
+  var rows = sheet.getDataRange().getValues();
+  var index = {};
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    var relatorioNum = r[5] ? String(r[5]) : '';
+    var reparticaoId = r[1] ? String(r[1]) : '';
+    if (!relatorioNum) continue; // arquivos antigos, enviados antes desta correção, ficam sem vínculo
+    var chave = relatorioNum + '|' + reparticaoId;
+    if (!index[chave]) index[chave] = [];
+    index[chave].push({
+      arquivo: String(r[2]),
+      driveLink: String(r[3]),
+      dataEnvio: r[4] ? formatDate_(r[4]) : ''
+    });
+  }
+  return index;
+}
+
 function getOrCreateArquivosEnviadosSheet() {
   var props = PropertiesService.getScriptProperties();
   var ssId = props.getProperty('USERS_SHEET_ID');
@@ -757,7 +791,14 @@ function getOrCreateArquivosEnviadosSheet() {
   var sheet = ss.getSheetByName('ArquivosEnviados');
   if (!sheet) {
     sheet = ss.insertSheet('ArquivosEnviados');
-    sheet.appendRow(['Email', 'ReparticaoId', 'Arquivo', 'DriveLink', 'DataEnvio']);
+    sheet.appendRow(['Email', 'ReparticaoId', 'Arquivo', 'DriveLink', 'DataEnvio', 'RelatorioNum', 'ProcessoNum']);
+    return sheet;
+  }
+  if (sheet.getRange(1, 6).getValue() !== 'RelatorioNum') {
+    sheet.getRange(1, 6).setValue('RelatorioNum');
+  }
+  if (sheet.getRange(1, 7).getValue() !== 'ProcessoNum') {
+    sheet.getRange(1, 7).setValue('ProcessoNum');
   }
   return sheet;
 }
