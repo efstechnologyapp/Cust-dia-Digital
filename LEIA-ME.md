@@ -463,6 +463,25 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Correção: cadastro de IA na repartição sem confirmação visual
+
+Bug relatado pelo usuário: ao salvar o provedor/chave de IA no modal
+"Editar repartição", não havia nenhuma confirmação visual de que o
+cadastro tinha realmente acontecido — diferente do que já ocorre com
+o cadastro de equipamentos.
+
+**Correção**:
+- O salvamento agora **espera** a confirmação da central antes de
+  mostrar qualquer mensagem (antes era "atire e esqueça").
+- Mensagem de status clara: "✓ Dados da repartição salvos. IA
+  (gemini) cadastrada/atualizada com sucesso para esta repartição."
+- Novo card **"🤖 IA cadastrada"**, no mesmo padrão visual do card de
+  equipamentos, mostrando o provedor ativo e se há chave configurada
+  — atualiza sozinho logo após salvar, sem precisar reabrir o modal.
+- O modal deixou de fechar sozinho após salvar — fica aberto até o
+  administrador fechar manualmente, dando tempo de conferir a
+  confirmação (igual já ocorre com usuários/equipamentos).
+
 ## Histórico de versões (novo formato)
 
 A informação de versão deixou de ser um único bloco que se

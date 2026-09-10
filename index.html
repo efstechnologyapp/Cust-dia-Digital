@@ -1722,6 +1722,10 @@
     </div>
     <div class="loc-status" id="repEquipamentosStatus"></div>
     <div id="repEquipamentosList"></div>
+
+    <hr class="sidebar-divider">
+    <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0 0 8px;">🤖 IA cadastrada</h4>
+    <div id="repAiStatusCard"></div>
   </div>
 </div>
 
@@ -2659,13 +2663,35 @@ function startEditReparticao(id){
   renderRepUsersLists(rep.clientId);
   renderRepEquipamentosList(rep.clientId);
   loadRepCadastradaPorInfo(rep);
-  // busca da central se essa repartição já tem provedor/chave de IA
-  // configurados, para refletir corretamente no seletor
-  callAppsScript({ action: 'list_reparticoes_pendentes' }).then(data => {
-    const central = (data.pendentes || []).find(p => p.clientId === rep.clientId);
-    if(central && central.aiProvider) $('repEditAiProvider').value = central.aiProvider;
-    if(central && central.aiTemChave) $('repEditAiKeyHint').textContent = '✓ Uma chave já está configurada para esta repartição. Usada nos recursos de IA — fica só no servidor, nunca é exposta.';
-  }).catch(() => {});
+  renderRepAiStatusCard(rep.clientId);
+}
+
+const AI_PROVIDER_LABELS = { anthropic: 'Anthropic (Claude)', gemini: 'Google (Gemini)', openai: 'OpenAI (ChatGPT)', deepseek: 'DeepSeek' };
+
+// busca na central se essa repartição já tem provedor/chave de IA
+// configurados — usada tanto ao abrir o modal quanto logo depois de
+// salvar, para o card refletir o estado atual sem precisar reabrir
+async function renderRepAiStatusCard(clientId){
+  const cardEl = $('repAiStatusCard');
+  cardEl.innerHTML = '<div class="loc-status">Carregando…</div>';
+  try {
+    const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
+    const central = (data.pendentes || []).find(p => p.clientId === clientId);
+    if(central && central.aiProvider){
+      $('repEditAiProvider').value = central.aiProvider;
+      if(central.aiTemChave) $('repEditAiKeyHint').textContent = '✓ Uma chave já está configurada para esta repartição. Usada nos recursos de IA — fica só no servidor, nunca é exposta.';
+      cardEl.innerHTML = `
+        <div class="rep-user-card">
+          <div class="rep-user-nome">${esc(AI_PROVIDER_LABELS[central.aiProvider] || central.aiProvider)}</div>
+          <div class="rep-user-detail">${central.aiTemChave ? '✓ Chave de API configurada' : '⚠ Provedor selecionado, mas sem chave configurada ainda'}</div>
+        </div>
+      `;
+    } else {
+      cardEl.innerHTML = '<div class="rep-users-empty">Nenhuma IA cadastrada ainda para esta repartição.</div>';
+    }
+  } catch(e){
+    cardEl.innerHTML = '<div class="rep-users-empty">Não foi possível carregar.</div>';
+  }
 }
 
 // mostra os equipamentos (PCs) cadastrados nesta repartição — mesma
@@ -2927,7 +2953,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   renderReparticoesPendentesList();
 });
 
-$('saveReparticaoEditBtn').addEventListener('click', () => {
+$('saveReparticaoEditBtn').addEventListener('click', async () => {
   const nome = $('repEditNome').value.trim();
   const email = $('repEditEmail').value.trim();
   const clientId = sanitizeClientId($('repEditClientId').value);
@@ -2943,22 +2969,43 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
   }
   const list = loadReparticoes();
   const idx = list.findIndex(r => r.id === editingReparticaoId);
-  if(idx >= 0){
-    list[idx] = { ...list[idx], nome, email, clientId, folderId, folderNome };
-    saveReparticoesList(list);
-    gisTokenClient = null;
-    setDriveConnectedFlag(false);
-    updateDriveStatusUI(false);
+  if(idx < 0) return;
+
+  list[idx] = { ...list[idx], nome, email, clientId, folderId, folderNome };
+  saveReparticoesList(list);
+  gisTokenClient = null;
+  setDriveConnectedFlag(false);
+  updateDriveStatusUI(false);
+
+  statusEl.textContent = 'Salvando…';
+  statusEl.className = 'loc-status';
+  try {
     // propaga a edição (nome da pasta, provedor/chave de IA) para a
     // central — assim, QUALQUER usuário desta repartição, em qualquer
     // aparelho, passa a usar a mesma configuração automaticamente,
     // sem precisar configurar nada localmente
-    callAppsScript({ action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey }).catch(() => {});
+    await callAppsScript({ action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey });
     $('repEditAiApiKey').value = '';
+    let msg = '✓ Dados da repartição salvos.';
+    if(aiProvider && aiApiKey){
+      msg += ` IA (${aiProvider}) cadastrada/atualizada com sucesso para esta repartição.`;
+      $('repEditAiKeyHint').textContent = '✓ Uma chave já está configurada para esta repartição. Usada nos recursos de IA — fica só no servidor, nunca é exposta.';
+    } else if(aiProvider && !aiApiKey){
+      msg += ' Provedor selecionado, mas nenhuma chave nova foi informada — a chave anterior (se houver) foi mantida.';
+    }
+    statusEl.textContent = msg;
+    statusEl.className = 'loc-status ok';
+    renderRepAiStatusCard(clientId);
+  } catch(err){
+    statusEl.textContent = 'Os dados foram salvos neste aparelho, mas não foi possível sincronizar com a central: ' + err.message;
+    statusEl.className = 'loc-status err';
   }
+
   renderReparticoesManageList();
   renderRepSelectDropdown();
-  closeEditReparticaoModal();
+  // não fecha mais sozinho — o card "IA cadastrada" e a mensagem de
+  // status ficam visíveis até o adm fechar manualmente, igual já
+  // ocorre com os cards de usuários/equipamentos
 });
 $('closeEditRepBtn').addEventListener('click', closeEditReparticaoModal);
 
