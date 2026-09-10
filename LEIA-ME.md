@@ -463,6 +463,57 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Histórico de versões (novo formato)
+
+A informação de versão deixou de ser um único bloco que se
+sobrescreve a cada atualização — agora é um **histórico** que só
+cresce, nunca apaga uma versão anterior:
+
+- Nova seção **"🕓 Histórico de versões"** na aba "Informações
+  Gerais", listando todas as versões já registradas (mais recente
+  primeiro), cada uma como um botão "Versão X.X — criada em
+  dd/mm/aaaa, às hhhmm".
+- Clicar numa versão abre um **modal** com a data completa e o
+  resumo detalhado daquela versão especificamente.
+- A versão exibida na sidebar (rodapé) e na página "Sobre o App"
+  sempre reflete a **mais recente** do histórico.
+- Tecnicamente, a antiga constante `APP_VERSION_INFO` virou um array
+  `APP_VERSION_HISTORY` — cada atualização futura só precisa de um
+  novo item adicionado ao final, sem tocar nos anteriores.
+- Registrada a **versão 1.0**, cobrindo tudo que foi implementado
+  desde a 0.85 (múltiplos arquivos, conformidade ampliada com o
+  Manual de POP, aba "Relatórios da Repartição", correção de timeout
+  no Drive, correção do bloco de assinatura/QR, correção dos links
+  de arquivo nos cards, e toda a integração com IA — análise de
+  metadados, multi-provedor, Minuta IA).
+
+## IA configurada por repartição, não mais globalmente (ajuste importante)
+
+A configuração de provedor/chave de IA deixou de ser **global**
+(uma só para o sistema inteiro) e passou a ser **por repartição** —
+reflete melhor a realidade: cada repartição contrata seu próprio
+provedor de IA, com seu próprio contrato e custo.
+
+- **Onde configurar agora**: dentro do modal "Editar repartição"
+  (Gestão de Conexões), e também já no formulário de **cadastro de
+  nova repartição** (tanto pelo admin quanto pela tela de login,
+  quando um usuário cria uma repartição nova durante o próprio
+  cadastro) — assim toda repartição nasce com esse campo disponível
+  para preenchimento, mesmo que opcional no momento da criação.
+- **Onde fica salvo**: nova colunas `AiProvider`/`AiApiKey` na
+  planilha central "ReparticoesPendentes" — a mesma que já guarda
+  nome, Client ID e pasta do Drive de cada repartição.
+- **Visível para todos os usuários da repartição**: como a busca do
+  provedor/chave acontece no servidor, por Client ID, a cada
+  chamada de IA — qualquer usuário logado naquela repartição, em
+  qualquer aparelho, já usa a mesma configuração automaticamente,
+  sem precisar sincronizar nada localmente.
+- A aba "Informações Gerais" da Gestão do App **não tem mais** a
+  seção de IA institucional — ela foi removida de lá.
+- Repartição sem provedor/chave configurados recebe mensagem clara
+  ao tentar usar os recursos de IA, apontando para o administrador
+  configurar em "Editar repartição".
+
 ## Integração com IA — multi-provedor + Minuta IA (evolução do recurso anterior)
 
 O recurso de IA foi ampliado e reorganizado:

@@ -1200,6 +1200,20 @@
           <label style="font-size:12px;">Nome dessa pasta no Drive</label>
           <input type="text" id="regNewRepFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
         </div>
+        <div class="field">
+          <label style="font-size:12px;">Provedor de IA contratado por esta repartição (opcional, dá para configurar depois)</label>
+          <select id="regNewRepAiProvider">
+            <option value="" selected>Ainda não configurar</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="gemini">Google (Gemini)</option>
+            <option value="openai">OpenAI (ChatGPT)</option>
+            <option value="deepseek">DeepSeek</option>
+          </select>
+        </div>
+        <div class="field">
+          <label style="font-size:12px;">Chave de API</label>
+          <input type="password" id="regNewRepAiApiKey" placeholder="Cole aqui, se já tiver a chave">
+        </div>
         <button class="btn-primary" id="regNewRepSaveBtn" style="margin-bottom:6px;">Salvar repartição</button>
         <div class="loc-status" id="regNewRepStatus"></div>
       </div>
@@ -1453,6 +1467,9 @@
       <div class="rep-users-section-title">📝 Funcionalidades do APP</div>
       <div class="rep-user-card" id="appInfoFuncionalidades">Aguarda descrição de funcionalidade pelo adm.</div>
 
+      <div class="rep-users-section-title">🕓 Histórico de versões</div>
+      <div id="appInfoVersionHistory"></div>
+
       <div class="rep-users-section-title">📊 Métricas do Sistema</div>
       <div class="rep-user-card">
         <div><b>Repartições:</b> <span id="appInfoReparticoes"></span></div>
@@ -1460,27 +1477,6 @@
         <div><b>Equipamentos de destino:</b> <span id="appInfoEquipamentos"></span></div>
         <div><b>Relatórios enviados:</b> <span id="appInfoRelatorios"></span></div>
         <div><b>Arquivos enviados:</b> <span id="appInfoArquivos"></span></div>
-      </div>
-
-      <div class="rep-users-section-title">🤖 IA Institucional</div>
-      <div class="rep-user-card">
-        <div class="hint" style="margin:0 0 8px;">Provedor de IA contratado pela instituição, usado por todos os usuários no app (análise de metadados e Minuta IA). A chave fica só no servidor, nunca é exposta.</div>
-        <div class="field">
-          <label>Provedor ativo</label>
-          <select id="aiProviderSelect">
-            <option value="anthropic">Anthropic (Claude)</option>
-            <option value="gemini">Google (Gemini)</option>
-            <option value="openai">OpenAI (ChatGPT)</option>
-            <option value="deepseek">DeepSeek</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Chave de API</label>
-          <input type="password" id="aiApiKeyInput" placeholder="Cole aqui para definir/atualizar a chave">
-          <div class="hint" id="aiKeyStatusHint"></div>
-        </div>
-        <button type="button" class="btn-attach" id="saveAiConfigBtn">💾 Salvar configuração</button>
-        <div class="loc-status" id="aiConfigStatus"></div>
       </div>
     </div>
 
@@ -1531,6 +1527,20 @@
           <label>Nome dessa pasta no Drive</label>
           <input type="text" id="repFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
         </div>
+        <div class="field">
+          <label>Provedor de IA contratado por esta repartição (opcional, pode configurar depois)</label>
+          <select id="repAiProvider">
+            <option value="" selected>Ainda não configurar</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="gemini">Google (Gemini)</option>
+            <option value="openai">OpenAI (ChatGPT)</option>
+            <option value="deepseek">DeepSeek</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Chave de API</label>
+          <input type="password" id="repAiApiKey" placeholder="Cole aqui, se já tiver a chave">
+        </div>
         <button class="btn-primary" id="saveReparticaoBtn" style="margin-bottom:8px;">Salvar repartição</button>
         <div class="loc-status" id="reparticaoFormStatus"></div>
       </div>
@@ -1563,6 +1573,16 @@
       <div class="loc-status" id="allReportsStatus"></div>
       <div id="allReportsList"></div>
     </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: detalhes de uma versão do app (Histórico de versões) ===== -->
+<div class="sidebar-overlay" id="versionDetailOverlay">
+  <div class="sidebar-panel edit-rep-panel">
+    <button class="sidebar-close" id="closeVersionDetailBtn">✕</button>
+    <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0 0 4px;" id="versionDetailTitle"></h3>
+    <div class="hint" style="margin:0 0 14px;" id="versionDetailData"></div>
+    <div id="versionDetailContent"></div>
   </div>
 </div>
 
@@ -1658,6 +1678,21 @@
     <div class="field">
       <label>Nome dessa pasta no Drive</label>
       <input type="text" id="repEditFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
+    </div>
+    <div class="field">
+      <label>Provedor de IA contratado por esta repartição</label>
+      <select id="repEditAiProvider">
+        <option value="" disabled selected>Selecione…</option>
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="gemini">Google (Gemini)</option>
+        <option value="openai">OpenAI (ChatGPT)</option>
+        <option value="deepseek">DeepSeek</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Chave de API</label>
+      <input type="password" id="repEditAiApiKey" placeholder="Cole aqui para definir/atualizar a chave">
+      <div class="hint" id="repEditAiKeyHint">Usada nos recursos de IA (análise de relatórios, Minuta IA) só por esta repartição. Fica só no servidor, nunca é exposta.</div>
     </div>
     <button class="btn-primary" id="saveReparticaoEditBtn" style="margin-bottom:8px;">Salvar alterações</button>
     <button class="btn-link" id="cancelEditRepBtn" style="width:100%;margin-bottom:8px;">Cancelar</button>
@@ -2616,11 +2651,21 @@ function startEditReparticao(id){
   $('repEditClientId').value = rep.clientId;
   $('repEditFolderId').value = rep.folderId;
   $('repEditFolderNome').value = rep.folderNome || '';
+  $('repEditAiProvider').value = '';
+  $('repEditAiApiKey').value = '';
+  $('repEditAiKeyHint').textContent = 'Usada nos recursos de IA (análise de relatórios, Minuta IA) só por esta repartição. Fica só no servidor, nunca é exposta.';
   $('reparticaoEditFormStatus').textContent = '';
   $('editRepOverlay').classList.add('open');
   renderRepUsersLists(rep.clientId);
   renderRepEquipamentosList(rep.clientId);
   loadRepCadastradaPorInfo(rep);
+  // busca da central se essa repartição já tem provedor/chave de IA
+  // configurados, para refletir corretamente no seletor
+  callAppsScript({ action: 'list_reparticoes_pendentes' }).then(data => {
+    const central = (data.pendentes || []).find(p => p.clientId === rep.clientId);
+    if(central && central.aiProvider) $('repEditAiProvider').value = central.aiProvider;
+    if(central && central.aiTemChave) $('repEditAiKeyHint').textContent = '✓ Uma chave já está configurada para esta repartição. Usada nos recursos de IA — fica só no servidor, nunca é exposta.';
+  }).catch(() => {});
 }
 
 // mostra os equipamentos (PCs) cadastrados nesta repartição — mesma
@@ -2829,6 +2874,8 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   const clientId = sanitizeClientId($('repClientId').value);
   const folderId = sanitizeFolderId($('repFolderId').value);
   const folderNome = $('repFolderNome').value.trim();
+  const aiProvider = $('repAiProvider').value;
+  const aiApiKey = $('repAiApiKey').value.trim();
   const statusEl = $('reparticaoFormStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -2844,7 +2891,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   // verdade usando ela, o que a promove automaticamente a "cadastrada"
   try {
     const data = await callAppsScript({
-      action: 'register_reparticao_pendente', nome, email, clientId, folderId, folderNome,
+      action: 'register_reparticao_pendente', nome, email, clientId, folderId, folderNome, aiProvider, aiApiKey,
       // registra também quem fez o cadastro (o administrador), para
       // aparecer tanto no card de pendentes quanto no modal da repartição
       usuarioNome: currentUser ? currentUser.nome : '',
@@ -2886,6 +2933,8 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
   const clientId = sanitizeClientId($('repEditClientId').value);
   const folderId = sanitizeFolderId($('repEditFolderId').value);
   const folderNome = $('repEditFolderNome').value.trim();
+  const aiProvider = $('repEditAiProvider').value;
+  const aiApiKey = $('repEditAiApiKey').value.trim();
   const statusEl = $('reparticaoEditFormStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -2900,9 +2949,12 @@ $('saveReparticaoEditBtn').addEventListener('click', () => {
     gisTokenClient = null;
     setDriveConnectedFlag(false);
     updateDriveStatusUI(false);
-    // propaga a edição (principalmente o nome da pasta) para a central,
-    // para que outros aparelhos também passem a ver a informação
-    callAppsScript({ action: 'update_reparticao_central', clientId, nome, folderId, folderNome }).catch(() => {});
+    // propaga a edição (nome da pasta, provedor/chave de IA) para a
+    // central — assim, QUALQUER usuário desta repartição, em qualquer
+    // aparelho, passa a usar a mesma configuração automaticamente,
+    // sem precisar configurar nada localmente
+    callAppsScript({ action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey }).catch(() => {});
+    $('repEditAiApiKey').value = '';
   }
   renderReparticoesManageList();
   renderRepSelectDropdown();
@@ -3125,8 +3177,8 @@ $('refreshReparticoesPendentesBtn').addEventListener('click', renderReparticoesP
 
 $('openAboutAppBtn').addEventListener('click', () => {
   $('sidebarOverlay').classList.remove('open');
-  $('aboutAppUpdateTitle').textContent = `Atualizações a partir da versão ${APP_VERSION_INFO.numero} (${APP_VERSION_INFO.data})`;
-  $('aboutAppUpdateContent').innerHTML = APP_VERSION_INFO.resumoHtml;
+  $('aboutAppUpdateTitle').textContent = `Atualizações a partir da versão ${getLatestVersion().numero} (${getLatestVersion().data})`;
+  $('aboutAppUpdateContent').innerHTML = getLatestVersion().resumoHtml;
   showView('about');
 });
 $('aboutAppBackBtn').addEventListener('click', () => {
@@ -3234,39 +3286,115 @@ $('allReportsSearchInput').addEventListener('input', () => renderAllReportsList(
 // única fonte de verdade sobre a versão atual do app — atualizar aqui
 // a cada nova versão publicada (usada tanto na sidebar quanto na aba
 // "Informações Gerais")
-const APP_VERSION_INFO = {
-  numero: 'v. 0.85',
-  dataHora: '08/09/2026, às 23h24',
-  data: '08/09/2026',
-  resumoHtml: `
-    <p style="margin:4px 0;"><b>🔐 Gestão do App</b> (antes "Conexões do Sistema")</p>
-    <ul style="margin:2px 0 8px;padding-left:16px;">
-      <li>Renomeada, com 3 abas: Informações Gerais (nova — dados do app, funcionalidades, contadores de repartições/usuários/equipamentos/relatórios/arquivos), Gestão de Conexões, Usuários cadastrados</li>
-      <li>Bolinhas vermelhas de pendência na sidebar e em cada aba, sinalizando repartições sem conexão e usuários sem habilitação, em tempo real</li>
-      <li>Histórico de acesso filtrado por ato específico (login, logout, edição de cadastro com campo alterado, conexão/adição/remoção de repartição, envio/exclusão de relatório) — só isso é registrado, mais nada</li>
-      <li>Modal de usuário: sobreposição corrigida, exclusão suave (não apaga, só marca), card de equipamentos com botão de remover</li>
-    </ul>
-    <p style="margin:4px 0;"><b>💻 Equipamentos cadastrados por repartição</b></p>
-    <ul style="margin:2px 0 8px;padding-left:16px;">
-      <li>Seção 5 do formulário passou a ter cadastro/reaproveitamento de PCs por repartição (não mais formulário livre)</li>
-      <li>Card correspondente no modal de edição de repartição</li>
-    </ul>
-    <p style="margin:4px 0;"><b>📝 Formulário — reestruturação completa</b></p>
-    <ul style="margin:2px 0 8px;padding-left:16px;">
-      <li>9 seções únicas (uma por vez, com "Próxima seção"), renumeradas e renomeadas: Inicialização do Procedimento de Extração (com aviso de criptografia + checklist obrigatório), Identificação Geral, Identificação da Fonte de Extração (múltiplos tipos: celular, tablet, HD/SSD, computador, nuvem, roteador/modem), Procedimento de Extração e Identificação do Arquivo, Identificação do Computador de Destino, Checagem de Integridade (PC), Análise de Integridade, Anexos (obrigatórios condicionados ao tipo de fonte), Cadeia de Custódia</li>
-      <li>Campos obrigatórios com bloqueio de avanço em praticamente todas as seções, cada um com mensagem específica</li>
-      <li>Botão "✏️ Retificar formulário" no relatório gerado (sem mexer no "Concluir Tarefa")</li>
-      <li>Relatório final não referencia mais a Seção 1 (é só checklist de uso)</li>
-      <li>Nomenclatura de arquivos com iniciais do usuário</li>
-    </ul>
-    <p style="margin:4px 0;"><b>🏢 Repartições e conexões</b></p>
-    <ul style="margin:2px 0 0;padding-left:16px;">
-      <li>Sistema de Client ID estável entre aparelhos (corrigindo vários bugs de duplicação)</li>
-      <li>Nome da pasta do Drive salvo manualmente (evitando depender de permissão que sempre falha)</li>
-      <li>Manual de cadastro (sidebar + PDF na tela de login)</li>
-    </ul>
-  `
-};
+// histórico de versões exibidas ao usuário — cada entrada registrada
+// fica pra sempre (nunca apagamos uma versão anterior); só
+// adicionamos uma nova quando o usuário pedir explicitamente
+const APP_VERSION_HISTORY = [
+  {
+    numero: 'v. 0.85',
+    dataHora: '08/09/2026, às 23h24',
+    data: '08/09/2026',
+    resumoHtml: `
+      <p style="margin:4px 0;"><b>🔐 Gestão do App</b> (antes "Conexões do Sistema")</p>
+      <ul style="margin:2px 0 8px;padding-left:16px;">
+        <li>Renomeada, com 3 abas: Informações Gerais (nova — dados do app, funcionalidades, contadores de repartições/usuários/equipamentos/relatórios/arquivos), Gestão de Conexões, Usuários cadastrados</li>
+        <li>Bolinhas vermelhas de pendência na sidebar e em cada aba, sinalizando repartições sem conexão e usuários sem habilitação, em tempo real</li>
+        <li>Histórico de acesso filtrado por ato específico (login, logout, edição de cadastro com campo alterado, conexão/adição/remoção de repartição, envio/exclusão de relatório) — só isso é registrado, mais nada</li>
+        <li>Modal de usuário: sobreposição corrigida, exclusão suave (não apaga, só marca), card de equipamentos com botão de remover</li>
+      </ul>
+      <p style="margin:4px 0;"><b>💻 Equipamentos cadastrados por repartição</b></p>
+      <ul style="margin:2px 0 8px;padding-left:16px;">
+        <li>Seção 5 do formulário passou a ter cadastro/reaproveitamento de PCs por repartição (não mais formulário livre)</li>
+        <li>Card correspondente no modal de edição de repartição</li>
+      </ul>
+      <p style="margin:4px 0;"><b>📝 Formulário — reestruturação completa</b></p>
+      <ul style="margin:2px 0 8px;padding-left:16px;">
+        <li>9 seções únicas (uma por vez, com "Próxima seção"), renumeradas e renomeadas: Inicialização do Procedimento de Extração (com aviso de criptografia + checklist obrigatório), Identificação Geral, Identificação da Fonte de Extração (múltiplos tipos: celular, tablet, HD/SSD, computador, nuvem, roteador/modem), Procedimento de Extração e Identificação do Arquivo, Identificação do Computador de Destino, Checagem de Integridade (PC), Análise de Integridade, Anexos (obrigatórios condicionados ao tipo de fonte), Cadeia de Custódia</li>
+        <li>Campos obrigatórios com bloqueio de avanço em praticamente todas as seções, cada um com mensagem específica</li>
+        <li>Botão "✏️ Retificar formulário" no relatório gerado (sem mexer no "Concluir Tarefa")</li>
+        <li>Relatório final não referencia mais a Seção 1 (é só checklist de uso)</li>
+        <li>Nomenclatura de arquivos com iniciais do usuário</li>
+      </ul>
+      <p style="margin:4px 0;"><b>🏢 Repartições e conexões</b></p>
+      <ul style="margin:2px 0 0;padding-left:16px;">
+        <li>Sistema de Client ID estável entre aparelhos (corrigindo vários bugs de duplicação)</li>
+        <li>Nome da pasta do Drive salvo manualmente (evitando depender de permissão que sempre falha)</li>
+        <li>Manual de cadastro (sidebar + PDF na tela de login)</li>
+      </ul>
+    `
+  },
+  {
+    numero: 'v. 1.0',
+    dataHora: '10/09/2026, às 15h25',
+    data: '10/09/2026',
+    resumoHtml: `
+      <p style="margin:4px 0;"><b>📄 Múltiplos arquivos por relatório</b></p>
+      <ul style="margin:2px 0 8px;padding-left:16px;">
+        <li>Seções 4 e 6 passaram a aceitar vários arquivos do mesmo dispositivo fonte (antes só 1 por seção), cada um com hash individual</li>
+        <li>Hash da lista de hashes calculado automaticamente, conforme o Manual de POP (MJSP)</li>
+        <li>Comparação par a par na Seção 7, com veredito individual e geral</li>
+      </ul>
+      <p style="margin:4px 0;"><b>✅ Conformidade ampliada com o Manual de POP (MJSP)</b></p>
+      <ul style="margin:2px 0 8px;padding-left:16px;">
+        <li>Fotos da Seção 8 agora vão de fato para o Drive (antes só o nome entrava no relatório)</li>
+        <li>Fuso horário do dispositivo de origem e do PC de destino (com detecção automática)</li>
+        <li>Campo de bloqueador de escrita (write blocker) para HD/SSD e computador como fonte</li>
+        <li>Campo dedicado de alterações promovidas além do normal da extração</li>
+        <li>Página "Sobre o App" citando a conformidade com o manual, com link direto e lista de funcionalidades atendidas</li>
+        <li>Agrupamento de relatórios por número de processo/inquérito no histórico</li>
+        <li>Assinatura digital criptográfica (ECDSA P-256, chave gerada e guardada só no aparelho) sobre os hashes do relatório</li>
+        <li>Carimbo de tempo em blockchain via OpenTimestamps (envia só o hash ao calendário público)</li>
+        <li>QR Code de verificação pública em cada relatório, sem exigir login</li>
+      </ul>
+      <p style="margin:4px 0;"><b>🏠 Nova aba na Home: "Relatórios da Repartição"</b></p>
+      <ul style="margin:2px 0 8px;padding-left:16px;">
+        <li>Busca de relatórios já enviados, limitada à repartição conectada — as abas só aparecem depois de conectar</li>
+      </ul>
+      <p style="margin:4px 0;"><b>🤖 Integração com IA institucional</b></p>
+      <ul style="margin:2px 0 8px;padding-left:16px;">
+        <li>Multi-provedor: cada repartição escolhe e configura seu próprio provedor (Anthropic, Gemini, OpenAI ou DeepSeek), com a chave ficando só no servidor</li>
+        <li>"📝 Minutar Relatórios de Análises": editor de texto com formatação básica e um botão de IA, para redigir Relatório de Metadados (pré-preenchido pela IA) ou Relatório de Análise Documental (redação livre com apoio de chat)</li>
+        <li>Tela de consentimento institucional na primeira vez que a IA é usada</li>
+        <li>Minutas salvas vão para o Drive da repartição, vinculadas ao relatório/processo, com o link aparecendo automaticamente no card correspondente</li>
+      </ul>
+      <p style="margin:4px 0;"><b>🐛 Correções importantes</b></p>
+      <ul style="margin:2px 0 0;padding-left:16px;">
+        <li>Envio ao Drive não trava mais "para sempre" em caso de conexão instável (limite de tempo com mensagem clara)</li>
+        <li>Cards de relatório (histórico e buscas) agora mostram o link de <b>todos</b> os arquivos enviados junto com o relatório, não só o do PDF</li>
+        <li>Bloco de assinatura/QR do relatório: corrigido bug de estrutura HTML (rótulo e valor apareciam colados) e reorganizado em caixa única, compacta e discreta</li>
+      </ul>
+    `
+  }
+];
+function getLatestVersion(){ return APP_VERSION_HISTORY[APP_VERSION_HISTORY.length - 1]; }
+
+function renderVersionHistoryList(){
+  const el = $('appInfoVersionHistory');
+  if(!el) return;
+  // mais recente primeiro
+  el.innerHTML = APP_VERSION_HISTORY.slice().reverse().map((v, idxReverso) => {
+    const idx = APP_VERSION_HISTORY.length - 1 - idxReverso;
+    return `
+      <button type="button" class="rep-user-card" data-version-idx="${idx}" style="display:block;width:100%;text-align:left;cursor:pointer;border:1px solid var(--line);background:#fff;">
+        <b>Versão ${esc(v.numero.replace('v. ', ''))}</b> — criada em ${esc(v.data)}, às ${esc(v.dataHora.split('às ')[1] || '')}
+      </button>
+    `;
+  }).join('');
+  el.querySelectorAll('[data-version-idx]').forEach(btn => {
+    btn.addEventListener('click', () => openVersionDetail(Number(btn.dataset.versionIdx)));
+  });
+}
+
+function openVersionDetail(idx){
+  const v = APP_VERSION_HISTORY[idx];
+  if(!v) return;
+  $('versionDetailTitle').textContent = `Versão ${v.numero.replace('v. ', '')}`;
+  $('versionDetailData').textContent = `Criada em ${v.dataHora}`;
+  $('versionDetailContent').innerHTML = v.resumoHtml;
+  $('versionDetailOverlay').classList.add('open');
+}
+$('closeVersionDetailBtn').addEventListener('click', () => $('versionDetailOverlay').classList.remove('open'));
+$('versionDetailOverlay').addEventListener('click', (e) => { if(e.target.id === 'versionDetailOverlay') $('versionDetailOverlay').classList.remove('open'); });
 
 async function renderAppInfoTab(){
   const statusEl = $('appInfoStatus');
@@ -3281,10 +3409,9 @@ async function renderAppInfoTab(){
     <div><b>E-mail do instituidor:</b> efstechnology.app@gmail.com</div>
     <div><b>Administradores:</b> <span id="appInfoAdmins">carregando…</span></div>
     <div><b>Conexões com outros sistemas:</b> Google Drive (armazenamento de arquivos), Google Cloud/OAuth (autenticação por repartição)</div>
-    <div><b>Versão do APP:</b> ${esc(APP_VERSION_INFO.numero)} (atualizada em ${esc(APP_VERSION_INFO.dataHora)})</div>
-    <div><b>Resumo da atualização:</b></div>
-    <div style="font-size:10px;color:var(--muted);line-height:1.5;">${APP_VERSION_INFO.resumoHtml}</div>
   `;
+
+  renderVersionHistoryList();
 
   try {
     const [statsData, usersData] = await Promise.all([
@@ -3310,32 +3437,7 @@ async function renderAppInfoTab(){
     statusEl.textContent = 'Não foi possível carregar as estatísticas: ' + err.message;
     statusEl.className = 'loc-status err';
   }
-
-  try {
-    const aiConfig = await callAppsScript({ action: 'get_ai_config' });
-    if(aiConfig.provider) $('aiProviderSelect').value = aiConfig.provider;
-    $('aiKeyStatusHint').textContent = aiConfig.temChave ? '✓ Uma chave já está configurada.' : 'Nenhuma chave configurada ainda.';
-  } catch(e){ /* falha silenciosa — não é crítico para o resto da aba */ }
 }
-$('saveAiConfigBtn').addEventListener('click', async () => {
-  const statusEl = $('aiConfigStatus');
-  statusEl.textContent = 'Salvando…';
-  statusEl.className = 'loc-status';
-  try {
-    await callAppsScript({
-      action: 'set_ai_config',
-      provider: $('aiProviderSelect').value,
-      apiKey: $('aiApiKeyInput').value.trim()
-    });
-    $('aiApiKeyInput').value = '';
-    statusEl.textContent = '✓ Configuração salva.';
-    statusEl.className = 'loc-status ok';
-    $('aiKeyStatusHint').textContent = '✓ Uma chave já está configurada.';
-  } catch(err){
-    statusEl.textContent = 'Não foi possível salvar: ' + err.message;
-    statusEl.className = 'loc-status err';
-  }
-});
 
 async function renderAllUsersList(){
   const statusEl = $('allUsersStatus');
@@ -3597,7 +3699,7 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   statusEl.textContent = 'A IA está redigindo…';
   statusEl.className = 'loc-status';
   try {
-    const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory });
+    const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory, reparticaoId: minutaContext ? minutaContext.reparticaoId : '' });
     minutaChatHistory.push({ role: 'assistant', content: data.resposta });
     appendMinutaChatBubble('assistant', data.resposta);
     statusEl.textContent = '';
@@ -4919,6 +5021,8 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
   const clientId = sanitizeClientId($('regNewRepClientId').value);
   const folderId = sanitizeFolderId($('regNewRepFolderId').value);
   const folderNome = $('regNewRepFolderNome').value.trim();
+  const aiProvider = $('regNewRepAiProvider').value;
+  const aiApiKey = $('regNewRepAiApiKey').value.trim();
   const statusEl = $('regNewRepStatus');
   if(!nome || !email || !clientId || !folderId){
     statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
@@ -4931,7 +5035,7 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
   saveReparticoesList(list);
   // guardado para, ao concluir o cadastro do usuário, avisar a central
   // com os dados da repartição + de quem a cadastrou
-  pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId, folderNome };
+  pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId, folderNome, aiProvider, aiApiKey };
   populateRegReparticaoSelect(newRep.clientId);
   $('regReparticao').value = newRep.id;
   $('regNewReparticaoForm').classList.add('hidden-view');
@@ -5303,6 +5407,8 @@ $('registerBtn').addEventListener('click', () => {
         clientId: pendingNewReparticaoData.clientId,
         folderId: pendingNewReparticaoData.folderId,
         folderNome: pendingNewReparticaoData.folderNome || '',
+        aiProvider: pendingNewReparticaoData.aiProvider || '',
+        aiApiKey: pendingNewReparticaoData.aiApiKey || '',
         usuarioNome: nome,
         usuarioCargo: cargo,
         usuarioMatricula: matricula,
@@ -5392,7 +5498,7 @@ function refreshUserUI(){
   $('sidebarCargo').textContent = currentUser.cargo || '';
   $('sidebarMatricula').textContent = 'Matrícula ' + currentUser.matricula;
 
-  $('sidebarVersionInfo').textContent = `${APP_VERSION_INFO.numero} — atualizado em ${APP_VERSION_INFO.data}`;
+  $('sidebarVersionInfo').textContent = `${getLatestVersion().numero} — atualizado em ${getLatestVersion().data}`;
 
   // gerenciamento de conexões: visível só para os dois logins administradores
   $('openConnectionsBtn').classList.toggle('hidden-view', !isConnectionsAdmin());

@@ -347,7 +347,9 @@ function doPost(e) {
         data.usuarioEmail || '',
         new Date(),
         'pendente',
-        data.folderNome || ''
+        data.folderNome || '',
+        data.aiProvider || '',
+        data.aiApiKey || ''
       ]);
       return respond({ ok: true, rowIndex: sheet.getLastRow() });
     }
@@ -370,7 +372,9 @@ function doPost(e) {
           usuarioEmail: String(r[7]),
           dataCadastro: r[8] ? formatDate_(r[8]) : '',
           status: r[9] ? String(r[9]) : 'pendente',
-          folderNome: r[10] ? String(r[10]) : ''
+          folderNome: r[10] ? String(r[10]) : '',
+          aiProvider: r[11] ? String(r[11]) : '',
+          aiTemChave: !!(r[12] && String(r[12]))
         });
       }
       pendentes.reverse();
@@ -405,6 +409,8 @@ function doPost(e) {
           if (data.nome) sheet.getRange(i + 1, 1).setValue(data.nome);
           if (data.folderId) sheet.getRange(i + 1, 4).setValue(data.folderId);
           if (data.folderNome !== undefined) sheet.getRange(i + 1, 11).setValue(data.folderNome);
+          if (data.aiProvider !== undefined) sheet.getRange(i + 1, 12).setValue(data.aiProvider);
+          if (data.aiApiKey) sheet.getRange(i + 1, 13).setValue(data.aiApiKey);
           atualizou = true;
         }
       }
@@ -709,7 +715,7 @@ function doPost(e) {
 
       var analise;
       try {
-        analise = callAIProvider_([{ role: 'user', content: prompt }], 500) || 'Sem resposta da IA.';
+        analise = callAIProvider_([{ role: 'user', content: prompt }], 500, reparticaoId) || 'Sem resposta da IA.';
       } catch (aiErr) {
         return respond({ ok: false, error: aiErr.message });
       }
@@ -728,27 +734,11 @@ function doPost(e) {
       var mensagens = data.messages || [];
       if (!mensagens.length) return respond({ ok: false, error: 'Nenhuma mensagem enviada.' });
       try {
-        var resposta = callAIProvider_(mensagens, 1500) || 'Sem resposta da IA.';
+        var resposta = callAIProvider_(mensagens, 1500, data.reparticaoId) || 'Sem resposta da IA.';
         return respond({ ok: true, resposta: resposta });
       } catch (aiErr) {
         return respond({ ok: false, error: aiErr.message });
       }
-    }
-
-    // ---------- configuração do provedor de IA institucional (admin) ----------
-    if (action === 'get_ai_config') {
-      var props = PropertiesService.getScriptProperties();
-      return respond({
-        ok: true,
-        provider: props.getProperty('AI_PROVIDER') || '',
-        temChave: !!props.getProperty('AI_API_KEY')
-      });
-    }
-    if (action === 'set_ai_config') {
-      var props = PropertiesService.getScriptProperties();
-      if (data.provider) props.setProperty('AI_PROVIDER', String(data.provider).toLowerCase());
-      if (data.apiKey) props.setProperty('AI_API_KEY', String(data.apiKey));
-      return respond({ ok: true });
     }
 
     return respond({ ok: false, error: 'Ação inválida.' });
@@ -925,12 +915,26 @@ function getOrCreateReportsSheet() {
 // instituição contratou (Propriedade "AI_PROVIDER": anthropic |
 // gemini | openai | deepseek), e cadastra a chave correspondente
 // (Propriedade "AI_API_KEY") — nunca fica exposta ao navegador
-function callAIProvider_(messages, maxTokens){
-  var props = PropertiesService.getScriptProperties();
-  var provider = (props.getProperty('AI_PROVIDER') || 'anthropic').toLowerCase();
-  var apiKey = props.getProperty('AI_API_KEY');
+// busca o provedor/chave de IA configurados especificamente para uma
+// repartição (não é mais uma configuração única do sistema todo —
+// cada repartição contrata seu próprio provedor de IA)
+function getReparticaoAiConfig_(reparticaoId){
+  var sheet = getOrCreateReparticoesPendentesSheet();
+  var rows = sheet.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][2]) === reparticaoId) {
+      return { provider: String(rows[i][11] || '').toLowerCase(), apiKey: String(rows[i][12] || '') };
+    }
+  }
+  return { provider: '', apiKey: '' };
+}
+
+function callAIProvider_(messages, maxTokens, reparticaoId){
+  var config = getReparticaoAiConfig_(reparticaoId || '');
+  var provider = config.provider || 'anthropic';
+  var apiKey = config.apiKey;
   if (!apiKey) {
-    throw new Error('Nenhuma chave de IA configurada no servidor (Propriedade "AI_API_KEY"). Peça ao administrador para configurar em Gestão do App > Informações Gerais.');
+    throw new Error('Esta repartição ainda não tem um provedor de IA configurado. Peça ao administrador para configurar em "Editar repartição", na Gestão do App.');
   }
 
   if (provider === 'anthropic') {
@@ -1023,7 +1027,7 @@ function getOrCreateReparticoesPendentesSheet() {
   var sheet = ss.getSheetByName('ReparticoesPendentes');
   if (!sheet) {
     sheet = ss.insertSheet('ReparticoesPendentes');
-    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status', 'FolderNome']);
+    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status', 'FolderNome', 'AiProvider', 'AiApiKey']);
     return sheet;
   }
   // garante as colunas mesmo em planilhas criadas antes desta atualização
@@ -1032,6 +1036,12 @@ function getOrCreateReparticoesPendentesSheet() {
   }
   if (sheet.getRange(1, 11).getValue() !== 'FolderNome') {
     sheet.getRange(1, 11).setValue('FolderNome');
+  }
+  if (sheet.getRange(1, 12).getValue() !== 'AiProvider') {
+    sheet.getRange(1, 12).setValue('AiProvider');
+  }
+  if (sheet.getRange(1, 13).getValue() !== 'AiApiKey') {
+    sheet.getRange(1, 13).setValue('AiApiKey');
   }
   return sheet;
 }
