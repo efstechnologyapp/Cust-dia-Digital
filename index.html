@@ -3424,15 +3424,48 @@ function renderHomeReportsList(termo){
     listEl.innerHTML = '<div class="rep-users-empty">Nenhum relatório encontrado.</div>';
     return;
   }
-  listEl.innerHTML = filtrados.slice(0, 100).map(r => `
+  listEl.innerHTML = filtrados.slice(0, 100).map((r, idx) => `
     <div class="rep-user-card">
       <div class="rep-user-nome">${esc(r.relatorioNum || 'Sem número')}${r.processoNum ? ' — Processo ' + esc(r.processoNum) : ''}</div>
       <div class="rep-user-detail">Responsável: ${esc(r.nome)}</div>
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
       ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
       ${(r.arquivosEnviados || []).filter(a => a.driveLink).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`).join('')}
+      <button type="button" class="btn-attach" data-analyze-idx="${idx}" style="margin-top:8px;font-size:11px;">🤖 Analisar com IA</button>
+      <div class="loc-status" id="homeAnaliseStatus_${idx}"></div>
+      <div class="rep-user-detail hidden-view" id="homeAnaliseResult_${idx}" style="white-space:pre-wrap;margin-top:4px;"></div>
+      <div class="hint" style="font-size:9px;margin-top:2px;">Análise automática de conformidade e completude, baseada apenas nos dados deste relatório. Não acessa o conteúdo extraído do dispositivo. Não substitui revisão humana.</div>
     </div>
   `).join('');
+
+  listEl.querySelectorAll('[data-analyze-idx]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const idx = Number(btn.dataset.analyzeIdx);
+      const r = filtrados[idx];
+      const statusEl = $(`homeAnaliseStatus_${idx}`);
+      const resultEl = $(`homeAnaliseResult_${idx}`);
+      btn.disabled = true;
+      statusEl.textContent = 'Analisando…';
+      statusEl.className = 'loc-status';
+      try {
+        const data = await callAppsScript({
+          action: 'analyze_report_metadata',
+          relatorioNum: r.relatorioNum, reparticaoId: r.reparticaoId,
+          email: currentUser ? currentUser.email : ''
+        });
+        resultEl.textContent = data.analise;
+        resultEl.classList.remove('hidden-view');
+        statusEl.textContent = data.cache ? `Análise já feita anteriormente (${data.dataAnalise})` : `Análise concluída (${data.dataAnalise})`;
+        statusEl.className = 'loc-status ok';
+        logUserAction('análise de relatório por IA', r.relatorioNum);
+      } catch(err){
+        statusEl.textContent = 'Não foi possível analisar: ' + err.message;
+        statusEl.className = 'loc-status err';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
 }
 $('homeReportsSearchInput').addEventListener('input', () => renderHomeReportsList($('homeReportsSearchInput').value));
 
@@ -6143,6 +6176,36 @@ async function addTimestampProofToReport(){
   }
 }
 
+// monta um texto simples com os METADADOS do relatório (campos
+// preenchidos pelo usuário), para eventual análise por IA — nunca
+// inclui o conteúdo do arquivo extraído em si, só a documentação do
+// procedimento
+function buildReportMetadataText(){
+  const v = id => ($(id) ? $(id).value : '');
+  const origEntradas = origArquivosManager.getEntries();
+  const copEntradas = copArquivosManager.getEntries();
+  const linhas = [
+    `Relatório nº: ${v('f_relatorio_num')}`,
+    `Processo/inquérito: ${v('f_processo_num')}`,
+    `Responsável: ${v('f_responsavel')}`,
+    `Finalidade: ${v('f_finalidade')}`,
+    `Local da coleta: ${v('f_local_coleta')}`,
+    `Tipo de dispositivo de origem: ${origemTipoLabels[v('f_origem_tipo')] || v('f_origem_tipo')}`,
+    `Proprietário informado: ${v('f_proprietario')}`,
+    `Fuso horário do dispositivo: ${v('f_origem_fuso')}`,
+    `Método de transferência: ${transferMethodLabels[v('f_metodo_transf')] || v('f_metodo_transf')}`,
+    `Descrição do procedimento: ${v('f_proc_descricao')}`,
+    `Alterações além do normal: ${v('f_alteracoes_tipo') === 'sim' ? v('f_alteracoes_descricao') : 'Nenhuma'}`,
+    `Quantidade de arquivos originais: ${origEntradas.length}`,
+    `Quantidade de arquivos copiados: ${copEntradas.length}`,
+    `Equipamento de destino: ${v('f_pc_equipamento')}`,
+    `Fuso horário do PC: ${v('f_pc_fuso')}`,
+    `Conclusão técnica: ${v('f_conclusao')}`,
+    `Custódia do dispositivo original: ${v('f_custodia_original_tipo')} — ${v('f_custodia_dispositivo')}`,
+  ];
+  return linhas.join('\n');
+}
+
 function buildReport(){
   const v = id => $(id).value;
 
@@ -6642,7 +6705,8 @@ async function concludeTask(){
           relatorioNum: $('f_relatorio_num').value || '',
           processoNum: $('f_processo_num').value || '',
           arquivo: file.name,
-          driveLink: result.webViewLink || ''
+          driveLink: result.webViewLink || '',
+          metadataText: buildReportMetadataText()
         }).catch(() => {});
         logUserAction('envio de relatório', rep.nome);
       }

@@ -300,7 +300,8 @@ function doPost(e) {
         data.driveLink || '',
         new Date(),
         data.reparticaoNome || '',
-        data.processoNum || ''
+        data.processoNum || '',
+        data.metadataText || ''
       ]);
       return respond({ ok: true });
     }
@@ -666,6 +667,75 @@ function doPost(e) {
       return respond({ ok: true, relatorios: relatorios });
     }
 
+    // ---------- análise de metadados do relatório por IA ----------
+    // nunca acessa o conteúdo extraído do dispositivo (mensagens,
+    // fotos) — só os campos de documentação do próprio relatório
+    if (action === 'analyze_report_metadata') {
+      var relatorioNum = data.relatorioNum || '';
+      var reparticaoId = data.reparticaoId || '';
+      if (!relatorioNum) return respond({ ok: false, error: 'Número do relatório não informado.' });
+
+      // 1) já existe uma análise em cache para este relatório?
+      var cacheSheet = getOrCreateAnaliseIASheet();
+      var cacheRows = cacheSheet.getDataRange().getValues();
+      for (var i = 1; i < cacheRows.length; i++) {
+        if (String(cacheRows[i][0]) === relatorioNum && String(cacheRows[i][1]) === reparticaoId) {
+          return respond({ ok: true, analise: String(cacheRows[i][2]), dataAnalise: formatDate_(cacheRows[i][3]), cache: true });
+        }
+      }
+
+      // 2) busca o texto de metadados salvo com o relatório
+      var reportsSheet = getOrCreateReportsSheet();
+      var reportRows = reportsSheet.getDataRange().getValues();
+      var metadataText = '';
+      for (var i = 1; i < reportRows.length; i++) {
+        if (String(reportRows[i][3]) === relatorioNum && String(reportRows[i][2]) === reparticaoId) {
+          metadataText = String(reportRows[i][9] || '');
+          break;
+        }
+      }
+      if (!metadataText) {
+        return respond({ ok: false, error: 'Não foram encontrados metadados salvos para este relatório (relatórios enviados antes desta funcionalidade não têm esse dado).' });
+      }
+
+      // 3) chama a API da Anthropic
+      var apiKey = PropertiesService.getScriptProperties().getProperty('ANTHROPIC_API_KEY');
+      if (!apiKey) {
+        return respond({ ok: false, error: 'Chave de API da Anthropic não configurada no servidor (ANTHROPIC_API_KEY).' });
+      }
+      var prompt = 'Você está analisando os METADADOS de um relatório técnico de extração forense de arquivo digital (não o conteúdo extraído em si — só a documentação do procedimento). ' +
+        'Com base SOMENTE nos dados abaixo, responda em português, em até 6 linhas, cobrindo: ' +
+        '(1) um resumo objetivo do procedimento documentado; ' +
+        '(2) se algum campo essencial parece incompleto ou inconsistente; ' +
+        '(3) se o procedimento aparenta estar de acordo com boas práticas de cadeia de custódia. ' +
+        'Não emita julgamento sobre crimes, indícios ou conteúdo — isso é atribuição exclusiva da autoridade responsável, não sua.\n\n' +
+        'DADOS DO RELATÓRIO:\n' + metadataText;
+
+      var payload = {
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }]
+      };
+      var options = {
+        method: 'post',
+        contentType: 'application/json',
+        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      };
+      var response = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', options);
+      if (response.getResponseCode() !== 200) {
+        return respond({ ok: false, error: 'Erro na API da Anthropic (HTTP ' + response.getResponseCode() + '): ' + response.getContentText().slice(0, 300) });
+      }
+      var result = JSON.parse(response.getContentText());
+      var analise = (result.content && result.content[0] && result.content[0].text) ? result.content[0].text : 'Sem resposta da IA.';
+
+      // 4) guarda em cache, para não reanalisar (e não gastar de novo) o mesmo relatório
+      cacheSheet.appendRow([relatorioNum, reparticaoId, analise, new Date(), (data.email || '').trim().toLowerCase()]);
+
+      return respond({ ok: true, analise: analise, dataAnalise: formatDate_(new Date()), cache: false });
+    }
+
     return respond({ ok: false, error: 'Ação inválida.' });
 
   } catch (err) {
@@ -820,7 +890,7 @@ function getOrCreateReportsSheet() {
   var sheet = ss.getSheetByName('Relatorios');
   if (!sheet) {
     sheet = ss.insertSheet('Relatorios');
-    sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio', 'ReparticaoNome', 'ProcessoNum']);
+    sheet.appendRow(['Email', 'Nome', 'ReparticaoId', 'RelatorioNum', 'Arquivo', 'DriveLink', 'DataEnvio', 'ReparticaoNome', 'ProcessoNum', 'MetadataText']);
     return sheet;
   }
   if (sheet.getRange(1, 8).getValue() !== 'ReparticaoNome') {
@@ -828,6 +898,28 @@ function getOrCreateReportsSheet() {
   }
   if (sheet.getRange(1, 9).getValue() !== 'ProcessoNum') {
     sheet.getRange(1, 9).setValue('ProcessoNum');
+  }
+  if (sheet.getRange(1, 10).getValue() !== 'MetadataText') {
+    sheet.getRange(1, 10).setValue('MetadataText');
+  }
+  return sheet;
+}
+
+function getOrCreateAnaliseIASheet() {
+  var props = PropertiesService.getScriptProperties();
+  var ssId = props.getProperty('USERS_SHEET_ID');
+  var ss = null;
+  if (ssId) {
+    try { ss = SpreadsheetApp.openById(ssId); } catch (e) { ss = null; }
+  }
+  if (!ss) {
+    getOrCreateUsersSheet();
+    ss = SpreadsheetApp.openById(props.getProperty('USERS_SHEET_ID'));
+  }
+  var sheet = ss.getSheetByName('AnaliseIA');
+  if (!sheet) {
+    sheet = ss.insertSheet('AnaliseIA');
+    sheet.appendRow(['RelatorioNum', 'ReparticaoId', 'Analise', 'DataAnalise', 'SolicitadoPor']);
   }
   return sheet;
 }

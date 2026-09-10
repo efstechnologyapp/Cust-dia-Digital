@@ -463,6 +463,39 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Integração com IA — análise de metadados do relatório
+
+Novo botão **"🤖 Analisar com IA"** em cada card da aba "Relatórios da
+Repartição" (Home). Escopo deliberadamente limitado: a IA analisa
+**só os metadados/campos do relatório** (procedimento, cadeia de
+custódia, hashes, datas) — **nunca** o conteúdo extraído do
+dispositivo (mensagens, fotos). Isso é reforçado tanto na
+implementação quanto no aviso fixo exibido junto ao botão.
+
+**⚠️ Configuração obrigatória antes de funcionar**: é preciso
+cadastrar uma chave de API da Anthropic nas Propriedades do Script
+(Apps Script → ⚙️ Configurações do projeto → Propriedades do script →
+adicionar `ANTHROPIC_API_KEY` com o valor da chave). Sem isso, o
+botão retorna erro "Chave de API da Anthropic não configurada no
+servidor". Essa chave é separada da assinatura Pro do Claude.ai —
+é cobrada por uso, via console.anthropic.com.
+
+**Como funciona:**
+- Ao enviar o relatório ao Drive, o app agora também salva um texto
+  simples com os metadados do relatório (nova coluna `MetadataText`
+  na planilha "Relatorios") — só relatórios enviados **a partir de
+  agora** têm esse dado; os anteriores não podem ser analisados.
+- Ao clicar "Analisar com IA", o Apps Script busca esse texto,
+  chama a API da Anthropic (modelo `claude-sonnet-4-6`) com um
+  prompt que pede resumo + verificação de completude/conformidade —
+  e explicitamente instrui a IA a não emitir juízo sobre crimes ou
+  indícios (isso é atribuição da autoridade, não da IA).
+- **Cache**: a análise de cada relatório é guardada numa nova planilha
+  "AnaliseIA" — clicar de novo no mesmo relatório não gasta uma nova
+  chamada à API, só mostra o resultado já salvo.
+- Uso registrado na trilha de auditoria (mesmo esquema de login/
+  conexão/envio já existente).
+
 ## Correção: cards de relatório não mostravam todos os arquivos enviados
 
 Bug relatado pelo usuário: os cards de relatório (histórico e
