@@ -3674,11 +3674,6 @@ async function loadHomeReportsForSearch(){
 let minutaContext = null; // { relatorioNum, processoNum, reparticaoId, tipo }
 let minutaChatHistory = [];
 
-function openMinutaChooser(r){
-  const tipo = confirm('Clique OK para "Relatório de Metadados", ou Cancelar para "Relatório de Análise Documental".') ? 'metadados' : 'documental';
-  openMinutaEditor(r, tipo);
-}
-
 async function openMinutaEditor(r, tipo){
   minutaContext = { relatorioNum: r.relatorioNum, processoNum: r.processoNum, reparticaoId: r.reparticaoId, tipo };
   minutaChatHistory = [];
@@ -3705,7 +3700,7 @@ async function openMinutaEditor(r, tipo){
       $('minutaEditor').innerHTML = `<p><i>Não foi possível carregar a análise automática: ${esc(err.message)}. Redija manualmente ou tente novamente.</i></p>`;
     }
   } else {
-    $('minutaTitle').textContent = 'Relatório de Análise Documental';
+    $('minutaTitle').textContent = 'Relatório de Análise de Arquivos Evidência';
     $('minutaSubtitle').textContent = `Relatório ${r.relatorioNum || ''}${r.processoNum ? ' — Processo ' + r.processoNum : ''}`;
     $('minutaEditor').innerHTML = '<p></p>';
     $('minutaView').style.display = 'block';
@@ -3787,26 +3782,25 @@ $('minutaSaveBtn').addEventListener('click', async () => {
     statusEl.className = 'loc-status err';
     return;
   }
-  const tipoLabel = minutaContext.tipo === 'metadados' ? 'Relatório de metadados' : 'Relatório de análise documental';
-  const nomeArquivo = `${tipoLabel} - ${minutaContext.relatorioNum || 'sem numero'}.html`;
+  const tipoLabelHumano = minutaContext.tipo === 'metadados' ? 'Relatório de Metadados' : 'Relatório de Análise de Arquivos Evidência';
+  const tipoCodigo = minutaContext.tipo === 'metadados' ? 'Rel.MDados' : 'Rel.AnArqEv';
   const conteudoHtml = `<html><head><meta charset="utf-8"></head><body>${$('minutaEditor').innerHTML}</body></html>`;
-  const file = new File([conteudoHtml], nomeArquivo, { type: 'text/html' });
+  const file = new File([conteudoHtml], buildStructuredFileName(tipoCodigo, minutaContext.relatorioNum) + '.html', { type: 'text/html' });
   statusEl.textContent = 'Salvando no Drive…';
   statusEl.className = 'loc-status';
   try {
-    const fileComIniciais = renameFileWithInitials(file);
-    const result = await uploadFileToDrive(fileComIniciais, rep.folderId, rep.clientId, statusEl);
+    const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
     if(currentUser && currentUser.email){
       await callAppsScript({
         action: 'log_arquivo_enviado',
         email: currentUser.email, reparticaoId: minutaContext.reparticaoId,
-        arquivo: fileComIniciais.name, driveLink: result.webViewLink || '',
+        arquivo: file.name, driveLink: result.webViewLink || '',
         relatorioNum: minutaContext.relatorioNum || '', processoNum: minutaContext.processoNum || ''
       });
     }
     statusEl.textContent = '✓ Salvo com sucesso no Drive da repartição.';
     statusEl.className = 'loc-status ok';
-    logUserAction('salvou ' + tipoLabel.toLowerCase(), minutaContext.relatorioNum);
+    logUserAction('salvou ' + tipoLabelHumano.toLowerCase(), minutaContext.relatorioNum);
     // atualiza a lista de relatórios da Home, para o novo link já aparecer no card
     loadHomeReportsForSearch();
   } catch(err){
@@ -3834,14 +3828,30 @@ function renderHomeReportsList(termo){
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
       ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
       ${(r.arquivosEnviados || []).filter(a => a.driveLink).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.arquivo)}</a></div>`).join('')}
-      <button type="button" class="btn-attach" data-minutar-idx="${idx}" style="margin-top:8px;font-size:11px;">📝 Minutar Relatórios de Análises</button>
+      <div class="field" style="margin-top:8px;margin-bottom:0;">
+        <select data-tipo-minuta-idx="${idx}" style="font-size:12px;">
+          <option value="" selected>Selecione o tipo de relatório de análise…</option>
+          <option value="metadados">Relatório de Metadados</option>
+          <option value="arqevidencia">Relatório de Análise de Arquivos Evidência</option>
+        </select>
+      </div>
+      <button type="button" class="btn-attach hidden-view" data-minutar-idx="${idx}" style="margin-top:6px;font-size:11px;">📝 Minutar Relatório</button>
     </div>
   `).join('');
 
+  listEl.querySelectorAll('[data-tipo-minuta-idx]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const idx = sel.dataset.tipoMinutaIdx;
+      const btn = listEl.querySelector(`[data-minutar-idx="${idx}"]`);
+      btn.classList.toggle('hidden-view', !sel.value);
+    });
+  });
   listEl.querySelectorAll('[data-minutar-idx]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = Number(btn.dataset.minutarIdx);
-      openMinutaChooser(filtrados[idx]);
+      const sel = listEl.querySelector(`[data-tipo-minuta-idx="${idx}"]`);
+      if(!sel.value) return;
+      openMinutaEditor(filtrados[idx], sel.value);
     });
   });
 }
@@ -4055,6 +4065,22 @@ const attachedFiles = { orig: null, cop: null }; // mantido só para compatibili
 
 // prefixa o arquivo com as iniciais dos dois primeiros nomes de quem
 // está enviando, ex.: "Fillipe Amorim Firmo da Silva" -> "FA - nome.ext"
+// nomenclatura padronizada dos arquivos enviados ao Drive: iniciais
+// do usuário + código do tipo de arquivo + nº do relatório + (quando
+// fizer sentido) o nome original do arquivo
+// Ex.: "FS - Rel.CIA - REL-001", "FS - ArqEv - REL-001 - msgstore.db.crypt14"
+function buildStructuredFileName(tipoLabel, relatorioNum, originalName){
+  const iniciais = currentUser ? initials(currentUser.nome) : 'XX';
+  const numLimpo = (relatorioNum || 'sem_numero').toString().trim() || 'sem_numero';
+  let nome = `${iniciais} - ${tipoLabel} - ${numLimpo}`;
+  if(originalName) nome += ` - ${originalName}`;
+  return nome;
+}
+function renameFileStructured(file, tipoLabel, relatorioNum){
+  const newName = buildStructuredFileName(tipoLabel, relatorioNum, file.name);
+  return new File([file], newName, { type: file.type });
+}
+
 function renameFileWithInitials(file){
   if(!currentUser) return file;
   const prefix = initials(currentUser.nome) + ' - ';
@@ -4087,7 +4113,7 @@ async function handleCustodyShare(){
       const total = entradasCop.length + anexosParaEnviar.length;
       let enviados = 0;
       for(let idx = 0; idx < entradasCop.length; idx++){
-        const file = renameFileWithInitials(entradasCop[idx].file);
+        const file = renameFileStructured(entradasCop[idx].file, 'ArqEv', $('f_relatorio_num').value);
         enviados++;
         statusEl.textContent = `Enviando arquivo ${enviados} de ${total} (${file.name})…`;
         statusEl.className = 'loc-status';
@@ -4111,7 +4137,7 @@ async function handleCustodyShare(){
       // por nome no relatório
       for(let idx = 0; idx < anexosParaEnviar.length; idx++){
         const item = anexosParaEnviar[idx];
-        const file = renameFileWithInitials(item.file);
+        const file = renameFileStructured(item.file, 'ArqAnex', $('f_relatorio_num').value);
         enviados++;
         statusEl.textContent = `Enviando anexo ${enviados} de ${total} (${file.name})…`;
         statusEl.className = 'loc-status';
@@ -4128,8 +4154,8 @@ async function handleCustodyShare(){
       }
       statusEl.textContent = `✓ ${total} arquivo(s) enviado(s) com sucesso.`;
       statusEl.className = 'loc-status ok';
-    } else if(navigator.share && navigator.canShare && navigator.canShare({ files: entradasCop.map(e => renameFileWithInitials(e.file)) })){
-      const filesToShare = entradasCop.map(e => renameFileWithInitials(e.file));
+    } else if(navigator.share && navigator.canShare && navigator.canShare({ files: entradasCop.map(e => renameFileStructured(e.file, 'ArqEv', $('f_relatorio_num').value)) })){
+      const filesToShare = entradasCop.map(e => renameFileStructured(e.file, 'ArqEv', $('f_relatorio_num').value));
       await navigator.share({ files: filesToShare, title: filesToShare[0].name });
       statusEl.textContent = 'Compartilhado via menu do celular — confirme manualmente onde foi salvo.';
       statusEl.className = 'loc-status ok';
@@ -7028,8 +7054,7 @@ function resetFormFields(){
 
 async function generateReportFile(){
   const reportNum = ($('f_relatorio_num').value || 'sem_numero').trim().replace(/[^\w\-]+/g, '_');
-  const iniciais = currentUser ? initials(currentUser.nome) : 'XX';
-  const baseName = `${iniciais} - Relatorio_${reportNum}_${Date.now()}`;
+  const baseName = buildStructuredFileName('Rel.CIA', reportNum);
   if(window.html2pdf){
     try {
       const worker = html2pdf().set({

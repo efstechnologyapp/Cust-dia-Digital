@@ -463,6 +463,29 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Nomenclatura padronizada de arquivos + novo seletor de tipo de minuta
+
+**Todos** os arquivos enviados ao Drive agora seguem uma convenção
+única: iniciais do usuário + código do tipo + número do relatório +
+(quando fizer sentido) o nome original do arquivo:
+
+- Relatório de Extração/Coleta (PDF): `FS - Rel.CIA - REL-001`
+- Arquivos Evidência (Seção 6): `FS - ArqEv - REL-001 - msgstore.db.crypt14`
+- Arquivos Anexos ao Formulário (Seção 8): `FS - ArqAnex - REL-001 - foto_equip.jpg`
+- Relatório de Análise de Metadados (minuta): `FS - Rel.MDados - REL-001`
+- Relatório de Análise de Arquivos Evidência (minuta, renomeado de
+  "documental"): `FS - Rel.AnArqEv - REL-001`
+
+Nova função `buildStructuredFileName(tipo, relatorioNum, nomeOriginal)`
+centraliza essa regra — usada em todos os 5 pontos de upload.
+
+**Aba "Relatórios da Repartição" (Home)**: o botão único "Minutar
+Relatórios de Análises" virou um fluxo em 2 passos — primeiro um
+seletor ("Relatório de Metadados" / "Relatório de Análise de
+Arquivos Evidência"), e só depois de escolher o tipo é que o botão
+"📝 Minutar Relatório" aparece, abrindo o editor correto. Substitui o
+antigo `confirm()` do navegador, que era pouco claro.
+
 ## Card de IA cadastrada: dados de quem cadastrou + remoção
 
 Duas melhorias no card "🤖 IA cadastrada" (modal "Editar repartição"):
