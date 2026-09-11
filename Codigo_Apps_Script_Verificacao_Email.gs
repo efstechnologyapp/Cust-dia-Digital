@@ -782,7 +782,7 @@ function doPost(e) {
       var mensagens = data.messages || [];
       if (!mensagens.length) return respond({ ok: false, error: 'Nenhuma mensagem enviada.' });
       try {
-        var resposta = callAIProvider_(mensagens, 1500, data.reparticaoId) || 'Sem resposta da IA.';
+        var resposta = callAIProvider_(mensagens, 4000, data.reparticaoId) || 'Sem resposta da IA.';
         return respond({ ok: true, resposta: resposta });
       } catch (aiErr) {
         return respond({ ok: false, error: aiErr.message });

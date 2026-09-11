@@ -1370,6 +1370,7 @@
       <button type="button" class="btn-attach" data-cmd="insertOrderedList" style="padding:4px 9px;">1. Lista</button>
       <span style="flex:1;"></span>
       <button type="button" class="btn-attach" id="minutaAiBtn" style="padding:4px 9px;">🤖 IA</button>
+      <span id="minutaAiProviderLabel" style="font-size:9px;color:var(--muted);align-self:center;margin-left:4px;"></span>
     </div>
     <div id="minutaEditor" contenteditable="true" style="border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:14px;min-height:300px;background:#fff;font-size:13.5px;line-height:1.6;"></div>
 
@@ -3674,6 +3675,24 @@ async function loadHomeReportsForSearch(){
 let minutaContext = null; // { relatorioNum, processoNum, reparticaoId, tipo }
 let minutaChatHistory = [];
 
+// mostra, ao lado do botão de IA no editor de minuta, qual provedor
+// está ativo para a repartição conectada — evita dúvida sobre qual
+// IA está de fato respondendo naquele momento
+async function updateMinutaAiProviderLabel(reparticaoId){
+  const labelEl = $('minutaAiProviderLabel');
+  labelEl.textContent = '';
+  if(!reparticaoId) return;
+  try {
+    const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
+    const central = (data.pendentes || []).find(p => p.clientId === reparticaoId);
+    if(central && central.aiProvider){
+      labelEl.textContent = `— ${AI_PROVIDER_LABELS[central.aiProvider] || central.aiProvider}`;
+    } else {
+      labelEl.textContent = '— nenhuma IA configurada';
+    }
+  } catch(e){ /* falha silenciosa — não é crítico */ }
+}
+
 async function openMinutaEditor(r, tipo){
   minutaContext = { relatorioNum: r.relatorioNum, processoNum: r.processoNum, reparticaoId: r.reparticaoId, tipo };
   minutaChatHistory = [];
@@ -3683,6 +3702,7 @@ async function openMinutaEditor(r, tipo){
   $('minutaSaveStatus').textContent = '';
   const consentJaAceito = localStorage.getItem('minuta_ia_consent') === '1';
   $('minutaConsentBox').classList.toggle('hidden-view', consentJaAceito);
+  updateMinutaAiProviderLabel(r.reparticaoId);
 
   if(tipo === 'metadados'){
     $('minutaTitle').textContent = 'Relatório de Metadados';
@@ -3734,21 +3754,48 @@ $('minutaConsentAcceptBtn').addEventListener('click', () => {
   $('minutaChatPanel').classList.remove('hidden-view');
 });
 
-function appendMinutaChatBubble(role, texto){
-  const div = document.createElement('div');
-  div.style.cssText = `margin-bottom:8px;padding:8px 10px;border-radius:8px;font-size:13px;white-space:pre-wrap;${role === 'user' ? 'background:#EAF0FA;margin-left:20px;' : 'background:#F2F4F7;margin-right:20px;'}`;
-  div.textContent = texto;
-  if(role !== 'user'){
-    const insertBtn = document.createElement('button');
-    insertBtn.type = 'button';
-    insertBtn.className = 'btn-link';
-    insertBtn.textContent = '➕ Inserir no documento';
-    insertBtn.style.cssText = 'display:block;margin-top:6px;font-size:11px;';
-    insertBtn.addEventListener('click', () => {
-      $('minutaEditor').innerHTML += `<p>${esc(texto).replace(/\n/g, '<br>')}</p>`;
-    });
-    div.appendChild(insertBtn);
+// guarda a posição do cursor dentro do editor de minuta, para que a
+// resposta da IA possa ser inserida exatamente onde o usuário estava
+// digitando — sem isso, ao clicar no chat (fora do editor), a posição
+// do cursor se perderia
+let minutaEditorSavedRange = null;
+function saveMinutaEditorSelection(){
+  const sel = window.getSelection();
+  if(sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+  if($('minutaEditor').contains(range.commonAncestorContainer)){
+    minutaEditorSavedRange = range.cloneRange();
   }
+}
+$('minutaEditor').addEventListener('keyup', saveMinutaEditorSelection);
+$('minutaEditor').addEventListener('mouseup', saveMinutaEditorSelection);
+
+// insere o texto da IA na posição salva do cursor (ou no final, se
+// nunca houve uma posição salva — ex.: editor ainda vazio)
+function insertTextIntoMinutaEditorAtCursor(texto){
+  const editor = $('minutaEditor');
+  editor.focus();
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  if(minutaEditorSavedRange){
+    sel.addRange(minutaEditorSavedRange);
+  } else {
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false); // move para o final
+    sel.addRange(range);
+  }
+  const html = '<br><br>' + esc(texto).replace(/\n/g, '<br>');
+  document.execCommand('insertHTML', false, html);
+  saveMinutaEditorSelection(); // atualiza a posição salva para o fim do texto recém-inserido
+}
+
+// mostra só a pergunta no painel — um histórico curto, para consulta;
+// a resposta não fica aqui, vai direto para o editor
+function appendMinutaQuestionBubble(texto){
+  const div = document.createElement('div');
+  div.style.cssText = 'margin-bottom:8px;padding:8px 10px;border-radius:8px;font-size:13px;white-space:pre-wrap;background:#EAF0FA;margin-left:20px;';
+  div.textContent = texto;
   $('minutaChatMessages').appendChild(div);
   $('minutaChatMessages').scrollTop = $('minutaChatMessages').scrollHeight;
 }
@@ -3756,7 +3803,7 @@ function appendMinutaChatBubble(role, texto){
 $('minutaChatSendBtn').addEventListener('click', async () => {
   const texto = $('minutaChatInput').value.trim();
   if(!texto) return;
-  appendMinutaChatBubble('user', texto);
+  appendMinutaQuestionBubble(texto);
   // na primeira mensagem da conversa, injeta os dados do relatório
   // como contexto — sem isso, a IA não tem como saber a que relatório
   // o usuário está se referindo quando pede para "analisar" algo
@@ -3775,8 +3822,9 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   try {
     const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory, reparticaoId: minutaContext ? minutaContext.reparticaoId : '' });
     minutaChatHistory.push({ role: 'assistant', content: data.resposta });
-    appendMinutaChatBubble('assistant', data.resposta);
-    statusEl.textContent = '';
+    insertTextIntoMinutaEditorAtCursor(data.resposta);
+    statusEl.textContent = '✓ Resposta inserida no documento.';
+    statusEl.className = 'loc-status ok';
     logUserAction('uso de Minuta IA', minutaContext ? minutaContext.relatorioNum : '');
   } catch(err){
     statusEl.textContent = 'Não foi possível obter resposta: ' + err.message;
