@@ -1374,7 +1374,7 @@
     <div id="minutaEditor" contenteditable="true" style="border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:14px;min-height:300px;background:#fff;font-size:13.5px;line-height:1.6;"></div>
 
     <div class="hidden-view" id="minutaChatPanel" style="border:1px solid var(--line);border-radius:8px;margin-top:12px;padding:10px;background:#fff;">
-      <div class="hint" style="margin:0 0 8px;">Chat com a IA institucional — o que você enviar aqui pode incluir qualquer informação necessária (é o mesmo serviço já contratado pela repartição).</div>
+      <div class="hint" style="margin:0 0 8px;font-size:9px;">Chat com a IA institucional — o que você enviar aqui pode incluir qualquer informação necessária.</div>
       <div id="minutaChatMessages" style="max-height:240px;overflow-y:auto;margin-bottom:8px;"></div>
       <div style="display:flex;flex-direction:column;gap:6px;">
         <textarea id="minutaChatInput" placeholder="Digite sua mensagem para a IA…" style="width:100%;min-height:70px;"></textarea>
@@ -5663,6 +5663,30 @@ function refreshUserUI(){
   $('f_assinatura_matricula').placeholder = currentUser.matricula + ' (preenchido automaticamente)';
 }
 
+// atualiza silenciosamente, uma vez por sessão (chamado ao entrar no
+// app), o nome da pasta do Drive de cada repartição já confirmada
+// neste aparelho — sem isso, se um administrador mudasse o nome
+// depois que o usuário já estivesse conectado, esse usuário nunca
+// veria a mudança, a não ser que desconectasse e reconectasse
+async function refreshReparticoesFolderNomesFromCentral(){
+  try {
+    const list = loadReparticoes();
+    const confirmadas = list.filter(r => r.status === 'confirmada' || r.status === undefined);
+    if(confirmadas.length === 0) return;
+    const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
+    const central = data.pendentes || [];
+    let mudou = false;
+    confirmadas.forEach(rep => {
+      const match = central.find(p => p.clientId === rep.clientId);
+      if(match && match.folderNome !== undefined && match.folderNome !== rep.folderNome){
+        rep.folderNome = match.folderNome;
+        mudou = true;
+      }
+    });
+    if(mudou) saveReparticoesList(list);
+  } catch(e){ /* falha silenciosa — não é crítico, não afeta o uso do app */ }
+}
+
 function enterApp(){
   showView('home');
   refreshUserUI();
@@ -5698,6 +5722,7 @@ function enterApp(){
   renderRepSelectDropdown();
   reflectStoredDriveStatus();
   updateCustodiaOriginalReparticaoLabel();
+  refreshReparticoesFolderNomesFromCentral();
 
   // autopreenche Responsável pela coleta se estiver vazio
   const respField = $('f_responsavel');

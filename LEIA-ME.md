@@ -463,6 +463,21 @@ agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
 
+## Correção: nome da pasta do Drive não atualizava entre dispositivos já conectados
+
+Investigação a pedido do usuário: o nome da pasta do Drive de uma
+repartição só era sincronizado entre dispositivos no momento da
+conexão inicial (clicar em "🔌 Conectar") — se um administrador
+mudasse esse nome depois, quem já estava conectado continuava vendo
+o nome antigo indefinidamente, a não ser que desconectasse e
+reconectasse manualmente.
+
+**Correção**: nova função `refreshReparticoesFolderNomesFromCentral()`,
+chamada automaticamente toda vez que o app é aberto/o usuário entra
+(`enterApp()`) — verifica silenciosamente, na central, se o nome da
+pasta de alguma repartição já confirmada neste aparelho mudou, e
+atualiza a cópia local sem o usuário precisar fazer nada.
+
 ## Ajustes visuais: ordem das seções e fonte do modal de versão
 
 - **"Histórico de versões"** passou a ser a **última** seção da aba
