@@ -3833,21 +3833,25 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
 });
 
 $('minutaSaveBtn').addEventListener('click', async () => {
-  if(!minutaContext) return;
-  const rep = getSelectedReparticao();
   const statusEl = $('minutaSaveStatus');
+  if(!minutaContext){
+    statusEl.textContent = 'Editor sem relatório associado — feche e abra de novo pelo card do relatório.';
+    statusEl.className = 'loc-status err';
+    return;
+  }
+  const rep = getSelectedReparticao();
   if(!rep || !rep.folderId){
     statusEl.textContent = 'Nenhuma repartição conectada com pasta configurada — não é possível salvar.';
     statusEl.className = 'loc-status err';
     return;
   }
-  const tipoLabelHumano = minutaContext.tipo === 'metadados' ? 'Relatório de Metadados' : 'Relatório de Análise de Arquivos Evidência';
-  const tipoCodigo = minutaContext.tipo === 'metadados' ? 'Rel.MDados' : 'Rel.AnArqEv';
-  const conteudoHtml = `<html><head><meta charset="utf-8"></head><body>${$('minutaEditor').innerHTML}</body></html>`;
-  const file = new File([conteudoHtml], buildStructuredFileName(tipoCodigo, minutaContext.relatorioNum) + '.html', { type: 'text/html' });
   statusEl.textContent = 'Salvando no Drive…';
   statusEl.className = 'loc-status';
   try {
+    const tipoLabelHumano = minutaContext.tipo === 'metadados' ? 'Relatório de Metadados' : 'Relatório de Análise de Arquivos Evidência';
+    const tipoCodigo = minutaContext.tipo === 'metadados' ? 'Rel.MDados' : 'Rel.AnArqEv';
+    const conteudoHtml = `<html><head><meta charset="utf-8"></head><body>${$('minutaEditor').innerHTML}</body></html>`;
+    const file = new File([conteudoHtml], buildStructuredFileName(tipoCodigo, minutaContext.relatorioNum) + '.html', { type: 'text/html' });
     const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
     if(currentUser && currentUser.email){
       await callAppsScript({
