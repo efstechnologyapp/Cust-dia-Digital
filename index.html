@@ -3696,6 +3696,7 @@ async function openMinutaEditor(r, tipo){
         email: currentUser ? currentUser.email : ''
       });
       $('minutaEditor').innerHTML = `<p>${esc(data.analise).replace(/\n/g, '<br>')}</p>`;
+      minutaContext.metadataText = data.metadataText || '';
     } catch(err){
       $('minutaEditor').innerHTML = `<p><i>Não foi possível carregar a análise automática: ${esc(err.message)}. Redija manualmente ou tente novamente.</i></p>`;
     }
@@ -3756,7 +3757,17 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   const texto = $('minutaChatInput').value.trim();
   if(!texto) return;
   appendMinutaChatBubble('user', texto);
-  minutaChatHistory.push({ role: 'user', content: texto });
+  // na primeira mensagem da conversa, injeta os dados do relatório
+  // como contexto — sem isso, a IA não tem como saber a que relatório
+  // o usuário está se referindo quando pede para "analisar" algo
+  let textoParaEnviar = texto;
+  if(minutaChatHistory.length === 0 && minutaContext){
+    const contexto = minutaContext.metadataText
+      ? `Contexto — metadados do relatório (documentação do procedimento; não é o conteúdo extraído do dispositivo):\n${minutaContext.metadataText}`
+      : `Contexto — relatório nº ${minutaContext.relatorioNum || 'não informado'}${minutaContext.processoNum ? ', processo ' + minutaContext.processoNum : ''}.`;
+    textoParaEnviar = `${contexto}\n\n---\n\nMensagem do usuário: ${texto}`;
+  }
+  minutaChatHistory.push({ role: 'user', content: textoParaEnviar });
   $('minutaChatInput').value = '';
   const statusEl = $('minutaChatStatus');
   statusEl.textContent = 'A IA está redigindo…';
