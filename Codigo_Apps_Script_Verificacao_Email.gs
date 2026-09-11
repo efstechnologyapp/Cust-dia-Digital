@@ -985,7 +985,7 @@ function callAIProvider_(messages, maxTokens, reparticaoId){
   }
 
   if (provider === 'anthropic') {
-    var payload = { model: 'claude-sonnet-4-6', max_tokens: maxTokens, messages: messages };
+    var payload = { model: 'claude-sonnet-5', max_tokens: maxTokens, messages: messages };
     var res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
       method: 'post', contentType: 'application/json',
       headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
@@ -1000,7 +1000,7 @@ function callAIProvider_(messages, maxTokens, reparticaoId){
     var contents = messages.map(function(m){
       return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] };
     });
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' + apiKey;
     var res = UrlFetchApp.fetch(url, {
       method: 'post', contentType: 'application/json',
       payload: JSON.stringify({ contents: contents, generationConfig: { maxOutputTokens: maxTokens } }),
@@ -1016,7 +1016,7 @@ function callAIProvider_(messages, maxTokens, reparticaoId){
     var res = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', {
       method: 'post', contentType: 'application/json',
       headers: { Authorization: 'Bearer ' + apiKey },
-      payload: JSON.stringify({ model: 'gpt-4o', max_tokens: maxTokens, messages: messages }),
+      payload: JSON.stringify({ model: 'gpt-5.6-terra', max_tokens: maxTokens, messages: messages }),
       muteHttpExceptions: true
     });
     if (res.getResponseCode() !== 200) throw new Error('Erro na API da OpenAI (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 300));
@@ -1028,7 +1028,7 @@ function callAIProvider_(messages, maxTokens, reparticaoId){
     var res = UrlFetchApp.fetch('https://api.deepseek.com/chat/completions', {
       method: 'post', contentType: 'application/json',
       headers: { Authorization: 'Bearer ' + apiKey },
-      payload: JSON.stringify({ model: 'deepseek-chat', max_tokens: maxTokens, messages: messages }),
+      payload: JSON.stringify({ model: 'deepseek-v4-flash', max_tokens: maxTokens, messages: messages }),
       muteHttpExceptions: true
     });
     if (res.getResponseCode() !== 200) throw new Error('Erro na API da DeepSeek (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 300));
