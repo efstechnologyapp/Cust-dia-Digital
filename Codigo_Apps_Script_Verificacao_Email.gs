@@ -731,22 +731,23 @@ function doPost(e) {
       // 1) já existe uma análise em cache para este relatório?
       var cacheSheet = getOrCreateAnaliseIASheet();
       var cacheRows = cacheSheet.getDataRange().getValues();
+      var metadataTextCache = ''; // buscado de qualquer forma, mesmo em cache-hit, para alimentar o chat depois
+      var reportsSheet = getOrCreateReportsSheet();
+      var reportRows = reportsSheet.getDataRange().getValues();
+      for (var i = 1; i < reportRows.length; i++) {
+        if (String(reportRows[i][3]) === relatorioNum && String(reportRows[i][2]) === reparticaoId) {
+          metadataTextCache = String(reportRows[i][9] || '');
+          break;
+        }
+      }
       for (var i = 1; i < cacheRows.length; i++) {
         if (String(cacheRows[i][0]) === relatorioNum && String(cacheRows[i][1]) === reparticaoId) {
-          return respond({ ok: true, analise: String(cacheRows[i][2]), dataAnalise: formatDate_(cacheRows[i][3]), cache: true });
+          return respond({ ok: true, analise: String(cacheRows[i][2]), dataAnalise: formatDate_(cacheRows[i][3]), cache: true, metadataText: metadataTextCache });
         }
       }
 
       // 2) busca o texto de metadados salvo com o relatório
-      var reportsSheet = getOrCreateReportsSheet();
-      var reportRows = reportsSheet.getDataRange().getValues();
-      var metadataText = '';
-      for (var i = 1; i < reportRows.length; i++) {
-        if (String(reportRows[i][3]) === relatorioNum && String(reportRows[i][2]) === reparticaoId) {
-          metadataText = String(reportRows[i][9] || '');
-          break;
-        }
-      }
+      var metadataText = metadataTextCache;
       if (!metadataText) {
         return respond({ ok: false, error: 'Não foram encontrados metadados salvos para este relatório (relatórios enviados antes desta funcionalidade não têm esse dado).' });
       }
@@ -770,7 +771,7 @@ function doPost(e) {
       // 4) guarda em cache, para não reanalisar (e não gastar de novo) o mesmo relatório
       cacheSheet.appendRow([relatorioNum, reparticaoId, analise, new Date(), (data.email || '').trim().toLowerCase()]);
 
-      return respond({ ok: true, analise: analise, dataAnalise: formatDate_(new Date()), cache: false });
+      return respond({ ok: true, analise: analise, dataAnalise: formatDate_(new Date()), cache: false, metadataText: metadataText });
     }
 
     // ---------- chat livre com a IA institucional (editor de Minuta IA) ----------
