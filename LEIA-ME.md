@@ -1,5 +1,23 @@
 # Custódia Digital — App (PWA)
 
+## Ícones de ajuda também no modal "Editar repartição" + passo a passo do Gemini
+
+- Os mesmos ícones "ⓘ" (Client ID e ID da pasta), no mesmo modal
+  centralizado, agora também aparecem no modal **"Editar
+  repartição"** da Gestão do App — não só no cadastro de usuário.
+- **Novo**: ícone "ⓘ" ao lado do campo "Chave de API", que só
+  aparece quando o provedor selecionado é **Gemini** (para os
+  outros 3 provedores, por ora, nada muda). Conteúdo com o passo a
+  passo atual pra obter a chave no Google AI Studio — pesquisado na
+  documentação oficial do Google (atualizada em 16/09/2026), incluindo
+  o aviso sobre a exigência de chaves restritas ("auth keys") que
+  entrou em vigor em setembro de 2026: chaves novas já nascem
+  seguras automaticamente, só quem tem uma chave antiga do tipo
+  "Standard" precisa gerar uma nova.
+- O ícone aparece corretamente tanto ao trocar o provedor manualmente
+  quanto quando o modal já carrega com Gemini configurado
+  previamente (dois pontos diferentes do código, ambos testados).
+
 ## Ajuda de campo + opção "a cargo do administrador" no cadastro de usuário
 
 Na tela de cadastro de usuário (fluxo "+ Cadastrar repartição"),

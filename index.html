@@ -1776,11 +1776,11 @@
       <input type="email" id="repEditEmail" placeholder="Ex.: repartição@gmail.com">
     </div>
     <div class="field">
-      <label>Client ID (OAuth)</label>
+      <label>Client ID (OAuth) <button type="button" class="field-info-btn" data-info="clientId">ⓘ</button></label>
       <input type="text" id="repEditClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
     </div>
     <div class="field">
-      <label>ID da pasta compartilhada no Drive</label>
+      <label>ID da pasta compartilhada no Drive <button type="button" class="field-info-btn" data-info="folderId">ⓘ</button></label>
       <input type="text" id="repEditFolderId" placeholder="Ex.: 1A2b3C4d5E...">
     </div>
     <div class="field">
@@ -1812,7 +1812,7 @@
       </select>
     </div>
     <div class="field">
-      <label>Chave de API</label>
+      <label>Chave de API <button type="button" class="field-info-btn hidden-view" id="repEditGeminiKeyInfoBtn" data-info="geminiApiKey">ⓘ</button></label>
       <input type="password" id="repEditAiApiKey" placeholder="Cole aqui para definir/atualizar a chave">
       <div class="hint" id="repEditAiKeyHint">Usada nos recursos de IA (análise de relatórios, Minuta IA) só por esta repartição. Fica só no servidor, nunca é exposta.</div>
     </div>
@@ -2788,6 +2788,7 @@ function startEditReparticao(id){
   $('repEditAiKeyHint').textContent = 'Usada nos recursos de IA (análise de relatórios, Minuta IA) só por esta repartição. Fica só no servidor, nunca é exposta.';
   $('reparticaoEditFormStatus').textContent = '';
   $('editRepOverlay').classList.add('open');
+  updateGeminiKeyInfoVisibility();
   renderRepUsersLists(rep.clientId);
   renderRepEquipamentosList(rep.clientId);
   loadRepCadastradaPorInfo(rep);
@@ -2795,6 +2796,12 @@ function startEditReparticao(id){
 }
 
 const AI_PROVIDER_LABELS = { anthropic: 'Anthropic (Claude)', gemini: 'Google (Gemini)', openai: 'OpenAI (ChatGPT)', deepseek: 'DeepSeek' };
+// mantém o ícone de ajuda da chave de API em sincronia sempre que o
+// provedor é definido programaticamente (não só quando o usuário
+// troca manualmente o <select>, que já dispara 'change' sozinho)
+function updateGeminiKeyInfoVisibility(){
+  $('repEditGeminiKeyInfoBtn').classList.toggle('hidden-view', $('repEditAiProvider').value !== 'gemini');
+}
 
 // busca na central se essa repartição já tem provedor/chave de IA
 // configurados — usada tanto ao abrir o modal quanto logo depois de
@@ -2814,6 +2821,7 @@ async function renderRepAiStatusCard(clientId){
     }
     if(central && central.aiProvider){
       $('repEditAiProvider').value = central.aiProvider;
+      updateGeminiKeyInfoVisibility();
       if(central.aiTemChave) $('repEditAiKeyHint').textContent = '✓ Uma chave já está configurada para esta repartição. Usada nos recursos de IA — fica só no servidor, nunca é exposta.';
       const cadastradoPorTexto = central.aiCadastradoPorNome
         ? `Cadastrado por ${esc(central.aiCadastradoPorNome)}${central.aiCadastradoPorCargo ? ' (' + esc(central.aiCadastradoPorCargo) + ')' : ''}, em ${esc(central.aiCadastradoEm)}`
@@ -2833,6 +2841,7 @@ async function renderRepAiStatusCard(clientId){
         try {
           await callAppsScript({ action: 'remove_ai_config', clientId });
           $('repEditAiProvider').value = '';
+          updateGeminiKeyInfoVisibility();
           $('repEditAiKeyHint').textContent = 'Usada nos recursos de IA (análise de relatórios, Minuta IA) só por esta repartição. Fica só no servidor, nunca é exposta.';
           renderRepAiStatusCard(clientId);
         } catch(err){
@@ -5467,6 +5476,20 @@ const FIELD_INFO_CONTENT = {
       </ol>
       <p style="margin:0;padding:10px;background:#F7F9FB;border-radius:8px;border:1px solid var(--line);">Se preferir não fazer isso agora, marque abaixo do campo <b>"Deixar a cargo do administrador do sistema"</b> — seu cadastro segue normalmente, e o administrador completa essa parte depois.</p>
     `
+  },
+  geminiApiKey: {
+    titulo: 'Chave de API do Gemini',
+    html: `
+      <p style="margin:0 0 10px;">Passo a passo para obter e habilitar a chave da IA do Google (Gemini) para esta repartição:</p>
+      <ol style="margin:0 0 12px;padding-left:18px;">
+        <li>Acesse o <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> e faça login com a conta Google que vai administrar a IA desta repartição.</li>
+        <li>Se for a primeira vez, aceite os termos de serviço — um projeto e uma chave padrão são criados automaticamente.</li>
+        <li>Clique em <b>"Create API key"</b> (ou use a chave padrão já criada).</li>
+        <li>Copie a chave gerada e cole aqui no campo "Chave de API".</li>
+      </ol>
+      <p style="margin:0 0 10px;padding:10px;background:#FBF6E9;border:1px solid #E8D8A6;border-radius:8px;">⚠️ Desde setembro de 2026, o Google passou a exigir chaves "restritas" (auth keys) — chaves novas já nascem assim automaticamente, então seguindo os passos acima não há nada extra a fazer. Se você já tinha uma chave antiga do tipo "Standard/sem restrição", crie uma nova pelo botão "Create API key" para evitar que pare de funcionar.</p>
+      <p style="margin:0;padding:10px;background:#F7F9FB;border-radius:8px;border:1px solid var(--line);">O Google oferece uma cota gratuita generosa para o Gemini — suficiente pra a maioria dos usos deste app.</p>
+    `
   }
 };
 function openFieldInfoModal(tipo){
@@ -5481,6 +5504,12 @@ document.querySelectorAll('.field-info-btn').forEach(btn => {
 });
 $('closeFieldInfoBtn').addEventListener('click', () => $('fieldInfoOverlay').classList.remove('open'));
 $('fieldInfoOverlay').addEventListener('click', (e) => { if(e.target.id === 'fieldInfoOverlay') $('fieldInfoOverlay').classList.remove('open'); });
+
+// o ícone de ajuda da chave de API só faz sentido pro provedor
+// selecionado — por ora, só o Gemini tem passo a passo próprio
+$('repEditAiProvider').addEventListener('change', () => {
+  $('repEditGeminiKeyInfoBtn').classList.toggle('hidden-view', $('repEditAiProvider').value !== 'gemini');
+});
 
 // ---------- "deixar a cargo do administrador" — desabilita/limpa o campo ----------
 $('regNewRepClientIdAdm').addEventListener('change', () => {
