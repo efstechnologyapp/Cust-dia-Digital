@@ -418,6 +418,28 @@
     font-size: 17px;
     color: var(--navy-dark);
   }
+  /* ---------- cabeçalho institucional da repartição, nos relatórios ---------- */
+  .report-institucional-header{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 8px;
+    margin-bottom: 18px;
+    text-align:center;
+  }
+  .report-institucional-logo{ max-width: 68px; max-height: 68px; object-fit:contain; }
+  .report-institucional-linha{
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: var(--navy-dark);
+    line-height: 1.4;
+  }
+  .report-institucional-separador{
+    border:none;
+    border-top: 1px solid var(--line);
+    margin: 0 0 18px;
+  }
   .rtable tr, .report-paper p, .sig-block{
     page-break-inside: avoid;
     break-inside: avoid;
@@ -1201,6 +1223,20 @@
           <input type="text" id="regNewRepFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
         </div>
         <div class="field">
+          <label style="font-size:12px;">Logo do órgão/repartição (aparece no cabeçalho dos relatórios)</label>
+          <div class="file-attach-row">
+            <input type="file" accept="image/*" id="regNewRepLogoInput" style="display:none;">
+            <button type="button" class="btn-attach" id="regNewRepLogoBtn">📎 Selecionar imagem</button>
+            <span class="file-attach-name" id="regNewRepLogoName"></span>
+          </div>
+          <img id="regNewRepLogoPreview" class="hidden-view" style="max-width:70px;max-height:70px;margin-top:6px;display:block;">
+        </div>
+        <div class="field">
+          <label style="font-size:12px;">Cabeçalho institucional (uma linha por linha do cabeçalho)</label>
+          <textarea id="regNewRepCabecalhoTexto" placeholder="Ex.: Tribunal de Justiça do Estado XXXX&#10;Juízo da 20ª Vara Criminal da comarca de XXXX" style="min-height:70px;"></textarea>
+          <div class="hint">Cada linha aparece em negrito e caixa alta no cabeçalho dos relatórios, não importa como for digitada aqui.</div>
+        </div>
+        <div class="field">
           <label style="font-size:12px;">Provedor de IA contratado por esta repartição (opcional, dá para configurar depois)</label>
           <select id="regNewRepAiProvider">
             <option value="" selected>Ainda não configurar</option>
@@ -1529,6 +1565,20 @@
           <input type="text" id="repFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
         </div>
         <div class="field">
+          <label>Logo do órgão/repartição (aparece no cabeçalho dos relatórios)</label>
+          <div class="file-attach-row">
+            <input type="file" accept="image/*" id="repLogoInput" style="display:none;">
+            <button type="button" class="btn-attach" id="repLogoBtn">📎 Selecionar imagem</button>
+            <span class="file-attach-name" id="repLogoName"></span>
+          </div>
+          <img id="repLogoPreview" class="hidden-view" style="max-width:70px;max-height:70px;margin-top:6px;display:block;">
+        </div>
+        <div class="field">
+          <label>Cabeçalho institucional (uma linha por linha do cabeçalho)</label>
+          <textarea id="repCabecalhoTexto" placeholder="Ex.: Tribunal de Justiça do Estado XXXX&#10;Juízo da 20ª Vara Criminal da comarca de XXXX" style="min-height:70px;"></textarea>
+          <div class="hint">Cada linha aparece em negrito e caixa alta no cabeçalho dos relatórios, não importa como for digitada aqui.</div>
+        </div>
+        <div class="field">
           <label>Provedor de IA contratado por esta repartição (opcional, pode configurar depois)</label>
           <select id="repAiProvider">
             <option value="" selected>Ainda não configurar</option>
@@ -1679,6 +1729,20 @@
     <div class="field">
       <label>Nome dessa pasta no Drive</label>
       <input type="text" id="repEditFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
+    </div>
+    <div class="field">
+      <label>Logo do órgão/repartição (aparece no cabeçalho dos relatórios)</label>
+      <div class="file-attach-row">
+        <input type="file" accept="image/*" id="repEditLogoInput" style="display:none;">
+        <button type="button" class="btn-attach" id="repEditLogoBtn">📎 Selecionar imagem</button>
+        <span class="file-attach-name" id="repEditLogoName"></span>
+      </div>
+      <img id="repEditLogoPreview" class="hidden-view" style="max-width:70px;max-height:70px;margin-top:6px;display:block;">
+    </div>
+    <div class="field">
+      <label>Cabeçalho institucional (uma linha por linha do cabeçalho)</label>
+      <textarea id="repEditCabecalhoTexto" placeholder="Ex.: Tribunal de Justiça do Estado XXXX&#10;Juízo da 20ª Vara Criminal da comarca de XXXX" style="min-height:70px;"></textarea>
+      <div class="hint">Cada linha aparece em negrito e caixa alta no cabeçalho dos relatórios, não importa como for digitada aqui.</div>
     </div>
     <div class="field">
       <label>Provedor de IA contratado por esta repartição</label>
@@ -2637,6 +2701,10 @@ function resetNewReparticaoForm(){
   $('repClientId').value = '';
   $('repFolderId').value = '';
   $('repFolderNome').value = '';
+  $('repCabecalhoTexto').value = '';
+  $('repAiProvider').value = '';
+  $('repAiApiKey').value = '';
+  repLogoManager.reset();
   $('reparticaoFormStatus').textContent = '';
 }
 
@@ -2656,6 +2724,8 @@ function startEditReparticao(id){
   $('repEditClientId').value = rep.clientId;
   $('repEditFolderId').value = rep.folderId;
   $('repEditFolderNome').value = rep.folderNome || '';
+  $('repEditCabecalhoTexto').value = '';
+  repEditLogoManager.reset();
   $('repEditAiProvider').value = '';
   $('repEditAiApiKey').value = '';
   $('repEditAiKeyHint').textContent = 'Usada nos recursos de IA (análise de relatórios, Minuta IA) só por esta repartição. Fica só no servidor, nunca é exposta.';
@@ -2678,6 +2748,13 @@ async function renderRepAiStatusCard(clientId){
   try {
     const data = await callAppsScript({ action: 'list_reparticoes_pendentes' });
     const central = (data.pendentes || []).find(p => p.clientId === clientId);
+    // aproveita essa mesma busca pra já carregar logo/cabeçalho
+    // institucional atuais da repartição, sem precisar de uma segunda
+    // chamada ao servidor
+    if(central){
+      repEditLogoManager.setBase64(central.logoBase64 || '');
+      $('repEditCabecalhoTexto').value = central.cabecalhoTexto || '';
+    }
     if(central && central.aiProvider){
       $('repEditAiProvider').value = central.aiProvider;
       if(central.aiTemChave) $('repEditAiKeyHint').textContent = '✓ Uma chave já está configurada para esta repartição. Usada nos recursos de IA — fica só no servidor, nunca é exposta.';
@@ -2919,6 +2996,8 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   const clientId = sanitizeClientId($('repClientId').value);
   const folderId = sanitizeFolderId($('repFolderId').value);
   const folderNome = $('repFolderNome').value.trim();
+  const cabecalhoTexto = $('repCabecalhoTexto').value.trim();
+  const logoBase64 = repLogoManager.getBase64();
   const aiProvider = $('repAiProvider').value;
   const aiApiKey = $('repAiApiKey').value.trim();
   const statusEl = $('reparticaoFormStatus');
@@ -2927,7 +3006,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
     statusEl.className = 'loc-status err';
     return;
   }
-  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, folderNome, status: 'pendente', centralRowIndex: null };
+  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, folderNome, cabecalhoTexto, logoBase64, status: 'pendente', centralRowIndex: null };
   const list = loadReparticoes();
   list.push(newRep);
   saveReparticoesList(list);
@@ -2936,7 +3015,7 @@ $('saveReparticaoBtn').addEventListener('click', async () => {
   // verdade usando ela, o que a promove automaticamente a "cadastrada"
   try {
     const data = await callAppsScript({
-      action: 'register_reparticao_pendente', nome, email, clientId, folderId, folderNome, aiProvider, aiApiKey,
+      action: 'register_reparticao_pendente', nome, email, clientId, folderId, folderNome, aiProvider, aiApiKey, cabecalhoTexto, logoBase64,
       // registra também quem fez o cadastro (o administrador), para
       // aparecer tanto no card de pendentes quanto no modal da repartição
       usuarioNome: currentUser ? currentUser.nome : '',
@@ -2978,6 +3057,7 @@ $('saveReparticaoEditBtn').addEventListener('click', async () => {
   const clientId = sanitizeClientId($('repEditClientId').value);
   const folderId = sanitizeFolderId($('repEditFolderId').value);
   const folderNome = $('repEditFolderNome').value.trim();
+  const cabecalhoTexto = $('repEditCabecalhoTexto').value.trim();
   const aiProvider = $('repEditAiProvider').value;
   const aiApiKey = $('repEditAiApiKey').value.trim();
   const statusEl = $('reparticaoEditFormStatus');
@@ -2990,7 +3070,14 @@ $('saveReparticaoEditBtn').addEventListener('click', async () => {
   const idx = list.findIndex(r => r.id === editingReparticaoId);
   if(idx < 0) return;
 
-  list[idx] = { ...list[idx], nome, email, clientId, folderId, folderNome };
+  // só inclui o logo na atualização se o adm de fato trocou a imagem
+  // nesta sessão — assim, deixar o campo intocado nunca apaga um logo
+  // já configurado por engano
+  const logoAlterado = repEditLogoManager.foiAlterado();
+  const logoBase64 = repEditLogoManager.getBase64();
+
+  list[idx] = { ...list[idx], nome, email, clientId, folderId, folderNome, cabecalhoTexto };
+  if(logoAlterado) list[idx].logoBase64 = logoBase64;
   saveReparticoesList(list);
   gisTokenClient = null;
   setDriveConnectedFlag(false);
@@ -2999,12 +3086,13 @@ $('saveReparticaoEditBtn').addEventListener('click', async () => {
   statusEl.textContent = 'Salvando…';
   statusEl.className = 'loc-status';
   try {
-    // propaga a edição (nome da pasta, provedor/chave de IA) para a
-    // central — assim, QUALQUER usuário desta repartição, em qualquer
-    // aparelho, passa a usar a mesma configuração automaticamente,
-    // sem precisar configurar nada localmente
+    // propaga a edição (nome da pasta, logo, cabeçalho, provedor/chave
+    // de IA) para a central — assim, QUALQUER usuário desta repartição,
+    // em qualquer aparelho, passa a usar a mesma configuração
+    // automaticamente, sem precisar configurar nada localmente
     await callAppsScript({
-      action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey,
+      action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey, cabecalhoTexto,
+      logoBase64: logoAlterado ? logoBase64 : undefined,
       usuarioNome: currentUser ? currentUser.nome : '', usuarioCargo: currentUser ? currentUser.cargo : ''
     });
     $('repEditAiApiKey').value = '';
@@ -3704,10 +3792,15 @@ async function openMinutaEditor(r, tipo){
   $('minutaConsentBox').classList.toggle('hidden-view', consentJaAceito);
   updateMinutaAiProviderLabel(r.reparticaoId);
 
+  // mesmo cabeçalho institucional do relatório principal, para a
+  // minuta já nascer com a identificação do órgão/repartição
+  const repInfo = loadReparticoes().find(rp => rp.clientId === r.reparticaoId) || {};
+  const headerHtml = buildInstitutionalHeaderHtml(repInfo);
+
   if(tipo === 'metadados'){
     $('minutaTitle').textContent = 'Relatório de Metadados';
     $('minutaSubtitle').textContent = `Relatório ${r.relatorioNum || ''}${r.processoNum ? ' — Processo ' + r.processoNum : ''}`;
-    $('minutaEditor').innerHTML = '<p><i>Carregando análise inicial da IA…</i></p>';
+    $('minutaEditor').innerHTML = headerHtml + '<p><i>Carregando análise inicial da IA…</i></p>';
     $('minutaView').style.display = 'block';
     try {
       const data = await callAppsScript({
@@ -3715,15 +3808,15 @@ async function openMinutaEditor(r, tipo){
         relatorioNum: r.relatorioNum, reparticaoId: r.reparticaoId,
         email: currentUser ? currentUser.email : ''
       });
-      $('minutaEditor').innerHTML = `<p>${esc(data.analise).replace(/\n/g, '<br>')}</p>`;
+      $('minutaEditor').innerHTML = headerHtml + `<p>${esc(data.analise).replace(/\n/g, '<br>')}</p>`;
       minutaContext.metadataText = data.metadataText || '';
     } catch(err){
-      $('minutaEditor').innerHTML = `<p><i>Não foi possível carregar a análise automática: ${esc(err.message)}. Redija manualmente ou tente novamente.</i></p>`;
+      $('minutaEditor').innerHTML = headerHtml + `<p><i>Não foi possível carregar a análise automática: ${esc(err.message)}. Redija manualmente ou tente novamente.</i></p>`;
     }
   } else {
     $('minutaTitle').textContent = 'Relatório de Análise de Arquivos Evidência';
     $('minutaSubtitle').textContent = `Relatório ${r.relatorioNum || ''}${r.processoNum ? ' — Processo ' + r.processoNum : ''}`;
-    $('minutaEditor').innerHTML = '<p></p>';
+    $('minutaEditor').innerHTML = headerHtml + '<p></p>';
     $('minutaView').style.display = 'block';
   }
 }
@@ -4132,6 +4225,89 @@ const attachedFiles = { orig: null, cop: null }; // mantido só para compatibili
 // do usuário + código do tipo de arquivo + nº do relatório + (quando
 // fizer sentido) o nome original do arquivo
 // Ex.: "FS - Rel.CIA - REL-001", "FS - ArqEv - REL-001 - msgstore.db.crypt14"
+// redimensiona uma imagem de logo antes de guardar como base64 —
+// sem isso, uma foto de câmera (vários MB) estouraria de longe o
+// limite de tamanho de célula da planilha do Google (~50.000
+// caracteres); 140px de lado já é mais que suficiente para o
+// tamanho em que a logo aparece no relatório
+function resizeImageToBase64(file, maxDim){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Não foi possível ler o arquivo de imagem.'));
+    reader.onload = () => {
+      img.onerror = () => reject(new Error('Arquivo não parece ser uma imagem válida.'));
+      img.onload = () => {
+        const escala = Math.min(1, (maxDim || 140) / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * escala));
+        const h = Math.max(1, Math.round(img.height * escala));
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// gerencia o upload+redimensionamento do logo institucional — usado
+// nos 3 lugares onde uma repartição pode ser cadastrada/editada
+// (cadastro de usuário, nova repartição admin, editar repartição)
+function setupLogoUpload(prefix){
+  let logoBase64Atual = '';
+  let alterado = false;
+  const btn = $(prefix + 'LogoBtn');
+  const input = $(prefix + 'LogoInput');
+  const nameEl = $(prefix + 'LogoName');
+  const previewEl = $(prefix + 'LogoPreview');
+  btn.addEventListener('click', () => input.click());
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if(!file) return;
+    nameEl.textContent = 'Processando…';
+    try {
+      logoBase64Atual = await resizeImageToBase64(file, 140);
+      alterado = true;
+      nameEl.textContent = file.name;
+      previewEl.src = logoBase64Atual;
+      previewEl.classList.remove('hidden-view');
+    } catch(err){
+      nameEl.textContent = 'Erro: ' + err.message;
+      logoBase64Atual = '';
+    }
+  });
+  return {
+    getBase64: () => logoBase64Atual,
+    foiAlterado: () => alterado,
+    setBase64: (b64) => {
+      logoBase64Atual = b64 || '';
+      alterado = false;
+      if(b64){
+        previewEl.src = b64;
+        previewEl.classList.remove('hidden-view');
+        nameEl.textContent = '(logo já configurada — selecione outra para trocar)';
+      } else {
+        previewEl.classList.add('hidden-view');
+        previewEl.src = '';
+        nameEl.textContent = '';
+      }
+    },
+    reset: () => {
+      logoBase64Atual = '';
+      alterado = false;
+      nameEl.textContent = '';
+      previewEl.classList.add('hidden-view');
+      previewEl.src = '';
+      input.value = '';
+    }
+  };
+}
+const repLogoManager = setupLogoUpload('rep');
+const repEditLogoManager = setupLogoUpload('repEdit');
+const regNewRepLogoManager = setupLogoUpload('regNewRep');
+
 function buildStructuredFileName(tipoLabel, relatorioNum, originalName){
   const iniciais = currentUser ? initials(currentUser.nome) : 'XX';
   const numLimpo = (relatorioNum || 'sem_numero').toString().trim() || 'sem_numero';
@@ -5210,6 +5386,8 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
   const clientId = sanitizeClientId($('regNewRepClientId').value);
   const folderId = sanitizeFolderId($('regNewRepFolderId').value);
   const folderNome = $('regNewRepFolderNome').value.trim();
+  const cabecalhoTexto = $('regNewRepCabecalhoTexto').value.trim();
+  const logoBase64 = regNewRepLogoManager.getBase64();
   const aiProvider = $('regNewRepAiProvider').value;
   const aiApiKey = $('regNewRepAiApiKey').value.trim();
   const statusEl = $('regNewRepStatus');
@@ -5219,12 +5397,12 @@ $('regNewRepSaveBtn').addEventListener('click', () => {
     return;
   }
   const list = loadReparticoes();
-  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, folderNome, status: 'pendente', centralRowIndex: null };
+  const newRep = { id: 'rep-' + Date.now(), nome, email, clientId, folderId, folderNome, cabecalhoTexto, logoBase64, status: 'pendente', centralRowIndex: null };
   list.push(newRep);
   saveReparticoesList(list);
   // guardado para, ao concluir o cadastro do usuário, avisar a central
   // com os dados da repartição + de quem a cadastrou
-  pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId, folderNome, aiProvider, aiApiKey };
+  pendingNewReparticaoData = { id: newRep.id, nome, email, clientId, folderId, folderNome, cabecalhoTexto, logoBase64, aiProvider, aiApiKey };
   populateRegReparticaoSelect(newRep.clientId);
   $('regReparticao').value = newRep.id;
   $('regNewReparticaoForm').classList.add('hidden-view');
@@ -5596,6 +5774,8 @@ $('registerBtn').addEventListener('click', () => {
         clientId: pendingNewReparticaoData.clientId,
         folderId: pendingNewReparticaoData.folderId,
         folderNome: pendingNewReparticaoData.folderNome || '',
+        cabecalhoTexto: pendingNewReparticaoData.cabecalhoTexto || '',
+        logoBase64: pendingNewReparticaoData.logoBase64 || '',
         aiProvider: pendingNewReparticaoData.aiProvider || '',
         aiApiKey: pendingNewReparticaoData.aiApiKey || '',
         usuarioNome: nome,
@@ -5731,6 +5911,12 @@ function refreshUserUI(){
 // neste aparelho — sem isso, se um administrador mudasse o nome
 // depois que o usuário já estivesse conectado, esse usuário nunca
 // veria a mudança, a não ser que desconectasse e reconectasse
+// atualiza silenciosamente, uma vez por sessão (chamado ao entrar no
+// app), o nome da pasta do Drive, o logo e o cabeçalho institucional
+// de cada repartição já confirmada neste aparelho — sem isso, se um
+// administrador mudasse esses dados depois que o usuário já estivesse
+// conectado, esse usuário nunca veria a mudança, a não ser que
+// desconectasse e reconectasse manualmente
 async function refreshReparticoesFolderNomesFromCentral(){
   try {
     const list = loadReparticoes();
@@ -5741,8 +5927,17 @@ async function refreshReparticoesFolderNomesFromCentral(){
     let mudou = false;
     confirmadas.forEach(rep => {
       const match = central.find(p => p.clientId === rep.clientId);
-      if(match && match.folderNome !== undefined && match.folderNome !== rep.folderNome){
+      if(!match) return;
+      if(match.folderNome !== undefined && match.folderNome !== rep.folderNome){
         rep.folderNome = match.folderNome;
+        mudou = true;
+      }
+      if(match.logoBase64 !== undefined && match.logoBase64 !== rep.logoBase64){
+        rep.logoBase64 = match.logoBase64;
+        mudou = true;
+      }
+      if(match.cabecalhoTexto !== undefined && match.cabecalhoTexto !== rep.cabecalhoTexto){
+        rep.cabecalhoTexto = match.cabecalhoTexto;
         mudou = true;
       }
     });
@@ -6501,6 +6696,25 @@ function updateHashCompare(){
   }
 }
 
+// monta o cabeçalho institucional (logo + linhas de texto da
+// repartição conectada) usado nos 3 tipos de relatório — cada linha
+// digitada pelo usuário aparece sempre em negrito e caixa alta,
+// independente de como foi digitada (via CSS, não altera o dado
+// salvo). Sem logo/linhas configuradas, cai de volta pro cabeçalho
+// simples anterior (só o título do relatório, sem marca nenhuma)
+function buildInstitutionalHeaderHtml(rep){
+  const temLogo = rep && rep.logoBase64;
+  const linhas = (rep && rep.cabecalhoTexto || '').split('\n').map(l => l.trim()).filter(Boolean);
+  if(!temLogo && linhas.length === 0) return '';
+  return `
+    <div class="report-institucional-header">
+      ${temLogo ? `<img src="${rep.logoBase64}" class="report-institucional-logo" alt="">` : ''}
+      ${linhas.map(l => `<div class="report-institucional-linha">${esc(l)}</div>`).join('')}
+    </div>
+    <hr class="report-institucional-separador">
+  `;
+}
+
 function esc(s){
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -6658,7 +6872,6 @@ async function addDigitalSignatureToReport(matricula){
     `;
     window.__lastSignature = { signature: sigB64, fingerprint, dataString };
     addTimestampProofToReport();
-    addVerificationQrCode();
   } catch(err){
     el.innerHTML = row('Assinatura', 'Erro ao gerar.');
   }
@@ -6736,6 +6949,7 @@ function buildReportMetadataText(){
 
 function buildReport(){
   const v = id => $(id).value;
+  const repConectada = getSelectedReparticao();
 
   const origEntradas = origArquivosManager.getEntries();
   const copEntradas = copArquivosManager.getEntries();
@@ -6802,11 +7016,8 @@ function buildReport(){
   }
 
   const html = `
-    <div class="report-header-brand">
-      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" class="report-header-logo" alt="">
-      <span class="report-header-name">Custódia Digital</span>
-    </div>
-    <h1>RELATÓRIO TÉCNICO DE EXTRAÇÃO E INTEGRIDADE DE ARQUIVOS DIGITAIS</h1>
+    ${buildInstitutionalHeaderHtml(repConectada)}
+    <h1>RELATÓRIO TÉCNICO DE COLETA, IDENTIFICAÇÃO E RASTREABILIDADE DE ARMAZENAMENTO DE ARQUIVOS DIGITAIS</h1>
 
     <h2>1. Identificação Geral</h2>
     <table class="rtable">
@@ -6900,18 +7111,24 @@ function buildReport(){
         Data e hora da emissão: ${emissaoTexto}
       </div>
     </div>
-    <div style="display:flex;align-items:flex-start;justify-content:center;gap:8px;border:1px solid var(--line,#ccc);border-radius:6px;padding:6px;margin-top:14px;font-size:5.5px;line-height:1.2;">
-      <div style="flex:0 0 40px;text-align:center;">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital" style="width:18px;height:18px;border-radius:3px;">
-        <div style="font-weight:bold;color:var(--navy-dark,#1B2A4A);margin-top:1px;">Custódia Digital</div>
+    <div style="margin-top:14px;">
+      <div style="display:flex;align-items:flex-start;justify-content:center;gap:8px;border:1px solid var(--line,#ccc);border-radius:6px;padding:6px;font-size:5.5px;line-height:1.2;">
+        <div style="flex:0 0 40px;text-align:center;">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital" style="width:18px;height:18px;border-radius:3px;">
+        </div>
+        <table id="digitalSignatureBlock" class="rtable" style="flex:0 1 auto;max-width:120px;font-size:5.5px;"></table>
+        <div id="reportQrCode" style="flex:0 0 40px;text-align:center;"></div>
       </div>
-      <table id="digitalSignatureBlock" class="rtable" style="flex:0 1 auto;max-width:120px;font-size:5.5px;"></table>
-      <div id="reportQrCode" style="flex:0 0 40px;text-align:center;"></div>
+      <div style="text-align:center;font-size:6px;color:var(--muted,#8A93A0);margin-top:3px;">Construído com o App Custódia Digital ®</div>
     </div>
     ${custodiaProprietarioHtml}
   `;
   $('reportPaper').innerHTML = html;
+  // assinatura, carimbo de tempo e QR Code são independentes entre si
+  // — se um falhar (ex.: crypto.subtle indisponível fora de HTTPS),
+  // os outros dois continuam sendo gerados normalmente
   addDigitalSignatureToReport(matriculaAssinatura);
+  addVerificationQrCode();
 }
 
 // ---------- histórico de relatórios ----------

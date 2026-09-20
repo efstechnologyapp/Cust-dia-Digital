@@ -1,5 +1,72 @@
 # Custódia Digital — App (PWA)
 
+## Ajustes no título e correção do QR Code de verificação
+
+- **Título do relatório principal** alterado para: "RELATÓRIO TÉCNICO
+  DE COLETA, IDENTIFICAÇÃO E RASTREABILIDADE DE ARMAZENAMENTO DE
+  ARQUIVOS DIGITAIS".
+- **Correção real**: o QR Code de verificação pública tinha
+  "sumido" — a causa era que sua geração estava presa dentro da
+  lógica da assinatura digital: se a assinatura falhasse por
+  qualquer motivo (ex.: `crypto.subtle` indisponível fora de um
+  contexto seguro/HTTPS), o QR nunca chegava a ser gerado, mesmo
+  sendo uma funcionalidade completamente independente. Agora as duas
+  coisas são geradas separadamente — uma falhar não afeta a outra.
+  Reproduzi o cenário exato do bug (assinatura indisponível) e
+  confirmei que o QR volta a aparecer normalmente.
+- **Rodapé de página do PDF** ("EFS Technology ©" à esquerda, "Página
+  X de Y" à direita, em todas as páginas): essa parte já estava
+  implementada em uma versão anterior do arquivo — testei a lógica
+  com um PDF simulado de 3 páginas e confirmou funcionando
+  corretamente, sem necessidade de alteração.
+
+## Cabeçalho institucional da repartição nos relatórios (novo)
+
+Os 3 tipos de relatório do app (Relatório de Extração/Coleta e
+Identificação de Arquivos, Relatório de Metadados, e Relatório de
+Análise de Arquivos Evidência) deixaram de exibir o logo do app
+Custódia Digital no topo — agora mostram o **logo e os dados da
+repartição conectada** no momento em que o relatório é gerado.
+
+**Onde configurar** (3 lugares, todos com os mesmos dois campos):
+- Tela de cadastro de usuário, no fluxo "+ Cadastrar repartição"
+- "Nova repartição", na Gestão do App (aba Gestão de Conexões)
+- Modal "Editar repartição" (pra quem já tem repartição cadastrada)
+
+**Os dois campos:**
+- **Logo do órgão/repartição**: upload de imagem, redimensionada
+  automaticamente pelo próprio navegador para no máximo 140px de
+  lado antes de salvar — evita estourar o limite de tamanho de
+  célula da planilha central do Google (~50.000 caracteres). Uma
+  foto de câmera de vários MB vira um arquivo de poucos KB.
+- **Cabeçalho institucional**: um campo de texto livre, uma linha
+  por linha do cabeçalho (ex.: "Tribunal de Justiça do Estado XXXX" /
+  "Juízo da 20ª Vara Criminal da comarca de XXXX"). Cada linha
+  aparece **sempre em negrito e caixa alta** no relatório, não
+  importa como foi digitada — a transformação é só visual (CSS),
+  o texto original digitado continua salvo como foi escrito.
+
+Repartição sem logo nem cabeçalho configurados: o relatório não
+mostra cabeçalho nenhum ali (nem o do Custódia Digital, que foi
+removido de vez do topo).
+
+**Onde foi parar o logo do Custódia Digital**: apareceu de novo,
+bem discreto, no rodapé do relatório principal — uma legenda
+"Construído com o App Custódia Digital ®", abaixo da caixinha
+compacta de assinatura digital/QR Code.
+
+**Sincronização entre dispositivos**: logo e cabeçalho são salvos na
+planilha central (novas colunas `LogoBase64` e `CabecalhoTexto`) — e
+sincronizados automaticamente pra todo mundo que já estiver
+conectado àquela repartição, sem precisar desconectar/reconectar
+(mesmo mecanismo silencioso que já sincronizava o nome da pasta do
+Drive).
+
+**Minuta IA**: os dois tipos de minuta (Relatório de Metadados e
+Relatório de Análise de Arquivos Evidência) também nascem com esse
+mesmo cabeçalho institucional já no topo do editor, antes do
+conteúdo.
+
 ## O que é isto, exatamente
 
 Este é um aplicativo web (PWA — Progressive Web App). Não é um `.apk` nativo.
@@ -462,95 +529,6 @@ Isso substitui o antigo campo único "Repartição" na tela de edição —
 agora um usuário pode estar vinculado a mais de uma repartição ao
 mesmo tempo. O cadastro inicial (primeiro acesso) continua igual,
 pedindo a repartição logo de início, antes dos demais campos.
-
-## Correção: nome da pasta do Drive não atualizava entre dispositivos já conectados
-
-Investigação a pedido do usuário: o nome da pasta do Drive de uma
-repartição só era sincronizado entre dispositivos no momento da
-conexão inicial (clicar em "🔌 Conectar") — se um administrador
-mudasse esse nome depois, quem já estava conectado continuava vendo
-o nome antigo indefinidamente, a não ser que desconectasse e
-reconectasse manualmente.
-
-**Correção**: nova função `refreshReparticoesFolderNomesFromCentral()`,
-chamada automaticamente toda vez que o app é aberto/o usuário entra
-(`enterApp()`) — verifica silenciosamente, na central, se o nome da
-pasta de alguma repartição já confirmada neste aparelho mudou, e
-atualiza a cópia local sem o usuário precisar fazer nada.
-
-## Ajustes visuais: ordem das seções e fonte do modal de versão
-
-- **"Histórico de versões"** passou a ser a **última** seção da aba
-  "Informações Gerais" (antes ficava entre "Funcionalidades" e
-  "Métricas").
-- Fonte do conteúdo dentro do **modal de detalhes de uma versão**
-  reduzida (12px), para ficar mais compacta.
-
-## Correção: "Concluir Tarefa" travava em "Enviando…", não voltava pra Home
-
-Bug relatado pelo usuário: os arquivos eram enviados e o histórico
-era atualizado corretamente, mas o botão ficava preso mostrando
-"Enviando ao Drive…" para sempre, sem nunca voltar para a Home.
-
-**Causa raiz**: resquício da reestruturação para múltiplos arquivos
-(Seções 4 e 6) — a função `resetFormFields()` ainda tentava
-resincronizar dois seletores de "ferramenta de hash" que **não
-existem mais** desde aquela mudança (`f_orig_ferramenta_tool` e
-`f_cop_ferramenta_tool`, substituídos por campos dinâmicos por
-entrada). Chamar `.dispatchEvent()` num elemento inexistente
-(`null`) lança um erro — e como isso acontecia **depois** do envio
-bem-sucedido ao Drive, mas **fora** do bloco de tratamento de erro
-da função, o erro interrompia a função no meio, antes das linhas que
-resetam o botão e voltam para a Home.
-
-**Correção**: removidas as duas linhas obsoletas (o reset das
-ferramentas de hash já é feito corretamente por
-`origArquivosManager.reset()`/`copArquivosManager.reset()`, que
-fazem parte da mesma função, logo acima).
-
-**Confirmação**: reproduzi o bug de propósito (reintroduzindo as
-linhas antigas) e confirmei o mesmo sintoma exato relatado pelo
-usuário, depois confirmei que a correção resolve.
-
-## Ajustes no editor de Minuta e nos cards de relatório
-
-- **Chat da IA no editor**: campo de mensagem e botão "Enviar"
-  estavam lado a lado, espremendo o campo de texto — agora o campo
-  fica em cima, ocupando a largura toda, e o botão embaixo.
-- **Cards de relatório (histórico e "Relatórios da Repartição")**:
-  os arquivos deixaram de ser mostrados pelo nome específico e
-  passaram a ser mostrados pela **classe** a que pertencem, extraída
-  do código embutido no nome do arquivo:
-  - `Rel de Ext, Id e Armaz` (o PDF do relatório)
-  - `Arqv Evidência 1`, `Arqv Evidência 2`... (arquivos da Seção 6, numerados)
-  - `Arqv Anexo 1`, `Arqv Anexo 2`... (anexos da Seção 8, numerados)
-  - `Rel Metadados` (minuta de metadados)
-  - `Rel Análise Arq Evidenc` (minuta de análise de arquivos evidência)
-  - Arquivos enviados **antes** desta convenção (sem o código no
-    nome) continuam mostrando o nome original, por compatibilidade.
-
-## Nomenclatura padronizada de arquivos + novo seletor de tipo de minuta
-
-**Todos** os arquivos enviados ao Drive agora seguem uma convenção
-única: iniciais do usuário + código do tipo + número do relatório +
-(quando fizer sentido) o nome original do arquivo:
-
-- Relatório de Extração/Coleta (PDF): `FS - Rel.CIA - REL-001`
-- Arquivos Evidência (Seção 6): `FS - ArqEv - REL-001 - msgstore.db.crypt14`
-- Arquivos Anexos ao Formulário (Seção 8): `FS - ArqAnex - REL-001 - foto_equip.jpg`
-- Relatório de Análise de Metadados (minuta): `FS - Rel.MDados - REL-001`
-- Relatório de Análise de Arquivos Evidência (minuta, renomeado de
-  "documental"): `FS - Rel.AnArqEv - REL-001`
-
-Nova função `buildStructuredFileName(tipo, relatorioNum, nomeOriginal)`
-centraliza essa regra — usada em todos os 5 pontos de upload.
-
-**Aba "Relatórios da Repartição" (Home)**: o botão único "Minutar
-Relatórios de Análises" virou um fluxo em 2 passos — primeiro um
-seletor ("Relatório de Metadados" / "Relatório de Análise de
-Arquivos Evidência"), e só depois de escolher o tipo é que o botão
-"📝 Minutar Relatório" aparece, abrindo o editor correto. Substitui o
-antigo `confirm()` do navegador, que era pouco claro.
 
 ## Card de IA cadastrada: dados de quem cadastrou + remoção
 

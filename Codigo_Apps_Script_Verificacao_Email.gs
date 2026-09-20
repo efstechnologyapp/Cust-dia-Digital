@@ -349,7 +349,10 @@ function doPost(e) {
         'pendente',
         data.folderNome || '',
         data.aiProvider || '',
-        data.aiApiKey || ''
+        data.aiApiKey || '',
+        '', '', '', // AiCadastradoPorNome / AiCadastradoPorCargo / AiCadastradoEm — só preenchidos ao configurar IA de fato
+        data.logoBase64 || '',
+        data.cabecalhoTexto || ''
       ]);
       return respond({ ok: true, rowIndex: sheet.getLastRow() });
     }
@@ -377,7 +380,9 @@ function doPost(e) {
           aiTemChave: !!(r[12] && String(r[12])),
           aiCadastradoPorNome: r[13] ? String(r[13]) : '',
           aiCadastradoPorCargo: r[14] ? String(r[14]) : '',
-          aiCadastradoEm: r[15] ? formatDate_(r[15]) : ''
+          aiCadastradoEm: r[15] ? formatDate_(r[15]) : '',
+          logoBase64: r[16] ? String(r[16]) : '',
+          cabecalhoTexto: r[17] ? String(r[17]) : ''
         });
       }
       pendentes.reverse();
@@ -420,6 +425,8 @@ function doPost(e) {
             sheet.getRange(i + 1, 15).setValue(data.usuarioCargo || '');
             sheet.getRange(i + 1, 16).setValue(new Date());
           }
+          if (data.logoBase64 !== undefined) sheet.getRange(i + 1, 17).setValue(data.logoBase64);
+          if (data.cabecalhoTexto !== undefined) sheet.getRange(i + 1, 18).setValue(data.cabecalhoTexto);
           atualizou = true;
         }
       }
@@ -441,7 +448,9 @@ function doPost(e) {
           data.aiApiKey || '',
           mexeuNaIa ? (data.usuarioNome || '') : '',
           mexeuNaIa ? (data.usuarioCargo || '') : '',
-          mexeuNaIa ? new Date() : ''
+          mexeuNaIa ? new Date() : '',
+          data.logoBase64 || '',
+          data.cabecalhoTexto || ''
         ]);
         atualizou = true;
       }
@@ -1075,7 +1084,7 @@ function getOrCreateReparticoesPendentesSheet() {
   var sheet = ss.getSheetByName('ReparticoesPendentes');
   if (!sheet) {
     sheet = ss.insertSheet('ReparticoesPendentes');
-    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status', 'FolderNome', 'AiProvider', 'AiApiKey', 'AiCadastradoPorNome', 'AiCadastradoPorCargo', 'AiCadastradoEm']);
+    sheet.appendRow(['Nome', 'Email', 'ClientId', 'FolderId', 'UsuarioNome', 'UsuarioCargo', 'UsuarioMatricula', 'UsuarioEmail', 'DataCadastro', 'Status', 'FolderNome', 'AiProvider', 'AiApiKey', 'AiCadastradoPorNome', 'AiCadastradoPorCargo', 'AiCadastradoEm', 'LogoBase64', 'CabecalhoTexto']);
     return sheet;
   }
   // garante as colunas mesmo em planilhas criadas antes desta atualização
@@ -1099,6 +1108,12 @@ function getOrCreateReparticoesPendentesSheet() {
   }
   if (sheet.getRange(1, 16).getValue() !== 'AiCadastradoEm') {
     sheet.getRange(1, 16).setValue('AiCadastradoEm');
+  }
+  if (sheet.getRange(1, 17).getValue() !== 'LogoBase64') {
+    sheet.getRange(1, 17).setValue('LogoBase64');
+  }
+  if (sheet.getRange(1, 18).getValue() !== 'CabecalhoTexto') {
+    sheet.getRange(1, 18).setValue('CabecalhoTexto');
   }
   return sheet;
 }
