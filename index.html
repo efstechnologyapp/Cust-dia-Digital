@@ -1683,6 +1683,46 @@
   </div>
 </div>
 
+<!-- ===== VIEW: Termo de Consentimento (gerado a partir da Seção 1) ===== -->
+<div id="consentFormView" style="position:fixed;inset:0;background:var(--bg);z-index:9998;overflow-y:auto;display:none;">
+  <div class="report-toolbar">
+    <button id="consentBackBtn">← Voltar</button>
+  </div>
+  <div style="max-width:760px;margin:0 auto;padding:0 16px 24px;">
+    <h2 class="history-title">Termo de Consentimento para Acesso a Dispositivo Eletrônico</h2>
+    <p class="history-sub">Preencha os dados do proprietário do dispositivo fonte. O documento abaixo é atualizado automaticamente.</p>
+
+    <div class="field">
+      <label>Nome completo do proprietário</label>
+      <input type="text" id="f_consent_nome" placeholder="Nome completo">
+    </div>
+    <div class="field">
+      <label>CPF</label>
+      <input type="text" id="f_consent_cpf" placeholder="Ex.: 000.000.000-00">
+    </div>
+    <div class="field">
+      <label>Endereço</label>
+      <input type="text" id="f_consent_endereco" placeholder="Endereço completo">
+    </div>
+    <div class="field">
+      <label>Aparelho</label>
+      <input type="text" id="f_consent_aparelho" placeholder="Ex.: Samsung Galaxy A54 5G">
+    </div>
+    <div class="field">
+      <label>Número(s) de linha(s) associada(s)</label>
+      <input type="text" id="f_consent_linha" placeholder="Ex.: (83) 9 9876-5432">
+    </div>
+
+    <div id="consentPreview" class="report-paper" style="margin-top:18px;"></div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button type="button" class="btn-primary" id="consentExportBtn">📤 Exportar informações para o formulário</button>
+      <button type="button" class="btn-attach" id="consentPrintBtn">🖨️ Imprimir/Salvar</button>
+    </div>
+    <div class="loc-status" id="consentFormStatus" style="margin-top:8px;"></div>
+  </div>
+</div>
+
 <!-- ===== MODAL: ajuda de campo (Client ID / ID da pasta), centralizado ===== -->
 <div class="centered-modal-overlay" id="fieldInfoOverlay">
   <div class="centered-modal-panel">
@@ -1915,16 +1955,61 @@
     </p>
     <div id="initChecklist">
       <label class="init-check-row">
-        <input type="checkbox" class="init-check" data-idx="1">
-        <span><b>1.</b> Certifique-se da existência da pasta de destino do arquivo no equipamento de destino;</span>
+        <input type="checkbox" class="init-check" id="initAutorizacaoCheck" data-idx="1" disabled onclick="return false;">
+        <span><b>1.</b> Junte o documento de consentimento do proprietário do dispositivo eletrônico ou de autorização judicial autorizando acesso ao dispositivo fonte;</span>
       </label>
+      <div id="autorizacaoBlock" style="margin:0 0 14px 27px;padding:10px 12px;background:#F7F9FB;border:1px solid var(--line);border-radius:8px;">
+        <div class="field" style="margin-bottom:10px;">
+          <label style="font-size:12.5px;">Tipo de autorização</label>
+          <select id="f_autorizacao_tipo">
+            <option value="" selected>Selecione…</option>
+            <option value="consentimento">Termo de consentimento do proprietário</option>
+            <option value="judicial">Decisão judicial</option>
+          </select>
+        </div>
+        <div class="hidden-view" id="autorizacaoJudicialFields">
+          <div class="field">
+            <label style="font-size:12.5px;">Juízo que proferiu a ordem</label>
+            <input type="text" id="f_autorizacao_juizo" placeholder="Ex.: Juízo da 20ª Vara Criminal da comarca de João Pessoa">
+          </div>
+          <div class="field">
+            <label style="font-size:12.5px;">Número do processo</label>
+            <input type="text" id="f_autorizacao_processo" placeholder="Ex.: 0000123-45.2026.8.15.0001">
+          </div>
+        </div>
+        <div class="hidden-view" id="autorizacaoConsentimentoFields">
+          <button type="button" class="btn-attach" id="openConsentFormBtn" style="margin-bottom:10px;">📝 Gerar termo de consentimento</button>
+        </div>
+        <div class="field" id="autorizacaoAnexoField" style="margin-bottom:0;">
+          <label style="font-size:12.5px;">Documento de autorização (assinado)</label>
+          <div class="file-attach-row">
+            <input type="file" accept="image/*,.pdf" id="autorizacaoDocInput" style="display:none;">
+            <button type="button" class="btn-attach" id="autorizacaoDocBtn">📎 Anexar documento</button>
+            <span class="file-attach-name" id="autorizacaoDocName"></span>
+          </div>
+          <div class="hint">Este documento será enviado ao Drive da repartição junto com os demais anexos, no momento do envio (Seção 9).</div>
+        </div>
+        <div class="loc-status" id="autorizacaoStatus" style="margin-top:6px;"></div>
+      </div>
       <label class="init-check-row">
-        <input type="checkbox" class="init-check" data-idx="2">
-        <span><b>2.</b> No equipamento/servidor fonte, localize o(s) arquivo(s) a se(rem) extraídos/transferidos ao equipamento de destino; e</span>
+        <input type="checkbox" class="init-check" id="initPastaDestinoCheck" data-idx="2" disabled onclick="return false;">
+        <span><b>2.</b> Certifique-se da existência da pasta de destino do arquivo no equipamento de destino;</span>
       </label>
+      <div style="margin:0 0 14px 27px;">
+        <div class="field" style="margin-bottom:0;">
+          <label style="font-size:12.5px;">Caminho da pasta de destino no PC</label>
+          <input type="text" id="f_pasta_destino_pc" placeholder="Ex.: C:\Extracao_WhatsApp\Processo_0000123-45">
+          <div class="hint">Cole aqui o caminho completo da pasta que vai receber o(s) arquivo(s) copiado(s) — precisa seguir um formato válido de caminho de PC (ex.: <code>C:\...</code> ou <code>/home/...</code>). Esse caminho será conferido depois, na Seção 6, contra o caminho completo de cada arquivo copiado.</div>
+        </div>
+        <div class="loc-status" id="pastaDestinoStatus" style="margin-top:6px;"></div>
+      </div>
       <label class="init-check-row">
         <input type="checkbox" class="init-check" data-idx="3">
-        <span><b>3.</b> Estabeleça a conexão entre o equipamento/servidor fonte e o equipamento de destino.</span>
+        <span><b>3.</b> Estabeleça a conexão entre o equipamento/servidor fonte e o equipamento de destino; e</span>
+      </label>
+      <label class="init-check-row">
+        <input type="checkbox" class="init-check" data-idx="4">
+        <span><b>4.</b> No equipamento/servidor fonte, localize o(s) arquivo(s) a se(rem) extraídos/transferidos ao equipamento de destino.</span>
       </label>
     </div>
     <div class="loc-status" id="initChecklistStatus" style="margin-top:8px;"></div>
@@ -2285,7 +2370,7 @@
     <div id="hashCompareBox" class="hash-check neutral">Adicione ao menos um arquivo nas Seções 4 e 6 para comparar automaticamente.</div>
     <div class="field">
       <label>Conclusão técnica</label>
-      <textarea id="f_conclusao">A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo móvel, e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.</textarea>
+      <textarea id="f_conclusao">A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo fonte (celular, notebook, pen drive, cloud, etc), e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.</textarea>
     </div>
   </section>
 
@@ -4396,6 +4481,7 @@ const FILE_CODE_LABELS = {
   'Rel.CIA': 'Rel de Ext, Id e Armaz',
   'ArqEv': 'Arqv Evidência',
   'ArqAnex': 'Arqv Anexo',
+  'AutorizAcesso': 'Autorização de Acesso',
   'Rel.MDados': 'Rel Metadados',
   'Rel.AnArqEv': 'Rel Análise Arq Evidenc'
 };
@@ -4432,8 +4518,9 @@ let allEvidenceLinks = []; // { arquivo, driveLink } de TODOS os arquivos evidê
 async function handleCustodyShare(){
   const entradasCop = copArquivosManager.getEntries().filter(e => e.file);
   const anexosParaEnviar = [
-    ...anexosFixosDefs.filter(def => anexosFixosFiles[def.key]).map(def => ({ file: anexosFixosFiles[def.key], label: def.label })),
-    ...anexoFiles.map((f, idx) => f ? { file: f, label: defaultAnexos[idx] || `Anexo extra ${idx + 1}` } : null).filter(Boolean)
+    ...(autorizacaoDocFile ? [{ file: autorizacaoDocFile, label: 'Documento de Autorização de Acesso', codigo: 'AutorizAcesso' }] : []),
+    ...anexosFixosDefs.filter(def => anexosFixosFiles[def.key]).map(def => ({ file: anexosFixosFiles[def.key], label: def.label, codigo: 'ArqAnex' })),
+    ...anexoFiles.map((f, idx) => f ? { file: f, label: defaultAnexos[idx] || `Anexo extra ${idx + 1}`, codigo: 'ArqAnex' } : null).filter(Boolean)
   ];
   const statusEl = $('shareRepStatus');
   const textareaEl = $('f_custodia_copia');
@@ -4475,7 +4562,7 @@ async function handleCustodyShare(){
       // por nome no relatório
       for(let idx = 0; idx < anexosParaEnviar.length; idx++){
         const item = anexosParaEnviar[idx];
-        const file = renameFileStructured(item.file, 'ArqAnex', $('f_relatorio_num').value);
+        const file = renameFileStructured(item.file, item.codigo || 'ArqAnex', $('f_relatorio_num').value);
         enviados++;
         statusEl.textContent = `Enviando anexo ${enviados} de ${total} (${file.name})…`;
         statusEl.className = 'loc-status';
@@ -4564,8 +4651,14 @@ updateDriveStatusUI(isDriveConnectedFlag());
 
 
 // ---------- seletores em cascata (ferramenta de hash) ----------
+// texto exato usado para identificar, na lista de ferramentas, que o
+// hash foi calculado automaticamente pelo próprio app (Web Crypto
+// API) — usado tanto para exibir a opção quanto para selecioná-la
+// sozinho depois do cálculo automático (ver anexação de arquivo)
+const FERRAMENTA_APP_AUTOMATICO = 'App Custódia Digital — cálculo automático (Web Crypto API do navegador)';
 const FERRAMENTA_APARELHO = {
   'Android': [
+    FERRAMENTA_APP_AUTOMATICO,
     'Termux — comando sha256sum',
     'MiXplorer — função Hash integrada',
     'Cx File Explorer — função Hash integrada',
@@ -4573,22 +4666,26 @@ const FERRAMENTA_APARELHO = {
     'Outro (especificar)'
   ],
   'iOS': [
+    FERRAMENTA_APP_AUTOMATICO,
     'iMazing — verificação de hash',
     'Outro (especificar)'
   ]
 };
 const FERRAMENTA_PC = {
   'Windows': [
+    FERRAMENTA_APP_AUTOMATICO,
     'PowerShell — Get-FileHash -Algorithm SHA256',
     'Prompt de Comando — certutil -hashfile (...) SHA256',
     '7-Zip — cálculo de CRC/SHA',
     'Outro (especificar)'
   ],
   'macOS': [
+    FERRAMENTA_APP_AUTOMATICO,
     'Terminal — shasum -a 256',
     'Outro (especificar)'
   ],
   'Linux': [
+    FERRAMENTA_APP_AUTOMATICO,
     'Terminal — sha256sum',
     'Outro (especificar)'
   ]
@@ -4703,6 +4800,12 @@ function createMultiFileManager(cfg){
       if(file.lastModified){ entry.data = formatDateTimeFromMs(file.lastModified); $(i.data).value = entry.data; }
       entry.hash = hex; $(i.hash).value = entry.hash;
       entry.horaHash = formatDateTimeFromMs(Date.now()); $(i.horaHash).value = entry.horaHash;
+      // o próprio app foi a "ferramenta" usada pra calcular esse hash
+      // (Web Crypto API do navegador) — registra isso automaticamente,
+      // em vez de deixar o usuário escolher manualmente algo que já
+      // aconteceu de fato dentro do próprio app
+      entry.ferramenta = FERRAMENTA_APP_AUTOMATICO;
+      restoreFerramenta(i, FERRAMENTA_APP_AUTOMATICO);
       statusEl.textContent = '✓ Hash calculado a partir do arquivo anexado.';
       statusEl.className = 'loc-status ok';
       cfg.onUpdate();
@@ -6634,9 +6737,14 @@ const sectionValidators = {
   5: () => {
     const faltando = [];
     const entradas = copArquivosManager.getEntries();
+    const pastaDestino = $('f_pasta_destino_pc').value.trim();
+    const normalizar = (s) => (s || '').trim().toLowerCase().replace(/[\\\/]+/g, '/').replace(/\/$/, '');
     entradas.forEach((e, idx) => {
       if(!e.file) faltando.push(`Arquivo ${idx + 1} — anexar o arquivo (transferido para o PC)`);
       if(!e.caminho.trim()) faltando.push(`Arquivo ${idx + 1} — Caminho completo no PC`);
+      else if(pastaDestino && !normalizar(e.caminho).startsWith(normalizar(pastaDestino))){
+        faltando.push(`Arquivo ${idx + 1} — divergência: o caminho da pasta de destino informado na Seção 1 ("${pastaDestino}") não corresponde ao início do caminho completo informado aqui ("${e.caminho}")`);
+      }
     });
     if(entradas.length !== origArquivosManager.getEntries().length){
       faltando.push(`A quantidade de arquivos aqui (${entradas.length}) deve ser igual à quantidade informada na Seção 4 (${origArquivosManager.getEntries().length})`);
@@ -6792,6 +6900,14 @@ $('f_origem_tipo').addEventListener('change', () => renderAnexos());
 
 // ---------- hash live compare (múltiplos arquivos, par a par) ----------
 function normHash(v){ return (v||'').trim().toLowerCase().replace(/\s+/g,''); }
+// os dois textos-padrão de conclusão da Seção 6 — trocados
+// automaticamente conforme o resultado da comparação de hash (ver
+// updateHashCompare), mas só enquanto o usuário não tiver
+// personalizado o texto manualmente (nesse caso, o texto digitado é
+// sempre respeitado e nunca sobrescrito)
+const CONCLUSAO_HASHES_IDENTICOS = 'A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo fonte (celular, notebook, pen drive, cloud, etc), e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.';
+const CONCLUSAO_HASHES_DIVERGENTES = 'A divergência entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo fonte (celular, notebook, pen drive, cloud, etc), e o valor de hash calculado no arquivo copiado no computador, indica que o conteúdo da cópia NÃO corresponde integralmente ao arquivo de origem, podendo ter ocorrido alteração, corrupção ou erro durante o processo de extração e transferência. Recomenda-se repetir o procedimento de cópia e realizar nova verificação de integridade antes de utilizar este material, ou descartá-lo caso o procedimento de coleta já tenha sido repetido.';
+
 function updateHashCompare(){
   const originais = origArquivosManager.getEntries();
   const copias = copArquivosManager.getEntries();
@@ -6839,9 +6955,15 @@ function updateHashCompare(){
   } else if(todasOk){
     box.className = 'hash-check ok';
     box.textContent = '✓ TODOS OS HASHES CONFEREM — integridade confirmada para todos os arquivos.';
+    if([CONCLUSAO_HASHES_IDENTICOS, CONCLUSAO_HASHES_DIVERGENTES, ''].includes($('f_conclusao').value)){
+      $('f_conclusao').value = CONCLUSAO_HASHES_IDENTICOS;
+    }
   } else {
     box.className = 'hash-check warn';
     box.textContent = '⚠ HÁ DIVERGÊNCIA em pelo menos um arquivo — a integridade da(s) cópia(s) NÃO pode ser confirmada. Revise os valores antes de gerar o relatório.';
+    if([CONCLUSAO_HASHES_IDENTICOS, CONCLUSAO_HASHES_DIVERGENTES, ''].includes($('f_conclusao').value)){
+      $('f_conclusao').value = CONCLUSAO_HASHES_DIVERGENTES;
+    }
   }
 }
 
@@ -7115,13 +7237,26 @@ function buildReport(){
       todasIdenticas = false;
     }
   }
-  let matchHtml;
-  if(!algumaVerificada){
-    matchHtml = `<span class="badge-match warn">NÃO VERIFICADO</span>`;
-  } else if(todasIdenticas){
-    matchHtml = `<span class="badge-match ok">HASHES IDÊNTICOS</span>`;
-  } else {
-    matchHtml = `<span class="badge-match warn">HASHES DIVERGENTES</span>`;
+  // resultado individual por arquivo — sem isso, com mais de um
+  // arquivo, o resumo geral ("divergente") não deixava claro QUAL
+  // arquivo específico não bateu, escondendo que os demais estavam OK
+  function hashResultTexto(hashOrig, hashCop){
+    const a = normHash(hashOrig), b = normHash(hashCop);
+    if(!a || !b) return 'NÃO VERIFICADO';
+    return a === b ? 'HASHES IDÊNTICOS' : 'HASHES DIVERGENTES';
+  }
+  // versão em negrito e colorida (verde/vermelho) do mesmo texto,
+  // usada na linha de resumo geral — mais fácil de bater o olho e
+  // identificar rapidamente qual arquivo teve problema
+  function hashResultColorido(hashOrig, hashCop){
+    const texto = hashResultTexto(hashOrig, hashCop);
+    const cor = texto === 'HASHES IDÊNTICOS' ? '#1E7A34' : (texto === 'HASHES DIVERGENTES' ? '#B23B3B' : 'inherit');
+    return `<b style="color:${cor};">${texto}</b>`;
+  }
+  function hashBadgeIndividual(hashOrig, hashCop){
+    const texto = hashResultTexto(hashOrig, hashCop);
+    const classe = texto === 'HASHES IDÊNTICOS' ? 'ok' : 'warn';
+    return `<span class="badge-match ${classe}">${texto}</span>`;
   }
 
   const nomeAssinatura = v('f_assinatura_nome') || (currentUser && currentUser.nome) || v('f_responsavel').split(',')[0] || '';
@@ -7164,9 +7299,25 @@ function buildReport(){
     `;
   }
 
-  const html = `
+function buildAutorizacaoNarrativa(){
+  const tipo = $('f_autorizacao_tipo').value;
+  if(!tipo) return '';
+  let clausula;
+  if(tipo === 'judicial'){
+    const juizo = esc($('f_autorizacao_juizo').value.trim() || '[juízo não informado]');
+    const processo = esc($('f_autorizacao_processo').value.trim() || '[processo não informado]');
+    clausula = `decisão proferida pelo ${juizo} nos autos do processo n.º ${processo}`;
+  } else {
+    const nome = esc($('f_proprietario').value.trim() || '[proprietário não informado]');
+    clausula = `consentimento do proprietário do dispositivo, ${nome},`;
+  }
+  return `<p class="body-text">Nesta data e local informados automaticamente ao final do relatório, mediante ${clausula} acessei o dispositivo fonte conforme dados a seguir para extrair os arquivos necessários à apuração de fatos sob apuração por este órgão.</p>`;
+}
+
+const html = `
     ${buildInstitutionalHeaderHtml(repConectada)}
-    <h1>RELATÓRIO TÉCNICO DE COLETA, IDENTIFICAÇÃO E RASTREABILIDADE DE ARMAZENAMENTO DE ARQUIVOS DIGITAIS</h1>
+    <h1>RELATÓRIO TÉCNICO DE COLETA, IDENTIFICAÇÃO E RASTREABILIDADE DE ARMAZENAMENTO DE ARQUIVOS DIGITAIS<sup>*</sup></h1>
+    ${buildAutorizacaoNarrativa()}
 
     <h2>1. Identificação Geral</h2>
     <table class="rtable">
@@ -7231,12 +7382,32 @@ function buildReport(){
     ${copEntradas.length > 1 ? `<table class="rtable">${row('Hash da lista de hashes (arquivos copiados)', v('f_hash_lista_copia'), true)}</table>` : ''}
 
     <h2>6. Análise de Integridade - avaliação de identidade entre os arquivos da fonte e dos destinos (PC e Drive)</h2>
+    ${Array.from({ length: maxArquivos }).map((_, idx) => {
+      const o = origEntradas[idx] || {};
+      const c = copEntradas[idx] || {};
+      return `
+        <table class="rtable" style="margin-bottom:14px;">
+          <tr><td class="lbl" colspan="2" style="width:100%;">Arquivo ${idx + 1}</td></tr>
+          <tr>
+            <td style="width:50%;"><b>Original:</b> ${esc(o.nome || '—')}<br><b>Caminho:</b> ${esc(o.caminho || '—')}<br><b>Última modificação:</b> ${esc(o.data || '—')}</td>
+            <td style="width:50%;"><b>Cópia:</b> ${esc(c.nome || '—')}<br><b>Caminho:</b> ${esc(c.caminho || '—')}<br><b>Última modificação:</b> ${esc(c.data || '—')}</td>
+          </tr>
+          <tr>
+            <td class="mono" style="width:50%;">${esc(o.hash || '—')}</td>
+            <td class="mono" style="width:50%;">${esc(c.hash || '—')}</td>
+          </tr>
+          <tr><td colspan="2" style="width:100%;">${hashBadgeIndividual(o.hash, c.hash)}</td></tr>
+        </table>
+      `;
+    }).join('')}
     <table class="rtable">
-      ${Array.from({ length: maxArquivos }).map((_, idx) => {
-        const nome = (origEntradas[idx] || {}).nome || (copEntradas[idx] || {}).nome || `Arquivo ${idx + 1}`;
-        return row(`Hash original × cópia — ${nome}`, `${(origEntradas[idx] || {}).hash || '—'} × ${(copEntradas[idx] || {}).hash || '—'}`, true);
-      }).join('')}
-      <tr><td class="lbl">Resultado da comparação</td><td>${matchHtml}</td></tr>
+      <tr><td class="lbl">Resultado geral da comparação</td><td>
+        ${Array.from({ length: maxArquivos }).map((_, idx) => {
+          const o = origEntradas[idx] || {};
+          const c = copEntradas[idx] || {};
+          return `Arquivo ${idx + 1} — ${hashResultColorido(o.hash, c.hash)}`;
+        }).join('<br>')}
+      </td></tr>
     </table>
     <p class="body-text">${esc(v('f_conclusao'))}</p>
 
@@ -7268,7 +7439,7 @@ function buildReport(){
         <table id="digitalSignatureBlock" class="rtable" style="flex:0 1 auto;max-width:120px;font-size:5.5px;"></table>
         <div id="reportQrCode" style="flex:0 0 40px;text-align:center;"></div>
       </div>
-      <div style="text-align:center;font-size:6px;color:var(--muted,#8A93A0);margin-top:3px;">Construído com o App Custódia Digital ®</div>
+      <div style="text-align:center;font-size:9.5px;color:var(--muted,#8A93A0);margin-top:5px;">* Este relatório foi preenchido com auxílio do App Custódia Digital ®</div>
     </div>
     ${custodiaProprietarioHtml}
   `;
@@ -7494,10 +7665,137 @@ $('historyBackBtn').addEventListener('click', () => {
 });
 
 // ---------- conclusão da tarefa: histórico + Google Drive + volta para home ----------
+// ---------- Seção 1: autorização de acesso (consentimento/judicial) ----------
+let autorizacaoDocFile = null; // documento assinado anexado, enviado ao Drive junto com os demais anexos na Seção 9
+
+// ---------- Seção 1, item 2: caminho da pasta de destino no PC ----------
+// aceita apenas formatos reconhecíveis de caminho de PC — Windows
+// (letra de unidade + dois-pontos + barra) ou Unix/macOS/Linux (barra
+// inicial) — para impedir qualquer texto digitado aleatoriamente
+function isValidPcFolderPath(str){
+  if(!str) return false;
+  const s = str.trim();
+  if(/^[a-zA-Z]:[\\\/].+/.test(s)) return true;
+  if(/^\/.+/.test(s)) return true;
+  return false;
+}
+function updatePastaDestinoCheckbox(){
+  const val = $('f_pasta_destino_pc').value;
+  const valido = isValidPcFolderPath(val);
+  $('initPastaDestinoCheck').checked = valido;
+  const statusEl = $('pastaDestinoStatus');
+  if(val.trim() && !valido){
+    statusEl.textContent = 'Formato de caminho inválido — use um padrão de caminho de PC (ex.: C:\\Pasta\\Subpasta ou /home/usuario/pasta).';
+    statusEl.className = 'loc-status err';
+  } else {
+    statusEl.textContent = '';
+  }
+}
+$('f_pasta_destino_pc').addEventListener('input', updatePastaDestinoCheckbox);
+
+function updateAutorizacaoCheckbox(){
+  const tipo = $('f_autorizacao_tipo').value;
+  let completo = false;
+  if(tipo === 'consentimento'){
+    completo = !!autorizacaoDocFile;
+  } else if(tipo === 'judicial'){
+    completo = !!($('f_autorizacao_juizo').value.trim() && $('f_autorizacao_processo').value.trim() && autorizacaoDocFile);
+  }
+  $('initAutorizacaoCheck').checked = completo;
+}
+
+$('f_autorizacao_tipo').addEventListener('change', () => {
+  const tipo = $('f_autorizacao_tipo').value;
+  $('autorizacaoJudicialFields').classList.toggle('hidden-view', tipo !== 'judicial');
+  $('autorizacaoConsentimentoFields').classList.toggle('hidden-view', tipo !== 'consentimento');
+  updateAutorizacaoCheckbox();
+});
+$('f_autorizacao_juizo').addEventListener('input', updateAutorizacaoCheckbox);
+$('f_autorizacao_processo').addEventListener('input', updateAutorizacaoCheckbox);
+
+$('autorizacaoDocBtn').addEventListener('click', () => $('autorizacaoDocInput').click());
+$('autorizacaoDocInput').addEventListener('change', () => {
+  const file = $('autorizacaoDocInput').files[0];
+  if(!file) return;
+  autorizacaoDocFile = file;
+  $('autorizacaoDocName').textContent = file.name;
+  $('autorizacaoStatus').textContent = '✓ Documento anexado. Será enviado ao Drive junto com os demais anexos, na Seção 9.';
+  $('autorizacaoStatus').className = 'loc-status ok';
+  updateAutorizacaoCheckbox();
+});
+
+
+// ---------- Termo de Consentimento (gerado a partir da Seção 1) ----------
+function buildConsentText(){
+  const rep = getSelectedReparticao();
+  const autorizado = rep ? rep.nome : '[repartição não conectada]';
+  const local = $('f_local_coleta').value.trim() || '[a informar]';
+  const hoje = new Date();
+  const dataStr = `${pad2(hoje.getDate())}/${pad2(hoje.getMonth()+1)}/${hoje.getFullYear()}`;
+  return `
+    <p class="body-text" style="text-align:center;"><b>TERMO DE CONSENTIMENTO PARA ACESSO A DISPOSITIVO ELETRÔNICO</b></p>
+    <p class="body-text">Eu, <b>${esc($('f_consent_nome').value || '[nome completo]')}</b>, portador(a) do CPF nº <b>${esc($('f_consent_cpf').value || '[CPF]')}</b>, residente em <b>${esc($('f_consent_endereco').value || '[endereço]')}</b>, na qualidade de proprietário(a) do dispositivo <b>${esc($('f_consent_aparelho').value || '[aparelho]')}</b>, linha(s) associada(s) <b>${esc($('f_consent_linha').value || '[número(s) de linha(s)]')}</b>, autorizo livre e espontaneamente <b>${esc(autorizado)}</b> a acessar o referido dispositivo e a coletar/extrair os arquivos necessários à apuração de fato(s) sob apuração por este órgão.</p>
+    <p class="body-text">${esc(local)}, ${dataStr}.</p>
+    <p class="body-text" style="margin-top:40px;">_________________________________________<br>Assinatura do(a) proprietário(a)</p>
+  `;
+}
+function updateConsentPreview(){ $('consentPreview').innerHTML = buildConsentText(); }
+['f_consent_nome','f_consent_cpf','f_consent_endereco','f_consent_aparelho','f_consent_linha'].forEach(id => {
+  $(id).addEventListener('input', updateConsentPreview);
+});
+$('openConsentFormBtn').addEventListener('click', () => {
+  updateConsentPreview();
+  $('consentFormView').style.display = 'block';
+  window.scrollTo(0, 0);
+});
+$('consentBackBtn').addEventListener('click', () => { $('consentFormView').style.display = 'none'; });
+$('consentExportBtn').addEventListener('click', () => {
+  if($('f_consent_nome').value.trim()) $('f_proprietario').value = $('f_consent_nome').value.trim();
+  if($('f_consent_aparelho').value.trim()) $('f_aparelho').value = $('f_consent_aparelho').value.trim();
+  if($('f_consent_linha').value.trim()) $('f_linha').value = $('f_consent_linha').value.trim();
+  $('consentFormStatus').textContent = '✓ Informações exportadas para os campos correspondentes do formulário.';
+  $('consentFormStatus').className = 'loc-status ok';
+});
+$('consentPrintBtn').addEventListener('click', async () => {
+  updateConsentPreview();
+  const statusEl = $('consentFormStatus');
+  if(window.html2pdf){
+    try {
+      statusEl.textContent = 'Gerando PDF…';
+      statusEl.className = 'loc-status';
+      await html2pdf().set({
+        margin: 10,
+        filename: buildStructuredFileName('TermoConsent', $('f_relatorio_num').value) + '.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from($('consentPreview')).save();
+      statusEl.textContent = '✓ PDF gerado — agora imprima/assine e depois anexe o documento assinado (Seção 1).';
+      statusEl.className = 'loc-status ok';
+    } catch(err){
+      statusEl.textContent = 'Não foi possível gerar o PDF: ' + err.message;
+      statusEl.className = 'loc-status err';
+    }
+  } else {
+    window.print();
+  }
+});
+
+
 function resetFormFields(){
   document.querySelectorAll('#formView input[type="text"], #formView input[type="hidden"], #formView textarea').forEach(el => { el.value = ''; });
   document.querySelectorAll('.init-check').forEach(c => { c.checked = false; });
   $('initChecklistStatus').textContent = '';
+  $('pastaDestinoStatus').textContent = '';
+  $('f_autorizacao_tipo').value = '';
+  $('autorizacaoJudicialFields').classList.add('hidden-view');
+  $('autorizacaoConsentimentoFields').classList.add('hidden-view');
+  autorizacaoDocFile = null;
+  $('autorizacaoDocName').textContent = '';
+  $('autorizacaoStatus').textContent = '';
+  updateAutorizacaoCheckbox();
+  document.querySelectorAll('#consentFormView input[type="text"]').forEach(el => { el.value = ''; });
+  $('consentFormStatus').textContent = '';
+  $('consentFormView').style.display = 'none';
   origArquivosManager.reset();
   copArquivosManager.reset();
   lastEvidenceDriveLink = null;
@@ -7525,7 +7823,7 @@ function resetFormFields(){
   $('f_alteracoes_tipo').value = 'nenhuma';
   $('f_alteracoes_descricao').classList.add('hidden-view');
   $('f_proc_descricao').value = transferMethodDescriptions.usb;
-  $('f_conclusao').value = 'A coincidência integral entre o valor de hash SHA-256 calculado no arquivo original, ainda armazenado no dispositivo móvel, e o valor de hash calculado no arquivo copiado no computador, demonstra matematicamente que a cópia constitui reprodução bit a bit idêntica ao arquivo de origem, sem qualquer alteração de conteúdo durante o processo de extração e transferência.';
+  $('f_conclusao').value = CONCLUSAO_HASHES_IDENTICOS;
 
   if(currentUser){
     const cargoTxt = currentUser.cargo ? `, ${currentUser.cargo}` : '';

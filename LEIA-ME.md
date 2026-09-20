@@ -1,5 +1,211 @@
 # Custódia Digital — App (PWA)
 
+## Seção 1, item 2: caminho da pasta de destino + validação cruzada com a Seção 6
+
+Três pedidos do usuário, implementados juntos:
+
+- **Novo campo** no item 2 do checklist: "Caminho da pasta de
+  destino no PC" — onde o usuário cola o caminho da pasta que vai
+  receber os arquivos copiados.
+- **Formato obrigatório**: o campo só aceita padrões reconhecíveis
+  de caminho de PC — Windows (`C:\...` ou `C:/...`) ou Unix/macOS/
+  Linux (`/...`) — qualquer texto fora desse padrão (ex.: "pasta
+  qualquer") é rejeitado. Testado com 10 casos (válidos e
+  inválidos), todos corretos.
+- **Checkbox do item 2 também nunca pode ser marcado manualmente** —
+  mesmo padrão do item 1 — só marca sozinho quando o caminho digitado
+  é válido nesse formato.
+- **Validação cruzada com a Seção 6** (Checagem de Integridade): ao
+  tentar avançar dessa seção, cada arquivo copiado tem seu "Caminho
+  completo no PC" comparado com a pasta de destino declarada na
+  Seção 1 — se não bater (o caminho completo não começa pela pasta
+  declarada), a seção não avança, com mensagem específica de
+  divergência por arquivo. Comparação normalizada (barra/contrabarra,
+  maiúsculas/minúsculas) para evitar falso-positivo por diferença de
+  formatação. Testado: bloqueia com caminho divergente, libera assim
+  que corrigido.
+
+## Novo item 1 do checklist da Seção 1: autorização de acesso ao dispositivo
+
+Funcionalidade grande, pedida pelo usuário. Antes da Seção 1
+(Inicialização do Procedimento) permitir avançar, agora exige juntar
+o documento que autoriza o acesso ao dispositivo fonte — item "1."
+do checklist, com os demais itens renumerados para 2, 3 e 4.
+
+**Ajuste fino**: os itens 3 e 4 (que já existiam antes) tiveram suas
+posições trocadas — "Estabeleça a conexão..." passou a ser o item 3,
+e "No equipamento/servidor fonte, localize..." passou a ser o item
+4, com o "; e" reposicionado corretamente no penúltimo item.
+
+**Como funciona:**
+- Seletor: "Termo de consentimento do proprietário" ou "Decisão
+  judicial".
+- Se **decisão judicial**: abrem campos para informar o Juízo que
+  proferiu a ordem e o número do processo.
+- Se **termo de consentimento**: aparece um botão "📝 Gerar termo de
+  consentimento" (ver seção seguinte).
+- Em ambos os casos, um botão "📎 Anexar documento" para juntar o
+  documento já assinado/a decisão judicial.
+- **O checkbox do item 1 nunca pode ser marcado manualmente** —
+  tentar clicar nele diretamente não faz efeito (`disabled` +
+  `onclick` bloqueado). Ele só marca sozinho quando todas as
+  condições daquele tipo de autorização estiverem completas
+  (seleção + campos do judicial, se for o caso + documento anexado).
+  Testado nos três estágios intermediários e no estágio final.
+- O documento anexado aqui é enviado ao Drive da repartição junto
+  com os demais anexos, no momento do envio da Seção 9 — com
+  nomenclatura própria e distinta dos demais anexos:
+  `FS - AutorizAcesso - {relatorioNum} - {nome original}`. Novo
+  rótulo "Autorização de Acesso" nos cards de relatório (histórico e
+  buscas), para diferenciar de um anexo genérico.
+
+## Gerador de Termo de Consentimento
+
+Quando o tipo de autorização selecionado é "Termo de consentimento",
+o botão "📝 Gerar termo de consentimento" abre uma tela dedicada
+(`consentFormView`) com um formulário simples para o proprietário do
+dispositivo fonte assinar:
+
+- Campos: nome completo, CPF, endereço, aparelho e número(s) de
+  linha(s) associada(s).
+- Uma prévia do documento é atualizada ao vivo, conforme os campos
+  são preenchidos.
+- **Autorizado**: preenchido automaticamente com o nome da
+  repartição conectada (não é um campo editável — a autorização é
+  sempre concedida à repartição).
+- **Local e data**: preenchidos automaticamente ao final do
+  documento — data de hoje sempre; local a partir do campo "Local da
+  coleta" da Seção 2, quando já preenchido (na prática, como esse
+  campo só é preenchido depois da Seção 1, geralmente aparecerá como
+  "[a informar]" até o usuário voltar e preencher).
+- Botão **"📤 Exportar informações para o formulário"**: copia nome
+  → Proprietário (Seção 2), aparelho → Aparelho e linha → Linha
+  (Seção 3) — só os campos que têm correspondência direta no
+  formulário principal (CPF e endereço ficam só no termo, não têm
+  campo equivalente no formulário). Testado e confirmado.
+- Botão **"🖨️ Imprimir/Salvar"**: gera um PDF do termo via
+  html2pdf, com nomenclatura própria (`TermoConsent`).
+
+## Texto preliminar no relatório (antes da Seção 1)
+
+O relatório final (PDF) agora abre com um parágrafo narrativo, fora
+do esquema de tabelas/seções, logo após o título e antes de "1.
+Identificação Geral":
+
+> "Nesta data e local informados automaticamente ao final do
+> relatório, mediante [consentimento do proprietário do dispositivo,
+> {nome}]/[decisão proferida pelo {juízo} nos autos do processo n.º
+> {processo}], acessei o dispositivo fonte conforme dados a seguir
+> para extrair os arquivos necessários à apuração de fatos sob
+> apuração por este órgão."
+
+A cláusula entre colchetes muda automaticamente conforme o tipo de
+autorização selecionado na Seção 1 — testados os dois cenários
+(consentimento e judicial), cada um gerando o texto certo com os
+dados reais preenchidos. Confirmado visualmente com captura de tela
+do relatório completo.
+
+## Legenda do rodapé virou nota de rodapé de verdade
+
+Pedido do usuário: a legenda "Custódia Digital" no rodapé do
+relatório estava com fonte quase invisível (6px) e "solta" — sem
+nenhuma referência no corpo do documento explicando por que estava
+ali.
+
+- Fonte aumentada de 6px para 9.5px, mais proporcional ao resto do
+  documento.
+- Adicionado um **"\*"** logo após o título do relatório
+  ("...ARQUIVOS DIGITAIS\*"), e o texto do rodapé reescrito no
+  formato de nota de rodapé de verdade: "\* Este relatório foi
+  preenchido com auxílio do App Custódia Digital ®" — agora há uma
+  referência clara conectando o marcador no título à explicação no
+  rodapé.
+
+## Reorganização da Seção 6 do relatório (Análise de Integridade)
+
+Pedido do usuário: facilitar a leitura da comparação entre arquivo
+original e cópia, que antes vinha tudo espremido numa única coluna
+(`hash1 × hash2`, texto corrido).
+
+**Novo layout, por arquivo comparado:**
+- Uma linha com o nome do arquivo, como título da mini-tabela
+- Uma linha logo abaixo, em duas colunas lado a lado: nome + data/hora
+  da última modificação do **original** (coluna 1) e da **cópia**
+  (coluna 2)
+- Uma linha abaixo dessa, também em duas colunas correspondentes:
+  hash do **original** (coluna 1) e da **cópia** (coluna 2)
+
+O resultado geral da comparação ("Hashes idênticos"/"divergentes")
+continua como um resumo único, abaixo de todos os arquivos. Testado
+visualmente — captura de tela conferida, inclusive com 2 arquivos
+(um idêntico, um divergente) para confirmar que a estrutura se repete
+corretamente por arquivo.
+
+**Ajuste fino**: o título de cada mini-tabela deixou de ser o nome do
+arquivo e passou a ser "Arquivo 1", "Arquivo 2"... — igual à
+numeração já usada nas Seções 3 e 5 do formulário.
+
+**Correção importante**: com mais de um arquivo, o "Resultado da
+comparação" só mostrava um veredito único e geral — se um arquivo
+batesse e outro não, o relatório só dizia "divergente", sem deixar
+claro qual arquivo específico tinha o problema (escondendo que os
+demais estavam corretos). Corrigido em duas frentes: cada bloco
+"Arquivo N" traz seu **próprio resultado individual** logo abaixo, e
+a linha "Resultado geral da comparação" foi reescrita para listar
+cada arquivo por linha (ex.: "Arquivo 1 — HASHES IDÊNTICOS / Arquivo 2
+— HASHES DIVERGENTES"), em vez de um badge único e genérico. Testado
+com 2 arquivos (um idêntico, um divergente) — confirma exibir os dois
+resultados corretamente, tanto no bloco individual quanto no resumo.
+
+**Mais dois ajustes na Seção 6**: acima da "Última modificação" (nas
+duas colunas), acrescentado o campo "Caminho" — mostrando o caminho
+no dispositivo de origem (coluna Original) e o caminho completo no PC
+(coluna Cópia), cada um com seu próprio dado. E na linha "Resultado
+geral da comparação", as conclusões agora aparecem em **negrito e
+coloridas** — verde para "HASHES IDÊNTICOS", vermelho para "HASHES
+DIVERGENTES" — confirmado via inspeção de estilo computado
+(rgb(30,122,52) e rgb(178,59,59), peso 700).
+
+## Preenchimento automático da "ferramenta usada para gerar o hash"
+
+Lacuna identificada a partir de uma dúvida do usuário sobre o campo
+"Ferramenta usada para gerar o hash" (Seções 3 e 5): quando o hash é
+calculado automaticamente pelo próprio app (anexando o arquivo, via
+Web Crypto API do navegador), o campo de ferramenta ficava em branco
+— obrigando o usuário a escolher manualmente algo na lista, mesmo o
+app tendo sido a própria ferramenta usada no cálculo.
+
+**Correção**: nova opção "App Custódia Digital — cálculo automático
+(Web Crypto API do navegador)", disponível em todos os sistemas
+(Android, iOS, Windows, macOS, Linux) das duas listas de ferramenta.
+Ao anexar um arquivo e o hash ser calculado automaticamente, essa
+opção agora é selecionada sozinha — tanto o dado interno quanto o
+próprio seletor na tela refletem isso, e a informação aparece
+corretamente no relatório final. Preencher manualmente continua
+funcionando normalmente para quem prefira usar outro
+terminal/aplicativo.
+
+## Legenda de conclusão da Seção 6: novo termo + texto pra divergência
+
+Pedido do usuário, na legenda que explica a conclusão ao final da
+Seção 6:
+
+- Substituído "dispositivo móvel" por "dispositivo fonte (celular,
+  notebook, pen drive, cloud, etc)" — mais preciso, já que a origem
+  nem sempre é um celular.
+- Acrescentado um **segundo texto de conclusão**, específico para o
+  caso de hashes divergentes (antes só existia a redação para o caso
+  de hashes idênticos) — explica que a cópia não corresponde
+  integralmente ao original e recomenda repetir o procedimento, ou
+  descartar o material caso o procedimento de coleta já tenha sido
+  repetido (complemento pedido pelo usuário depois).
+- O texto exibido no campo **troca sozinho** entre os dois, conforme
+  o resultado real da comparação (idênticos/divergentes) muda
+  enquanto o usuário preenche o formulário — mas só enquanto o campo
+  ainda tiver um dos dois textos padrão. Se o usuário personalizar a
+  conclusão manualmente, a troca automática para de acontecer e o
+  texto digitado nunca é sobrescrito (testado e confirmado).
+
 ## Ícones de ajuda também no modal "Editar repartição" + passo a passo do Gemini
 
 - Os mesmos ícones "ⓘ" (Client ID e ID da pasta), no mesmo modal
