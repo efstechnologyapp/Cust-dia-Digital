@@ -413,9 +413,18 @@ function doPost(e) {
       var rows = sheet.getDataRange().getValues();
       var atualizou = false;
       var mexeuNaIa = data.aiProvider !== undefined || data.aiApiKey;
+      // localiza a linha por rowIndex quando informado (necessário
+      // quando o próprio Client ID está sendo alterado — ex.: um
+      // administrador completando o cadastro de uma repartição que
+      // nasceu sem essa informação, com um valor temporário); sem
+      // rowIndex, cai no comportamento antigo de buscar pelo Client ID
+      var rowIndexInformado = Number(data.rowIndex);
+      var linhaAlvo = (rowIndexInformado && rowIndexInformado >= 2) ? rowIndexInformado - 1 : -1;
       for (var i = 1; i < rows.length; i++) {
-        if (String(rows[i][2]) === clientId) {
+        var ehLinhaCerta = linhaAlvo >= 0 ? (i === linhaAlvo) : (String(rows[i][2]) === clientId);
+        if (ehLinhaCerta) {
           if (data.nome) sheet.getRange(i + 1, 1).setValue(data.nome);
+          if (linhaAlvo >= 0) sheet.getRange(i + 1, 3).setValue(clientId); // permite trocar o próprio Client ID
           if (data.folderId) sheet.getRange(i + 1, 4).setValue(data.folderId);
           if (data.folderNome !== undefined) sheet.getRange(i + 1, 11).setValue(data.folderNome);
           if (data.aiProvider !== undefined) sheet.getRange(i + 1, 12).setValue(data.aiProvider);

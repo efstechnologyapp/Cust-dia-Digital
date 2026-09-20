@@ -299,6 +299,44 @@
   .hash-check.neutral{ background: #F1F3F6; color: var(--muted); font-weight:500; }
 
   .anexos-list{ margin-bottom: 10px; }
+  .field-info-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px;
+    border-radius:50%;
+    border: 1px solid var(--navy);
+    background:#fff;
+    color: var(--navy);
+    font-size:10.5px;
+    font-weight:700;
+    line-height:1;
+    cursor:pointer;
+    vertical-align:middle;
+    margin-left:4px;
+    padding:0;
+  }
+  .field-info-btn:hover{ background: var(--navy); color:#fff; }
+
+  /* ---------- modal centralizado (ex.: ajuda de campo) ---------- */
+  .centered-modal-overlay{
+    position: fixed; inset:0;
+    background: rgba(15,20,28,.5);
+    display:none;
+    z-index: 400;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+  }
+  .centered-modal-overlay.open{ display:flex; }
+  .centered-modal-panel{
+    background:#fff;
+    border-radius: 14px;
+    max-width: 380px;
+    width:100%;
+    max-height: 82vh;
+    overflow-y:auto;
+    padding: 22px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.28);
+  }
   .pending-badge{
     display:inline-flex; align-items:center; justify-content:center;
     min-width:14px; height:14px; padding:0 3px;
@@ -1211,12 +1249,20 @@
           <input type="email" id="regNewRepEmail" placeholder="Ex.: repartição@gmail.com">
         </div>
         <div class="field">
-          <label style="font-size:12px;">Client ID (OAuth)</label>
+          <label style="font-size:12px;">Client ID (OAuth) <button type="button" class="field-info-btn" data-info="clientId">ⓘ</button></label>
           <input type="text" id="regNewRepClientId" placeholder="xxxxxxxx.apps.googleusercontent.com">
+          <label class="init-check-row" style="font-size:11.5px;margin-top:6px;">
+            <input type="checkbox" id="regNewRepClientIdAdm">
+            Deixar a cargo do administrador do sistema
+          </label>
         </div>
         <div class="field">
-          <label style="font-size:12px;">ID da pasta compartilhada no Drive</label>
+          <label style="font-size:12px;">ID da pasta compartilhada no Drive <button type="button" class="field-info-btn" data-info="folderId">ⓘ</button></label>
           <input type="text" id="regNewRepFolderId" placeholder="Ex.: 1A2b3C4d5E...">
+          <label class="init-check-row" style="font-size:11.5px;margin-top:6px;">
+            <input type="checkbox" id="regNewRepFolderIdAdm">
+            Deixar a cargo do administrador do sistema
+          </label>
         </div>
         <div class="field">
           <label style="font-size:12px;">Nome dessa pasta no Drive</label>
@@ -1634,6 +1680,17 @@
     <h3 style="font-family:var(--serif);font-size:16px;color:var(--navy-dark);margin:0 0 4px;" id="versionDetailTitle"></h3>
     <div class="hint" style="margin:0 0 14px;" id="versionDetailData"></div>
     <div id="versionDetailContent" style="font-size:9px;line-height:1.5;"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: ajuda de campo (Client ID / ID da pasta), centralizado ===== -->
+<div class="centered-modal-overlay" id="fieldInfoOverlay">
+  <div class="centered-modal-panel">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <h3 style="font-family:var(--serif);font-size:16.5px;color:var(--navy-dark);margin:0;" id="fieldInfoTitle"></h3>
+      <button class="sidebar-close" id="closeFieldInfoBtn" style="margin:0;">✕</button>
+    </div>
+    <div style="font-size:12.5px;line-height:1.6;color:var(--ink);" id="fieldInfoContent"></div>
   </div>
 </div>
 
@@ -3092,6 +3149,7 @@ $('saveReparticaoEditBtn').addEventListener('click', async () => {
     // automaticamente, sem precisar configurar nada localmente
     await callAppsScript({
       action: 'update_reparticao_central', clientId, nome, folderId, folderNome, aiProvider, aiApiKey, cabecalhoTexto,
+      rowIndex: list[idx].centralRowIndex || undefined,
       logoBase64: logoAlterado ? logoBase64 : undefined,
       usuarioNome: currentUser ? currentUser.nome : '', usuarioCargo: currentUser ? currentUser.cargo : ''
     });
@@ -5380,19 +5438,81 @@ $('regReparticao').addEventListener('change', () => {
   }
 });
 
+// ---------- ajuda de campo (Client ID / ID da pasta) — modal centralizado ----------
+const FIELD_INFO_CONTENT = {
+  clientId: {
+    titulo: 'Client ID (OAuth)',
+    html: `
+      <p style="margin:0 0 10px;">É a credencial que autoriza o login com Google/Drive dessa repartição. Passo a passo resumido, no <a href="https://console.cloud.google.com" target="_blank" rel="noopener">Google Cloud Console</a>:</p>
+      <ol style="margin:0 0 12px;padding-left:18px;">
+        <li>Faça login com o e-mail que vai administrar essa repartição e crie um projeto novo.</li>
+        <li>Ative a "Google Drive API" (busque pelo nome na barra de busca do topo).</li>
+        <li>Configure a "Tela de consentimento OAuth" (tipo "Externo").</li>
+        <li>Vá em "Credenciais" → "+ Criar credenciais" → "ID do cliente OAuth" → tipo "Aplicativo da Web".</li>
+        <li>Em "Origens JavaScript autorizadas", adicione exatamente:<br><code style="font-size:11px;">https://efstechnologyapp.github.io</code></li>
+        <li>Copie o Client ID gerado usando o botão de copiar ao lado do campo.</li>
+      </ol>
+      <p style="margin:0;padding:10px;background:#F7F9FB;border-radius:8px;border:1px solid var(--line);">Se preferir não fazer isso agora, marque abaixo do campo <b>"Deixar a cargo do administrador do sistema"</b> — seu cadastro segue normalmente, e o administrador completa essa parte depois.</p>
+    `
+  },
+  folderId: {
+    titulo: 'ID da pasta compartilhada no Drive',
+    html: `
+      <p style="margin:0 0 10px;">É o identificador da pasta do Google Drive onde os relatórios dessa repartição serão salvos. Passo a passo resumido:</p>
+      <ol style="margin:0 0 12px;padding-left:18px;">
+        <li>No Google Drive da mesma conta que administra o projeto acima, crie uma pasta nova (ex.: "Custódia Digital - Nome da Repartição").</li>
+        <li>Abra a pasta e copie o trecho da URL que vem depois de "/folders/" — esse é o ID.</li>
+        <li>Atenção: se a URL tiver algo depois disso (tipo "?hl=pt-br"), não inclua — use só o trecho antes do "?".</li>
+        <li>Compartilhe essa pasta (botão direito → Compartilhar) com o e-mail de cada pessoa que vai operar o sistema, com permissão de <b>Editor</b>.</li>
+      </ol>
+      <p style="margin:0;padding:10px;background:#F7F9FB;border-radius:8px;border:1px solid var(--line);">Se preferir não fazer isso agora, marque abaixo do campo <b>"Deixar a cargo do administrador do sistema"</b> — seu cadastro segue normalmente, e o administrador completa essa parte depois.</p>
+    `
+  }
+};
+function openFieldInfoModal(tipo){
+  const info = FIELD_INFO_CONTENT[tipo];
+  if(!info) return;
+  $('fieldInfoTitle').textContent = info.titulo;
+  $('fieldInfoContent').innerHTML = info.html;
+  $('fieldInfoOverlay').classList.add('open');
+}
+document.querySelectorAll('.field-info-btn').forEach(btn => {
+  btn.addEventListener('click', () => openFieldInfoModal(btn.dataset.info));
+});
+$('closeFieldInfoBtn').addEventListener('click', () => $('fieldInfoOverlay').classList.remove('open'));
+$('fieldInfoOverlay').addEventListener('click', (e) => { if(e.target.id === 'fieldInfoOverlay') $('fieldInfoOverlay').classList.remove('open'); });
+
+// ---------- "deixar a cargo do administrador" — desabilita/limpa o campo ----------
+$('regNewRepClientIdAdm').addEventListener('change', () => {
+  const marcado = $('regNewRepClientIdAdm').checked;
+  $('regNewRepClientId').disabled = marcado;
+  if(marcado) $('regNewRepClientId').value = '';
+});
+$('regNewRepFolderIdAdm').addEventListener('change', () => {
+  const marcado = $('regNewRepFolderIdAdm').checked;
+  $('regNewRepFolderId').disabled = marcado;
+  if(marcado) $('regNewRepFolderId').value = '';
+});
+
 $('regNewRepSaveBtn').addEventListener('click', () => {
   const nome = $('regNewRepNome').value.trim();
   const email = $('regNewRepEmail').value.trim();
-  const clientId = sanitizeClientId($('regNewRepClientId').value);
-  const folderId = sanitizeFolderId($('regNewRepFolderId').value);
+  const clientIdAdm = $('regNewRepClientIdAdm').checked;
+  const folderIdAdm = $('regNewRepFolderIdAdm').checked;
+  // sem o dado, gera um identificador temporário único — mantém a
+  // repartição utilizável na central (evita colisão entre várias
+  // repartições "pendentes de configuração") até o administrador
+  // completar o cadastro de verdade, pela tela de "Editar repartição"
+  const clientId = clientIdAdm ? ('PENDENTE-CLIENTID-' + Date.now()) : sanitizeClientId($('regNewRepClientId').value);
+  const folderId = folderIdAdm ? ('PENDENTE-FOLDERID-' + Date.now()) : sanitizeFolderId($('regNewRepFolderId').value);
   const folderNome = $('regNewRepFolderNome').value.trim();
   const cabecalhoTexto = $('regNewRepCabecalhoTexto').value.trim();
   const logoBase64 = regNewRepLogoManager.getBase64();
   const aiProvider = $('regNewRepAiProvider').value;
   const aiApiKey = $('regNewRepAiApiKey').value.trim();
   const statusEl = $('regNewRepStatus');
-  if(!nome || !email || !clientId || !folderId){
-    statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta.';
+  if(!nome || !email || (!clientIdAdm && !clientId) || (!folderIdAdm && !folderId)){
+    statusEl.textContent = 'Preencha nome, e-mail, Client ID e ID da pasta (ou marque "a cargo do administrador").';
     statusEl.className = 'loc-status err';
     return;
   }

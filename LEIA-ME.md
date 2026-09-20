@@ -1,5 +1,34 @@
 # Custódia Digital — App (PWA)
 
+## Ajuda de campo + opção "a cargo do administrador" no cadastro de usuário
+
+Na tela de cadastro de usuário (fluxo "+ Cadastrar repartição"),
+dois campos técnicos costumavam travar quem não tem familiaridade
+com Google Cloud: **Client ID (OAuth)** e **ID da pasta compartilhada
+no Drive**. Duas melhorias:
+
+- **Ícone "ⓘ" ao lado de cada rótulo**: clicar abre um modal
+  centralizado (não mais uma gaveta lateral) com o passo a passo
+  resumido de como obter aquele dado especificamente, baseado no
+  Manual de Cadastro de Repartição já existente.
+- **Checkbox "Deixar a cargo do administrador do sistema"**, abaixo
+  de cada um dos dois campos: quem marcar não precisa preencher
+  aquele campo — o cadastro segue normalmente com um valor
+  temporário único (ex.: `PENDENTE-CLIENTID-1789919036714`), e um
+  administrador completa a configuração de verdade depois, pelo
+  modal "Editar repartição".
+
+**Ajuste técnico necessário por trás disso**: como o Client ID é
+usado como identificador único da repartição na planilha central, um
+administrador **trocando** esse valor temporário por um real
+antigamente criava uma **linha duplicada** em vez de atualizar a
+existente (a ação de atualização buscava a linha pelo próprio Client
+ID — que estava mudando). Corrigido: a atualização agora também pode
+localizar a linha por `rowIndex` (guardado desde o cadastro inicial),
+permitindo trocar o Client ID com segurança. Validado tanto com
+simulação completa do fluxo quanto com a lógica isolada do Apps
+Script, com múltiplas linhas na planilha.
+
 ## Ajustes no título e correção do QR Code de verificação
 
 - **Título do relatório principal** alterado para: "RELATÓRIO TÉCNICO
