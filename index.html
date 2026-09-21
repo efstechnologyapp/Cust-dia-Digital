@@ -67,10 +67,11 @@
   }
   header.top h1{
     font-family: var(--serif);
-    font-size: 26px;
+    font-size: 12px;
     margin: 0 0 6px;
-    color: var(--navy-dark);
-    font-weight: 700;
+    color: var(--muted);
+    font-weight: 600;
+    font-style: italic;
   }
   header.top p{
     margin:0;
@@ -1266,6 +1267,20 @@
           <input type="text" id="regNewRepNome" placeholder="Ex.: 14ª Delegacia de Polícia">
         </div>
         <div class="field">
+          <label style="font-size:12px;">Logo do órgão/repartição (aparece no cabeçalho dos relatórios)</label>
+          <div class="file-attach-row">
+            <input type="file" accept="image/*" id="regNewRepLogoInput" style="display:none;">
+            <button type="button" class="btn-attach" id="regNewRepLogoBtn">📎 Selecionar imagem</button>
+            <span class="file-attach-name" id="regNewRepLogoName"></span>
+          </div>
+          <img id="regNewRepLogoPreview" class="hidden-view" style="max-width:70px;max-height:70px;margin-top:6px;display:block;">
+        </div>
+        <div class="field">
+          <label style="font-size:12px;">Cabeçalho institucional (uma linha por linha do cabeçalho)</label>
+          <textarea id="regNewRepCabecalhoTexto" placeholder="Ex.: Tribunal de Justiça do Estado XXXX&#10;Juízo da 20ª Vara Criminal da comarca de XXXX" style="min-height:70px;"></textarea>
+          <div class="hint">Cada linha aparece em negrito e caixa alta no cabeçalho dos relatórios, não importa como for digitada aqui.</div>
+        </div>
+        <div class="field">
           <label style="font-size:12px;">E-mail do Cloud/Drive da repartição</label>
           <input type="email" id="regNewRepEmail" placeholder="Ex.: repartição@gmail.com">
         </div>
@@ -1290,30 +1305,16 @@
           <input type="text" id="regNewRepFolderNome" placeholder="Ex.: Custódia Digital - Nome da Repartição">
         </div>
         <div class="field">
-          <label style="font-size:12px;">Logo do órgão/repartição (aparece no cabeçalho dos relatórios)</label>
-          <div class="file-attach-row">
-            <input type="file" accept="image/*" id="regNewRepLogoInput" style="display:none;">
-            <button type="button" class="btn-attach" id="regNewRepLogoBtn">📎 Selecionar imagem</button>
-            <span class="file-attach-name" id="regNewRepLogoName"></span>
-          </div>
-          <img id="regNewRepLogoPreview" class="hidden-view" style="max-width:70px;max-height:70px;margin-top:6px;display:block;">
-        </div>
-        <div class="field">
-          <label style="font-size:12px;">Cabeçalho institucional (uma linha por linha do cabeçalho)</label>
-          <textarea id="regNewRepCabecalhoTexto" placeholder="Ex.: Tribunal de Justiça do Estado XXXX&#10;Juízo da 20ª Vara Criminal da comarca de XXXX" style="min-height:70px;"></textarea>
-          <div class="hint">Cada linha aparece em negrito e caixa alta no cabeçalho dos relatórios, não importa como for digitada aqui.</div>
-        </div>
-        <div class="field">
           <label style="font-size:12px;">Provedor de IA contratado por esta repartição (opcional, dá para configurar depois)</label>
           <select id="regNewRepAiProvider">
-            <option value="" selected>Ainda não configurar</option>
+            <option value="" selected>Deixar a cargo do administrador do sistema</option>
             <option value="anthropic">Anthropic (Claude)</option>
             <option value="gemini">Google (Gemini)</option>
             <option value="openai">OpenAI (ChatGPT)</option>
             <option value="deepseek">DeepSeek</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field hidden-view" id="regNewRepAiApiKeyField">
           <label style="font-size:12px;">Chave de API</label>
           <input type="password" id="regNewRepAiApiKey" placeholder="Cole aqui, se já tiver a chave">
         </div>
@@ -1919,7 +1920,7 @@
       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAFMUlEQVR4nO3cMW8URxjG8XGUAuSSPrYoIiGXdHZDQZcPYZpQ5sOkhIYvkY6ChpLSQqKwED2llZQpFlmrvb1lz8/s+z4z9/9Vlm3Zc7P/m53dO93J2eV1AR7ql+wBoG0EBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ/Jo9gLXubj9kDyHU6dMX2UNYxT2gY+vm3viBO8fkG9DRprNrmArPjEz3QNSzy3NO7FYgz2kyYbgUea1A1LOG1SwZBWQ1L+Z85solIJ8ZaYXJjLkEhEZZBGTyZGqOw7zlB+QwC+1Kn738gNC05IDSn0AdyJ1DViBICAiSzIA4f9WSOJOsQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkGQGZPUhAU1LnElWIEjsPt7FxMe/f5t85+qvbykjMUdAU7vpjL9vmFHuTiD5FOa2DdpXz/pfODYnZ5fXWf/7+80/Wf961qe3z1b+5vM/P286kkM9ufgj619zCvtht55xJZOffnr7zK2hLFyFzZv0QS77EFApOwvMbC6Tb64/3/WNgKYWFhvWoV0EBAkBQZJzFeZ2Ad+6YT5TLuZZgSAhoFIWb/mMjX/EhnpAQDNmG+K6fRYB/bB8m2fNjaLjlPBa2N3th//+vQv+pyutWWZs63n0+DT+xem4gMaf42cbUPlZQ7b1lFIePT69/zqspKCAJp8C6RzQYPm1VU/jgEpUQzkrELYWtgLF3Ui8f0iUtJ34PVDCnejxg7x5/+b86e/xY+jG19svpZSLl6+zBpD/hrJhCvYhr+X5SZdwGX/z/s2mf9+5ua1riF+KQgPaOh0MIjOKuxNNPWEipzooIOoJFjbhvBYGSURALD8pYqY9/zK+ltmdo0O7tgOrooeAFi46hh9lHS3bgVXU/B5ozSVryo1a24HVFRHQdtO0/i8HHyqHgcU85IZPYeMJ+vrx3fDF+dWrhd+POWXMDqzsH1vYwLYQdAqr/mzYd5DGXwcMY/lfTAazMLZN52dTcXugDs73rejzpYxSysXL11Uem/JHNp3c9IHVmuH1EvZA40dY5dx/fvVqzR4o3nhgZcuxHfX7gaqw6mbMdmC1NH8fCLkICBICgoSAIGkyIOXabdN7vrYD206TAcFHqwE97Pka8Cy3HdhGWg2oHD7pYQfJdmBbaDigcsjUBx8k24FV13ZAZd0BSDlItgOrq4eXMobDYPjWY9uBVdRDQAPbQ2I7sCqaP4UhFwFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQ9PN+oFkmnynT8VuCel6BTOopTiOprueAEICAIOk5IJ+dh89Iqut8E93xkTPR8wqEAAQECQFB0vkeyOQGTMdbsZ5XIJN6itNIqus5IAQgIEh6Dshn5+Ezkuo630R3fORMJK9AHe8uw+TOYc+nMAQgIEjyA+IspkifvfyA0DSLgNKfRo1ymDeLgPAADvUUn4BMpgOHcgmo0NAhfObKKKDiNC/OrGbp5OzyOnsMU7z+sI9VOgPHgAZkNGFYT3EOaEBGxTWdgXtAg+PMyLmbe20EBFteV2FoDgFBQkCQEBAkBAQJAUFCQJAQECQEBAkBQUJAkBAQJAQECQFBQkCQEBAkBATJ/zQqcoJrkwPlAAAAAElFTkSuQmCC" alt="Custódia Digital" class="app-header-logo">
       <span class="app-header-name">Custódia Digital</span>
     </div>
-    <h1>Extração e Verificação de Integridade de Arquivos Digitais</h1>
+    <h1>Coleta/Extração, Identificação e Documentação da Cadeia de Custódia de Arquivos Digitais</h1>
   </header>
 
   <div class="hidden-view" id="homeTabBar" style="display:flex;gap:6px;margin:10px auto 16px;max-width:760px;border-bottom:1px solid var(--line);">
@@ -5893,6 +5894,12 @@ $('regNewRepFolderIdAdm').addEventListener('change', () => {
   const marcado = $('regNewRepFolderIdAdm').checked;
   $('regNewRepFolderId').disabled = marcado;
   if(marcado) $('regNewRepFolderId').value = '';
+});
+// o campo de chave de API só faz sentido se um provedor de verdade
+// foi escolhido — some quando "deixar a cargo do administrador"
+$('regNewRepAiProvider').addEventListener('change', () => {
+  $('regNewRepAiApiKeyField').classList.toggle('hidden-view', !$('regNewRepAiProvider').value);
+  if(!$('regNewRepAiProvider').value) $('regNewRepAiApiKey').value = '';
 });
 
 $('regNewRepSaveBtn').addEventListener('click', () => {
