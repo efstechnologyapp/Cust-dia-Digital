@@ -3960,7 +3960,7 @@ async function openMinutaEditor(r, tipo){
         relatorioNum: r.relatorioNum, reparticaoId: r.reparticaoId,
         email: currentUser ? currentUser.email : ''
       });
-      $('minutaEditor').innerHTML = headerHtml + `<p>${esc(data.analise).replace(/\n/g, '<br>')}</p>`;
+      $('minutaEditor').innerHTML = headerHtml + markdownParaHtml(data.analise);
       minutaContext.metadataText = data.metadataText || '';
     } catch(err){
       $('minutaEditor').innerHTML = headerHtml + `<p><i>Não foi possível carregar a análise automática: ${esc(err.message)}. Redija manualmente ou tente novamente.</i></p>`;
@@ -4017,6 +4017,53 @@ $('minutaEditor').addEventListener('mouseup', saveMinutaEditorSelection);
 
 // insere o texto da IA na posição salva do cursor (ou no final, se
 // nunca houve uma posição salva — ex.: editor ainda vazio)
+// converte o markdown que a IA costuma gerar (negrito, títulos, listas,
+// linhas horizontais, parágrafos) em HTML de verdade — sem isso, o
+// texto entrava todo em sequência, com os símbolos de markdown
+// (**, #, ---) aparecendo literalmente em vez de formatação real.
+// Sempre escapa o texto original antes de aplicar qualquer marcação,
+// para nunca interpretar HTML que porventura venha na resposta da IA
+// (evita, por ex., tags <html>/<body> aparecendo como texto visível)
+function markdownParaHtml(texto){
+  const blocos = texto.replace(/\r\n/g, '\n').split(/\n{2,}/);
+  return blocos.map(bloco => {
+    const linhas = bloco.split('\n').map(l => l.trim()).filter(Boolean);
+    if(linhas.length === 0) return '';
+
+    // título (#, ##, ###...)
+    const tituloMatch = linhas.length === 1 && linhas[0].match(/^(#{1,6})\s+(.*)$/);
+    if(tituloMatch){
+      const nivel = Math.min(tituloMatch[1].length + 1, 6); // # vira h2, ## vira h3... (h1 é reservado pro título do relatório)
+      return `<h${nivel}>${aplicarNegritoItalico(esc(tituloMatch[2]))}</h${nivel}>`;
+    }
+
+    // linha horizontal (---, ***, ___)
+    if(linhas.length === 1 && /^(-{3,}|\*{3,}|_{3,})$/.test(linhas[0])){
+      return '<hr>';
+    }
+
+    // lista não ordenada (linhas começando com - ou *)
+    if(linhas.every(l => /^[-*]\s+/.test(l))){
+      const itens = linhas.map(l => `<li>${aplicarNegritoItalico(esc(l.replace(/^[-*]\s+/, '')))}</li>`).join('');
+      return `<ul>${itens}</ul>`;
+    }
+
+    // lista ordenada (linhas começando com 1. 2. ...)
+    if(linhas.every(l => /^\d+[\.\)]\s+/.test(l))){
+      const itens = linhas.map(l => `<li>${aplicarNegritoItalico(esc(l.replace(/^\d+[\.\)]\s+/, '')))}</li>`).join('');
+      return `<ol>${itens}</ol>`;
+    }
+
+    // parágrafo comum — quebras de linha simples dentro do bloco viram <br>
+    return `<p>${linhas.map(l => aplicarNegritoItalico(esc(l))).join('<br>')}</p>`;
+  }).filter(Boolean).join('');
+}
+function aplicarNegritoItalico(textoEscapado){
+  return textoEscapado
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/(^|[^*])\*(?!\*)(.+?)\*(?!\*)/g, '$1<i>$2</i>');
+}
+
 function insertTextIntoMinutaEditorAtCursor(texto){
   const editor = $('minutaEditor');
   editor.focus();
@@ -4030,7 +4077,7 @@ function insertTextIntoMinutaEditorAtCursor(texto){
     range.collapse(false); // move para o final
     sel.addRange(range);
   }
-  const html = '<br><br>' + esc(texto).replace(/\n/g, '<br>');
+  const html = '<br>' + markdownParaHtml(texto);
   document.execCommand('insertHTML', false, html);
   saveMinutaEditorSelection(); // atualiza a posição salva para o fim do texto recém-inserido
 }
@@ -4054,10 +4101,11 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   // o usuário está se referindo quando pede para "analisar" algo
   let textoParaEnviar = texto;
   if(minutaChatHistory.length === 0 && minutaContext){
-    const contexto = minutaContext.metadataText
+    const dadosRelatorio = minutaContext.metadataText
       ? `Contexto — metadados do relatório (documentação do procedimento; não é o conteúdo extraído do dispositivo):\n${minutaContext.metadataText}`
       : `Contexto — relatório nº ${minutaContext.relatorioNum || 'não informado'}${minutaContext.processoNum ? ', processo ' + minutaContext.processoNum : ''}.`;
-    textoParaEnviar = `${contexto}\n\n---\n\nMensagem do usuário: ${texto}`;
+    const instrucoesFormato = 'Instruções de formato: sua resposta será inserida diretamente dentro de um documento já existente (não crie um documento novo do zero) — não repita cabeçalho/título do relatório, não use tags HTML nem escreva "<html>", "<head>" ou "<body>" na resposta. Pode usar markdown simples (negrito com **, títulos com #, listas com - ou 1.) que será formatado automaticamente. Escreva em texto corrido bem estruturado em parágrafos.';
+    textoParaEnviar = `${dadosRelatorio}\n\n${instrucoesFormato}\n\n---\n\nMensagem do usuário: ${texto}`;
   }
   minutaChatHistory.push({ role: 'user', content: textoParaEnviar });
   $('minutaChatInput').value = '';
@@ -4079,6 +4127,8 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
 
 $('minutaSaveBtn').addEventListener('click', async () => {
   const statusEl = $('minutaSaveStatus');
+  const btn = $('minutaSaveBtn');
+  if(btn.disabled) return; // evita duplo clique gerando múltiplos arquivos idênticos
   if(!minutaContext){
     statusEl.textContent = 'Editor sem relatório associado — feche e abra de novo pelo card do relatório.';
     statusEl.className = 'loc-status err';
@@ -4090,6 +4140,9 @@ $('minutaSaveBtn').addEventListener('click', async () => {
     statusEl.className = 'loc-status err';
     return;
   }
+  btn.disabled = true;
+  const textoOriginalBtn = btn.textContent;
+  btn.textContent = 'Salvando…';
   statusEl.textContent = 'Salvando no Drive…';
   statusEl.className = 'loc-status';
   try {
@@ -4114,6 +4167,9 @@ $('minutaSaveBtn').addEventListener('click', async () => {
   } catch(err){
     statusEl.textContent = 'Não foi possível salvar: ' + err.message;
     statusEl.className = 'loc-status err';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = textoOriginalBtn;
   }
 });
 
@@ -4135,7 +4191,12 @@ function renderHomeReportsList(termo){
       <div class="rep-user-detail">Responsável: ${esc(r.nome)}</div>
       <div class="rep-user-detail">Enviado em: ${esc(r.dataEnvio)}</div>
       ${r.driveLink ? `<div><a href="${esc(r.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 Abrir relatório no Drive</a></div>` : ''}
-      ${buildFileDisplayLabels((r.arquivosEnviados || []).filter(a => a.driveLink)).map(a => `<div><a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.label)}</a></div>`).join('')}
+      ${buildFileDisplayLabels((r.arquivosEnviados || []).filter(a => a.driveLink)).map(a => `
+        <div style="display:flex;align-items:center;gap:6px;">
+          <a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.label)}</a>
+          ${a.codigo === 'Rel.MDados' ? `<button type="button" class="copy-email-btn" data-del-arquivo="${esc(a.arquivo)}" data-del-relatorio="${esc(r.relatorioNum || '')}" data-del-reparticao="${esc(r.reparticaoId || '')}" data-del-idx="${idx}" title="Excluir este relatório de metadados" aria-label="Excluir" style="font-size:13px;color:#B23B3B;">✕</button>` : ''}
+        </div>
+      `).join('')}
       <div class="field" style="margin-top:8px;margin-bottom:0;">
         <select data-tipo-minuta-idx="${idx}" style="font-size:12px;">
           <option value="" selected>Selecione o tipo de relatório de análise…</option>
@@ -4146,6 +4207,25 @@ function renderHomeReportsList(termo){
       <button type="button" class="btn-attach hidden-view" data-minutar-idx="${idx}" style="margin-top:6px;font-size:11px;">📝 Minutar Relatório</button>
     </div>
   `).join('');
+
+  listEl.querySelectorAll('[data-del-arquivo]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('Excluir este Relatório de Metadados? Ele será removido do Drive e não vai mais aparecer aqui.')) return;
+      btn.disabled = true;
+      try {
+        await callAppsScript({
+          action: 'remove_arquivo_enviado',
+          arquivo: btn.dataset.delArquivo,
+          relatorioNum: btn.dataset.delRelatorio,
+          reparticaoId: btn.dataset.delReparticao
+        });
+        loadHomeReportsForSearch();
+      } catch(err){
+        alert('Não foi possível excluir: ' + err.message);
+        btn.disabled = false;
+      }
+    });
+  });
 
   listEl.querySelectorAll('[data-tipo-minuta-idx]').forEach(sel => {
     sel.addEventListener('change', () => {
@@ -4382,6 +4462,38 @@ const attachedFiles = { orig: null, cop: null }; // mantido só para compatibili
 // limite de tamanho de célula da planilha do Google (~50.000
 // caracteres); 140px de lado já é mais que suficiente para o
 // tamanho em que a logo aparece no relatório
+// comprime uma imagem antes de anexar como documento — sem isso, uma
+// foto de câmera sem compressão (8-15MB) pode fazer o envio falhar em
+// redes domésticas (banda de upload menor que a de download); PDFs
+// não são tocados (não dá pra comprimir cliente-side sem uma lib
+// própria, e normalmente já vêm bem mais leves que uma foto)
+function compressImageFile(file, maxDim, quality){
+  return new Promise((resolve, reject) => {
+    if(!file.type || !file.type.startsWith('image/')){ resolve(file); return; }
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Não foi possível ler o arquivo de imagem.'));
+    reader.onload = () => {
+      img.onerror = () => reject(new Error('Arquivo não parece ser uma imagem válida.'));
+      img.onload = () => {
+        const escala = Math.min(1, (maxDim || 1600) / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * escala));
+        const h = Math.max(1, Math.round(img.height * escala));
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => {
+          if(!blob){ resolve(file); return; }
+          const novoNome = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+          resolve(new File([blob], novoNome, { type: 'image/jpeg' }));
+        }, 'image/jpeg', quality || 0.85);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function resizeImageToBase64(file, maxDim){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -4495,13 +4607,13 @@ function buildFileDisplayLabels(arquivosEnviados){
   return (arquivosEnviados || []).map(a => {
     const codigo = parseFileCode(a.arquivo);
     const labelBase = FILE_CODE_LABELS[codigo];
-    if(!labelBase) return { label: a.arquivo, driveLink: a.driveLink }; // arquivo antigo, sem o código — mostra como estava
+    if(!labelBase) return { label: a.arquivo, driveLink: a.driveLink, codigo: '', arquivo: a.arquivo }; // arquivo antigo, sem o código — mostra como estava
     let label = labelBase;
     if(FILE_CODES_NUMERADOS.includes(codigo)){
       contadores[codigo] = (contadores[codigo] || 0) + 1;
       label = `${labelBase} ${contadores[codigo]}`;
     }
-    return { label, driveLink: a.driveLink };
+    return { label, driveLink: a.driveLink, codigo, arquivo: a.arquivo };
   });
 }
 
@@ -7714,13 +7826,24 @@ $('f_autorizacao_juizo').addEventListener('input', updateAutorizacaoCheckbox);
 $('f_autorizacao_processo').addEventListener('input', updateAutorizacaoCheckbox);
 
 $('autorizacaoDocBtn').addEventListener('click', () => $('autorizacaoDocInput').click());
-$('autorizacaoDocInput').addEventListener('change', () => {
+$('autorizacaoDocInput').addEventListener('change', async () => {
   const file = $('autorizacaoDocInput').files[0];
   if(!file) return;
-  autorizacaoDocFile = file;
-  $('autorizacaoDocName').textContent = file.name;
-  $('autorizacaoStatus').textContent = '✓ Documento anexado. Será enviado ao Drive junto com os demais anexos, na Seção 9.';
-  $('autorizacaoStatus').className = 'loc-status ok';
+  $('autorizacaoDocName').textContent = 'Processando…';
+  $('autorizacaoStatus').textContent = '';
+  try {
+    autorizacaoDocFile = await compressImageFile(file, 1600, 0.85);
+    $('autorizacaoDocName').textContent = file.name;
+    $('autorizacaoStatus').textContent = '✓ Documento anexado. Será enviado ao Drive junto com os demais anexos, na Seção 9.';
+    $('autorizacaoStatus').className = 'loc-status ok';
+  } catch(err){
+    // se a compressão falhar por algum motivo, ainda assim usa o
+    // arquivo original — melhor enviar sem compressão do que travar
+    autorizacaoDocFile = file;
+    $('autorizacaoDocName').textContent = file.name;
+    $('autorizacaoStatus').textContent = '✓ Documento anexado (sem compressão — ' + err.message + ').';
+    $('autorizacaoStatus').className = 'loc-status ok';
+  }
   updateAutorizacaoCheckbox();
 });
 

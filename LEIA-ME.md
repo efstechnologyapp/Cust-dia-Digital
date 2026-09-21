@@ -1,5 +1,131 @@
 # Custódia Digital — App (PWA)
 
+## Ícone de excluir Relatório de Metadados (cards "Relatórios da Repartição")
+
+Novo botão "✕" ao lado do link "Rel Metadados" nos cards da aba
+"Relatórios da Repartição" (Home) — aparece **só** para esse tipo
+específico de arquivo, não para evidências/anexos/outros relatórios.
+
+- Confirmação antes de excluir.
+- Remove o registro da planilha central e tenta mover o arquivo
+  real para a lixeira do Drive (extraindo o ID a partir do link
+  salvo — funciona mesmo se o arquivo já tiver sido removido
+  manualmente, nesse caso só limpa o registro).
+- Busca a linha mais recente que bate com arquivo + relatório +
+  repartição (mesmo cuidado de "mais recente primeiro" já aplicado
+  em outras buscas desta planilha).
+- Testado: botão não aparece em arquivos de evidência, aparece
+  corretamente no Rel Metadados, e envia os dados certos para a
+  remoção.
+
+
+## Três correções na Minuta IA: clique duplo, formatação e tags HTML visíveis
+
+Três problemas relatados juntos pelo usuário, depois de um ciclo
+completo de teste real:
+
+1. **Botão "Salvar" sem feedback + 3 arquivos duplicados**: clicar
+   repetidamente (por falta de retorno visual) disparava múltiplos
+   envios simultâneos ao Drive, cada um virando um link duplicado no
+   card do relatório. Corrigido: o botão agora fica desabilitado e
+   muda para "Salvando…" assim que clicado, e ignora cliques
+   repetidos até terminar. Confirmado que um clique real (disparado
+   como evento de verdade) resulta em apenas 1 upload, mesmo
+   "clicando" 3 vezes.
+
+2. **Texto da IA sem estrutura de parágrafo**: a resposta da IA
+   (que vem em markdown — `**negrito**`, `# título`, listas com `-`)
+   estava sendo inserida como texto corrido, com os símbolos de
+   markdown aparecendo literalmente em vez de formatação real. Nova
+   função `markdownParaHtml()` — converte negrito, itálico, títulos
+   (`#`/`##`/`###`), listas numeradas e não numeradas, linhas
+   horizontais e parágrafos em HTML de verdade. Aplicada tanto às
+   respostas do chat quanto à análise automática inicial. Testado
+   com um texto real de exemplo — resultado visualmente confirmado
+   (negrito, títulos e listas renderizando corretamente).
+
+3. **Tags `<html><head>...` aparecendo como texto no documento
+   salvo**: a IA, sem instrução clara de formato, às vezes decidia
+   "criar um documento novo" e envolvia sua resposta em
+   `<html><head>...<body>`. Duas camadas de correção: (a) instrução
+   explícita adicionada ao contexto enviado à IA (tanto no chat
+   quanto na análise automática do servidor) pedindo para não
+   repetir cabeçalho/título nem usar tags HTML, já que a resposta
+   entra dentro de um documento já existente; (b) mesmo que a IA
+   ignore a instrução, o texto agora sempre passa por escape antes
+   da formatação — tags feitas dessa forma aparecem como texto
+   visível inofensivo, nunca mais quebram a estrutura do documento.
+   Testado com um texto contendo `<html><head>` literal — confirmado
+   que aparece escapado, sem virar código.
+
+## Nova tentativa automática em erros transitórios da IA (503/429/500/502/504)
+
+Pedido do usuário, depois de encontrar o erro "HTTP 503 — This model
+is currently experiencing high demand" do Gemini pela segunda vez.
+Esse tipo de erro é sempre temporário (sobrecarga momentânea do lado
+do provedor), então antes o usuário precisava clicar em "Enviar" de
+novo manualmente.
+
+**Correção**: nova função `fetchComRetentativa_()`, aplicada às 4
+chamadas de provedor de IA (Anthropic, Gemini, OpenAI, DeepSeek) —
+tenta até 3 vezes, com espera crescente entre tentativas (1,5s, depois
+3s), só para os códigos de erro **transitórios** (503, 429 limite de
+taxa, 500, 502, 504). Erros permanentes (ex.: 400, chave inválida)
+continuam retornando na primeira tentativa, sem atraso desnecessário.
+Validado com 4 cenários isolados (sucesso direto, falha-depois-sucesso,
+falha persistente, erro permanente) — todos corretos.
+
+## Correção: análise de metadados não encontrava relatório recém-gerado
+
+Bug relatado pelo usuário: mesmo um relatório **recém-gerado**, com
+os metadados corretamente salvos na planilha (conferido manualmente
+pelo usuário direto na aba "Relatorios", coluna "MetadataText"),
+retornava "Não foram encontrados metadados salvos para este
+relatório" ao abrir o editor de "Relatório de Metadados".
+
+**Causa raiz**: quando o mesmo número de relatório é usado mais de
+uma vez (ex.: testes repetidos com o mesmo nome, ou retificações
+gerando novos envios), existem **múltiplas linhas** na planilha com
+o mesmo número. A busca percorria a planilha de cima para baixo e
+parava no **primeiro** resultado — se uma linha antiga (de antes
+dessa funcionalidade existir, sem metadados) viesse antes da linha
+nova (com os metadados certos), a busca "achava" a linha errada e
+reportava que não havia dado, mesmo com o dado correto existindo
+mais abaixo na planilha.
+
+**Correção**: as duas buscas envolvidas (metadados do relatório e
+cache de análise já feita) agora percorrem a planilha de **baixo
+para cima** — a versão mais recente sempre prevalece. Validada a
+lógica isoladamente com um cenário reproduzindo exatamente o caso
+relatado (linha antiga sem metadados + linha nova com metadados,
+mesmo número) — a busca agora encontra corretamente a versão nova.
+
+## Correção preventiva: "Failed to fetch" ao enviar o documento de autorização
+
+Bug relatado pelo usuário: o envio na Seção 9 falhava com "Não foi
+possível enviar: Failed to fetch" — um erro de rede genuíno (a
+chamada de rede falha antes de qualquer resposta do Google chegar),
+não um erro de lógica do código. Investigação concluiu que a causa
+mais provável era o **tamanho do arquivo** anexado como documento de
+autorização (Seção 1) — uma foto de câmera sem compressão facilmente
+tem 8-15MB, bem mais pesada que os demais arquivos já enviados com
+sucesso, o que pode derrubar o envio em redes domésticas (banda de
+upload menor que a de download).
+
+**Correção preventiva**: nova função `compressImageFile()` — quando o
+documento anexado é uma **imagem** (foto/print), ela é redimensionada
+(máx. 1600px de lado) e comprimida (JPEG, qualidade 0.85) antes de
+ficar pronta para envio — mesmo princípio já usado para o logo da
+repartição. **PDFs não são tocados** (a compressão só se aplica a
+imagens). Testado com uma imagem sintética de 4000×3000: redução de
+75% no tamanho, mantendo o documento legível. Confirmado que PDFs
+passam pelo processo sem qualquer alteração.
+
+**Confirmado também**: o documento anexado na Seção 1 já era enviado
+somente ao clicar em "☁️ Enviar ao Drive da repartição" na Seção 9 —
+nunca automaticamente antes disso (fica só como referência local até
+esse momento) — conferido no código a pedido do usuário.
+
 ## Seção 1, item 2: caminho da pasta de destino + validação cruzada com a Seção 6
 
 Três pedidos do usuário, implementados juntos:
