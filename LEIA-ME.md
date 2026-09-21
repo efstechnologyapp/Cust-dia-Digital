@@ -1,5 +1,156 @@
 # Custódia Digital — App (PWA)
 
+## Minutar Relatório com IA restrito a administradores da repartição
+
+Funcionalidade pedida pelo usuário: só usuários marcados como
+**administrador** de uma repartição (pode haver mais de um por
+repartição) veem a opção de minutar relatórios com IA — usuários
+"de rotina" não têm mais acesso a isso.
+
+**Onde configurar**: modal "Editar repartição" → seção de usuários
+habilitados → cada usuário agora tem um seletor "Papel na
+repartição" (Usuário de rotina / Administrador).
+
+**Como funciona por trás**: nova coluna "PapelRepartição" na
+planilha de usuários; ao entrar no app, o sistema verifica o papel
+do usuário logado na repartição conectada e guarda isso
+(`currentUserPapel`) — só quando for `'admin'` é que a opção de
+minutar aparece na aba "Relatórios da Repartição" da Home. Testado:
+usuário de rotina não vê nem o seletor de tipo nem o botão de
+minutar; administrador vê os dois normalmente.
+
+**⚠️ Atenção — ação necessária após publicar**: como essa coluna é
+nova, **todo usuário já habilitado (inclusive você mesmo) começa
+como "de rotina"** por padrão, até alguém marcar explicitamente como
+administrador no modal de edição da repartição. Assim que publicar,
+entre em "Editar repartição" e marque você (e qualquer outro
+administrador de fato) como "Administrador" — senão ninguém vai
+conseguir minutar relatórios, nem você.
+
+
+## Lista de conexões com outros sistemas (Informações Gerais)
+
+Campo "Conexões com outros sistemas" (aba Informações Gerais →
+Dados do app) reformatado como lista, um sistema por linha, e
+acrescentado o **Google AI Studio (integração com Gemini)** — antes
+só mencionava Google Drive e Google Cloud/OAuth.
+
+
+## Logo da repartição nos cards de "Repartições cadastradas"
+
+Pedido do usuário: mostrar a logo cadastrada de cada repartição, ao
+lado **esquerdo** do nome, na aba Gestão de Conexões (Gestão do App).
+
+- Repartição **com logo**: mostra a imagem cadastrada, em círculo.
+- Repartição **sem logo**: mostra um círculo com as iniciais do nome
+  (mesmo padrão já usado no avatar do usuário).
+- Nomes longos truncam com reticências para não empurrar a logo/os
+  ícones de ação pra fora do card. Testado com os dois cenários
+  (com e sem logo) — confirmado visualmente.
+
+
+## Ícone de excluir também no Relatório de Análise de Arquivos Evidência
+
+Extensão do botão "✕" (já existente para o Relatório de Metadados)
+para também aparecer no **Relatório de Análise de Arquivos
+Evidência** — mesmo mecanismo de exclusão (planilha + Drive), texto
+de confirmação generalizado. Continua ausente nos arquivos evidência
+genéricos (fotos, anexos comuns). Testado com os 3 tipos de arquivo
+juntos no mesmo card — confirma aparecer só nos dois tipos de minuta.
+
+
+## Chat conversacional na Minuta IA (não insere mais automaticamente)
+
+Pedido do usuário, natural depois de corrigir o problema de invenção
+de conteúdo: em vez da resposta da IA entrar direto no documento, o
+chat agora funciona como uma **conversa de verdade** sobre os dados
+e as alterações propostas — o usuário decide, resposta por resposta,
+o que efetivamente vai pro documento oficial.
+
+- A resposta da IA aparece **formatada** (negrito, listas, títulos)
+  dentro do próprio painel do chat, com um botão **"➕ Inserir no
+  documento"** — só ao clicar é que aquele trecho entra no editor,
+  na posição do cursor.
+- O usuário pode conversar livremente antes de decidir (pedir
+  esclarecimentos, corrigir a IA, discutir a redação) sem que nada
+  seja gravado no documento até que ele escolha inserir.
+- Reaproveita a mesma inserção sem aninhamento (bloco irmão, nunca
+  dentro de um item de lista anterior) já corrigida antes.
+- Testado: resposta aparece formatada no painel com o botão, o editor
+  permanece vazio até o clique, e só depois do clique o conteúdo
+  aparece no documento. Confirmado visualmente com um cenário real
+  (arquivo evidência único, IA pedindo mais informação em vez de
+  inventar).
+
+
+## CORREÇÃO CRÍTICA: IA estava inventando arquivos e conteúdo de análise
+
+Bug grave relatado pelo usuário: ao pedir uma minuta de "Análise de
+Arquivos Evidência" para um relatório cujo único arquivo evidência
+era um print de mensagem do WhatsApp, a IA **inventou** uma lista
+inteira de arquivos fictícios (contrato, planilha de fluxo de caixa,
+comprovantes bancários, cadeia de e-mails) com descrições de
+"indícios de manipulação" e "inconsistências contábeis" — nada disso
+existia de verdade.
+
+**Causa raiz**: diferente do "Relatório de Metadados" (que já recebe
+os dados reais do relatório como contexto), a "Análise de Arquivos
+Evidência" abria o editor **em branco**, sem nenhum dado real —
+quando o usuário pedia pra IA "elaborar a minuta", ela não tinha
+absolutamente nada pra trabalhar e preenchia a lacuna inventando
+conteúdo plausível, mas completamente falso.
+
+**Correção, em duas frentes:**
+1. Agora a lista **real** dos arquivos evidência efetivamente
+   anexados àquele relatório (nomes originais, extraídos do próprio
+   nome do arquivo salvo) é enviada como contexto à IA — a mesma
+   lógica já usada para os metadados.
+2. **Instrução explícita e reforçada em duas camadas** dizendo que a
+   IA nunca deve inventar, presumir ou fabricar nomes de arquivo,
+   conteúdo, valores, datas ou conclusões — e que, faltando
+   informação, ela deve dizer isso e pedir mais dados, nunca inventar
+   um exemplo genérico como se fosse real. Reforçada tanto no chat
+   quanto no prompt automático do servidor (análise de metadados).
+
+Testado com o cenário exato relatado (relatório com só 1 arquivo
+evidência real, "print_whatsapp.jpg") — confirmado que a IA agora
+recebe o nome real do arquivo e as duas instruções anti-invenção na
+mensagem enviada.
+
+**Importante**: essa correção reduz bastante o risco, mas não é uma
+garantia absoluta — modelos de IA às vezes não seguem instruções à
+risca. Vale sempre conferir o conteúdo gerado antes de usar num
+relatório oficial.
+
+
+## Correção: layout quebrado no PDF da minuta (espaço em branco enorme, texto cortado)
+
+Bug relatado pelo usuário, com PDF real anexado para análise:
+o cabeçalho institucional aparecia no **meio da primeira página**,
+com um vão enorme de espaço em branco acima dele, e a segunda página
+ficava quase toda vazia, com um trecho de texto cortado no meio da
+frase.
+
+**Causa raiz**: o editor da minuta (`#minutaEditor`) tem
+`min-height: 300px` no CSS — necessário para ficar confortável de
+digitar mesmo com pouco texto. Só que a geração do PDF capturava o
+elemento **ao vivo**, com esse `min-height` incluído — isso inflava
+a altura capturada bem além do tamanho real do conteúdo, e o cálculo
+de paginação do jsPDF (baseado nessa altura errada) cortava o texto
+em pontos arbitrários e desperdiçava a maior parte da segunda
+página.
+
+**Correção**: nova função `generateMinutaPdf()` — antes de gerar o
+PDF, o conteúdo do editor é copiado para um elemento temporário e
+"limpo" (fora da tela, sem nenhum estilo de edição, reaproveitando a
+classe `report-paper` do relatório principal), e é **essa cópia**
+que vira o PDF, não o editor ao vivo. Testado e confirmado: o editor
+original mede 300px mesmo com pouco texto, enquanto a cópia limpa se
+ajusta corretamente ao conteúdo real (149px no teste). Confirmado
+também que o `html2pdf` agora recebe o elemento correto (classe
+`report-paper`, largura fixa de papel) em vez do editor.
+
+
 ## Três correções importantes na Minuta IA (segunda rodada)
 
 1. **Botão "Enviar" do chat sem feedback claro**: agora desabilita e

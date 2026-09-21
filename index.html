@@ -591,6 +591,27 @@
     font-weight:700;
     font-size: 14.5px;
     color: var(--navy-dark);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+  }
+  .reparticao-logo-avatar{
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: none;
+    border: 1px solid var(--line);
+  }
+  .reparticao-logo-avatar-iniciais{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: #EAF0F7;
+    color: var(--navy);
+    font-size: 10px;
+    font-weight:700;
   }
   .reparticao-card-icons{
     display:flex;
@@ -1458,7 +1479,7 @@
 
     <div class="hidden-view" id="minutaChatPanel" style="border:1px solid var(--line);border-radius:8px;margin-top:12px;padding:10px;background:#fff;">
       <div class="hint" style="margin:0 0 8px;font-size:9px;">Chat com a IA institucional — o que você enviar aqui pode incluir qualquer informação necessária.</div>
-      <div id="minutaChatMessages" style="max-height:240px;overflow-y:auto;margin-bottom:8px;"></div>
+      <div id="minutaChatMessages" style="max-height:340px;overflow-y:auto;margin-bottom:8px;"></div>
       <div style="display:flex;flex-direction:column;gap:6px;">
         <textarea id="minutaChatInput" placeholder="Digite sua mensagem para a IA…" style="width:100%;min-height:70px;"></textarea>
         <button type="button" class="btn-primary" id="minutaChatSendBtn" style="align-self:flex-end;">Enviar</button>
@@ -2792,9 +2813,15 @@ function renderReparticoesManageList(){
   getConfirmedReparticoes().forEach(r => {
     const card = document.createElement('div');
     card.className = 'reparticao-card';
+    const avatarHtml = r.logoBase64
+      ? `<img src="${esc(r.logoBase64)}" alt="" class="reparticao-logo-avatar">`
+      : `<div class="reparticao-logo-avatar reparticao-logo-avatar-iniciais">${esc(initials(r.nome))}</div>`;
     card.innerHTML = `
       <div class="reparticao-card-top">
-        <div class="reparticao-card-nome">${esc(r.nome)}</div>
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          ${avatarHtml}
+          <div class="reparticao-card-nome">${esc(r.nome)}</div>
+        </div>
         <div class="reparticao-card-icons">
           <button data-action="edit" title="Editar" aria-label="Editar">✏️</button>
           <button data-action="unconfirm" title="Marcar como pendente novamente (exigir nova confirmação de conexão)" aria-label="Marcar como pendente">↩️</button>
@@ -3024,7 +3051,16 @@ function repUserCardHtml(u, showEnableBtn){
       </div>
       <div class="rep-user-detail">${esc(u.cargo)} — matrícula ${esc(u.matricula)}</div>
       ${u.habilitadoEm ? `<div class="rep-user-habilitado-em">Habilitado em: ${esc(u.habilitadoEm)}</div>` : ''}
-      ${showEnableBtn ? `<button data-row="${u.rowIndex}">✓ Marcar como habilitado</button>` : ''}
+      ${showEnableBtn ? `<button data-row="${u.rowIndex}">✓ Marcar como habilitado</button>` : `
+        <div class="field" style="margin-top:6px;margin-bottom:0;">
+          <label style="font-size:11px;">Papel na repartição</label>
+          <select data-papel-row="${u.rowIndex}" style="font-size:12px;">
+            <option value="rotina" ${u.papel !== 'admin' ? 'selected' : ''}>Usuário de rotina</option>
+            <option value="admin" ${u.papel === 'admin' ? 'selected' : ''}>Administrador</option>
+          </select>
+          <div class="hint">Só administradores veem a opção de minutar relatórios com IA.</div>
+        </div>
+      `}
     </div>
   `;
 }
@@ -3072,6 +3108,21 @@ async function renderRepUsersLists(reparticaoId){
       habilitadosEl.innerHTML = data.habilitados.map(u => repUserCardHtml(u, false)).join('');
       habilitadosEl.querySelectorAll('button[data-remove-user]').forEach(btn => {
         btn.addEventListener('click', () => removeRepUser(btn.dataset.removeUser, reparticaoId));
+      });
+      habilitadosEl.querySelectorAll('select[data-papel-row]').forEach(sel => {
+        sel.addEventListener('change', async () => {
+          const rowIndex = sel.dataset.papelRow;
+          const papelAnterior = sel.value === 'admin' ? 'rotina' : 'admin';
+          sel.disabled = true;
+          try {
+            await callAppsScript({ action: 'set_user_papel', rowIndex, papel: sel.value });
+          } catch(err){
+            alert('Não foi possível salvar: ' + err.message);
+            sel.value = papelAnterior;
+          } finally {
+            sel.disabled = false;
+          }
+        });
       });
     }
   } catch(err){
@@ -3717,7 +3768,13 @@ async function renderAppInfoTab(){
     <div><b>URL:</b> https://efstechnologyapp.github.io/Cust-dia-Digital/</div>
     <div><b>E-mail do instituidor:</b> efstechnology.app@gmail.com</div>
     <div><b>Administradores:</b> <span id="appInfoAdmins">carregando…</span></div>
-    <div><b>Conexões com outros sistemas:</b> Google Drive (armazenamento de arquivos), Google Cloud/OAuth (autenticação por repartição)</div>
+    <div><b>Conexões com outros sistemas:</b>
+      <ul style="margin:4px 0 0;padding-left:18px;">
+        <li>Google Drive (armazenamento de arquivos)</li>
+        <li>Google Cloud/OAuth (autenticação por repartição)</li>
+        <li>Google AI Studio (integração com Gemini)</li>
+      </ul>
+    </div>
   `;
 
   renderVersionHistoryList();
@@ -3970,6 +4027,19 @@ async function openMinutaEditor(r, tipo){
     $('minutaSubtitle').textContent = `Relatório ${r.relatorioNum || ''}${r.processoNum ? ' — Processo ' + r.processoNum : ''}`;
     $('minutaEditor').innerHTML = headerHtml + '<p></p>';
     $('minutaView').style.display = 'block';
+    // lista real dos arquivos evidência já anexados a este relatório —
+    // sem isso, a IA não tinha NENHUM dado real pra trabalhar e podia
+    // inventar nomes de arquivo e conteúdo de análise inexistentes
+    // (aconteceu de verdade, relatado pelo usuário)
+    const nomesReais = (r.arquivosEnviados || [])
+      .filter(a => parseFileCode(a.arquivo) === 'ArqEv')
+      .map(a => {
+        const partes = (a.arquivo || '').split(' - ');
+        return partes.length > 3 ? partes.slice(3).join(' - ') : a.arquivo;
+      });
+    minutaContext.evidenceFilesText = nomesReais.length
+      ? `Arquivos evidência efetivamente anexados a este relatório (${nomesReais.length}):\n${nomesReais.map((n, i) => `${i + 1}. ${n}`).join('\n')}`
+      : 'Nenhum arquivo evidência foi encontrado anexado a este relatório.';
   }
 }
 
@@ -4134,12 +4204,33 @@ function insertTextIntoMinutaEditorAtCursor(texto){
   }
 }
 
-// mostra só a pergunta no painel — um histórico curto, para consulta;
-// a resposta não fica aqui, vai direto para o editor
-function appendMinutaQuestionBubble(texto){
+// mostra a conversa completa (pergunta + resposta) no painel do chat
+// — a IA agora conversa com o usuário sobre os dados e propostas de
+// alteração, em vez de tudo entrar automaticamente no documento; o
+// usuário decide, resposta por resposta, o que efetivamente inserir
+function appendMinutaChatBubble(role, texto){
   const div = document.createElement('div');
-  div.style.cssText = 'margin-bottom:8px;padding:8px 10px;border-radius:8px;font-size:13px;white-space:pre-wrap;background:#EAF0FA;margin-left:20px;';
-  div.textContent = texto;
+  const ehUsuario = role === 'user';
+  div.style.cssText = `margin-bottom:8px;padding:8px 10px;border-radius:8px;font-size:13px;${ehUsuario ? 'background:#EAF0FA;margin-left:20px;white-space:pre-wrap;' : 'background:#F2F4F7;margin-right:20px;'}`;
+  if(ehUsuario){
+    div.textContent = texto;
+  } else {
+    const conteudo = document.createElement('div');
+    conteudo.innerHTML = markdownParaHtml(texto);
+    conteudo.style.cssText = 'font-size:13px;';
+    div.appendChild(conteudo);
+    const insertBtn = document.createElement('button');
+    insertBtn.type = 'button';
+    insertBtn.className = 'btn-link';
+    insertBtn.textContent = '➕ Inserir no documento';
+    insertBtn.style.cssText = 'display:block;margin-top:6px;font-size:11px;';
+    insertBtn.addEventListener('click', () => {
+      insertTextIntoMinutaEditorAtCursor(texto);
+      insertBtn.textContent = '✓ Inserido';
+      insertBtn.disabled = true;
+    });
+    div.appendChild(insertBtn);
+  }
   $('minutaChatMessages').appendChild(div);
   $('minutaChatMessages').scrollTop = $('minutaChatMessages').scrollHeight;
 }
@@ -4149,17 +4240,23 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   if(!texto) return;
   const btn = $('minutaChatSendBtn');
   if(btn.disabled) return;
-  appendMinutaQuestionBubble(texto);
+  appendMinutaChatBubble('user', texto);
   // na primeira mensagem da conversa, injeta os dados do relatório
   // como contexto — sem isso, a IA não tem como saber a que relatório
   // o usuário está se referindo quando pede para "analisar" algo
   let textoParaEnviar = texto;
   if(minutaChatHistory.length === 0 && minutaContext){
-    const dadosRelatorio = minutaContext.metadataText
-      ? `Contexto — metadados do relatório (documentação do procedimento; não é o conteúdo extraído do dispositivo):\n${minutaContext.metadataText}`
-      : `Contexto — relatório nº ${minutaContext.relatorioNum || 'não informado'}${minutaContext.processoNum ? ', processo ' + minutaContext.processoNum : ''}.`;
-    const instrucoesFormato = 'Instruções de formato: sua resposta será inserida diretamente dentro de um documento já existente (não crie um documento novo do zero) — não repita cabeçalho/título do relatório, não use tags HTML nem escreva "<html>", "<head>" ou "<body>" na resposta. Pode usar markdown simples (negrito com **, títulos com #, listas com - ou 1.) que será formatado automaticamente. Escreva em texto corrido bem estruturado em parágrafos.';
-    textoParaEnviar = `${dadosRelatorio}\n\n${instrucoesFormato}\n\n---\n\nMensagem do usuário: ${texto}`;
+    let dadosRelatorio;
+    if(minutaContext.metadataText){
+      dadosRelatorio = `Contexto — metadados do relatório (documentação do procedimento; não é o conteúdo extraído do dispositivo):\n${minutaContext.metadataText}`;
+    } else if(minutaContext.evidenceFilesText){
+      dadosRelatorio = `Contexto — ${minutaContext.evidenceFilesText}\n\nIMPORTANTE: esta é a lista COMPLETA e REAL dos arquivos evidência anexados. Você não tem acesso ao conteúdo desses arquivos (mensagens, fotos, documentos) — apenas sabe que eles existem e seus nomes. NUNCA invente, presuma ou fabrique nomes de arquivos diferentes destes, descrições de conteúdo, ou conclusões de análise que não foram fornecidas pelo usuário. Se o usuário pedir uma "análise" sem ter descrito o conteúdo dos arquivos, explique que você só pode redigir com base no que ele descrever, e peça essas informações — nunca invente para preencher a lacuna.`;
+    } else {
+      dadosRelatorio = `Contexto — relatório nº ${minutaContext.relatorioNum || 'não informado'}${minutaContext.processoNum ? ', processo ' + minutaContext.processoNum : ''}.`;
+    }
+    const instrucoesFormato = 'Instruções de formato: você está conversando com o usuário sobre este relatório — ele decide, mensagem por mensagem, o que efetivamente inserir no documento final. Quando redigir um trecho destinado ao documento, escreva pronto para ser inserido (não repita cabeçalho/título do relatório, não use tags HTML nem escreva "<html>", "<head>" ou "<body>"). Pode usar markdown simples (negrito com **, títulos com #, listas com - ou 1.) que será formatado automaticamente. Escreva em texto corrido bem estruturado em parágrafos.';
+    const instrucaoAntiInvencao = 'Regra inviolável: você é uma ferramenta de redação para um relatório técnico oficial. NUNCA invente, presuma ou fabrique fatos, nomes de arquivos, conteúdos, valores, datas ou conclusões que não tenham sido fornecidos explicitamente pelo usuário ou pelos dados de contexto acima. Se faltar informação para responder ao pedido, diga isso claramente e peça os dados que faltam — nunca preencha a lacuna com suposições ou exemplos genéricos como se fossem reais.';
+    textoParaEnviar = `${dadosRelatorio}\n\n${instrucoesFormato}\n\n${instrucaoAntiInvencao}\n\n---\n\nMensagem do usuário: ${texto}`;
   }
   minutaChatHistory.push({ role: 'user', content: textoParaEnviar });
   $('minutaChatInput').value = '';
@@ -4167,16 +4264,13 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   btn.disabled = true;
   const textoOriginalBtn = btn.textContent;
   btn.textContent = 'Enviando…';
-  statusEl.textContent = 'A IA está redigindo — a resposta vai aparecer direto no documento acima…';
+  statusEl.textContent = 'A IA está redigindo…';
   statusEl.className = 'loc-status';
   try {
     const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory, reparticaoId: minutaContext ? minutaContext.reparticaoId : '' });
     minutaChatHistory.push({ role: 'assistant', content: data.resposta });
-    insertTextIntoMinutaEditorAtCursor(data.resposta);
-    // rola a tela até o documento, pra deixar claro que algo mudou lá
-    $('minutaEditor').scrollIntoView({ behavior: 'smooth', block: 'end' });
-    statusEl.textContent = '✓ Resposta inserida no documento (role para cima para ver).';
-    statusEl.className = 'loc-status ok';
+    appendMinutaChatBubble('assistant', data.resposta);
+    statusEl.textContent = '';
     logUserAction('uso de Minuta IA', minutaContext ? minutaContext.relatorioNum : '');
   } catch(err){
     statusEl.textContent = 'Não foi possível obter resposta: ' + err.message;
@@ -4210,7 +4304,7 @@ $('minutaSaveBtn').addEventListener('click', async () => {
   try {
     const tipoLabelHumano = minutaContext.tipo === 'metadados' ? 'Relatório de Metadados' : 'Relatório de Análise de Arquivos Evidência';
     const tipoCodigo = minutaContext.tipo === 'metadados' ? 'Rel.MDados' : 'Rel.AnArqEv';
-    const file = await generatePdfFromElement($('minutaEditor'), buildStructuredFileName(tipoCodigo, minutaContext.relatorioNum));
+    const file = await generateMinutaPdf(buildStructuredFileName(tipoCodigo, minutaContext.relatorioNum));
     const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
     if(currentUser && currentUser.email){
       await callAppsScript({
@@ -4255,23 +4349,25 @@ function renderHomeReportsList(termo){
       ${buildFileDisplayLabels((r.arquivosEnviados || []).filter(a => a.driveLink)).map(a => `
         <div style="display:flex;align-items:center;gap:6px;">
           <a href="${esc(a.driveLink)}" target="_blank" rel="noopener" class="history-drive-link">🔗 ${esc(a.label)}</a>
-          ${a.codigo === 'Rel.MDados' ? `<button type="button" class="copy-email-btn" data-del-arquivo="${esc(a.arquivo)}" data-del-relatorio="${esc(r.relatorioNum || '')}" data-del-reparticao="${esc(r.reparticaoId || '')}" data-del-idx="${idx}" title="Excluir este relatório de metadados" aria-label="Excluir" style="font-size:13px;color:#B23B3B;">✕</button>` : ''}
+          ${(a.codigo === 'Rel.MDados' || a.codigo === 'Rel.AnArqEv') ? `<button type="button" class="copy-email-btn" data-del-arquivo="${esc(a.arquivo)}" data-del-relatorio="${esc(r.relatorioNum || '')}" data-del-reparticao="${esc(r.reparticaoId || '')}" data-del-idx="${idx}" title="Excluir este relatório" aria-label="Excluir" style="font-size:13px;color:#B23B3B;">✕</button>` : ''}
         </div>
       `).join('')}
-      <div class="field" style="margin-top:8px;margin-bottom:0;">
-        <select data-tipo-minuta-idx="${idx}" style="font-size:12px;">
-          <option value="" selected>Selecione o tipo de relatório de análise…</option>
-          <option value="metadados">Relatório de Metadados</option>
-          <option value="arqevidencia">Relatório de Análise de Arquivos Evidência</option>
-        </select>
-      </div>
-      <button type="button" class="btn-attach hidden-view" data-minutar-idx="${idx}" style="margin-top:6px;font-size:11px;">📝 Minutar Relatório</button>
+      ${currentUserPapel === 'admin' ? `
+        <div class="field" style="margin-top:8px;margin-bottom:0;">
+          <select data-tipo-minuta-idx="${idx}" style="font-size:12px;">
+            <option value="" selected>Selecione o tipo de relatório de análise…</option>
+            <option value="metadados">Relatório de Metadados</option>
+            <option value="arqevidencia">Relatório de Análise de Arquivos Evidência</option>
+          </select>
+        </div>
+        <button type="button" class="btn-attach hidden-view" data-minutar-idx="${idx}" style="margin-top:6px;font-size:11px;">📝 Minutar Relatório</button>
+      ` : ''}
     </div>
   `).join('');
 
   listEl.querySelectorAll('[data-del-arquivo]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if(!confirm('Excluir este Relatório de Metadados? Ele será removido do Drive e não vai mais aparecer aqui.')) return;
+      if(!confirm('Excluir este relatório? Ele será removido do Drive e não vai mais aparecer aqui.')) return;
       btn.disabled = true;
       try {
         await callAppsScript({
@@ -6370,6 +6466,23 @@ async function refreshReparticoesFolderNomesFromCentral(){
   } catch(e){ /* falha silenciosa — não é crítico, não afeta o uso do app */ }
 }
 
+// verifica se o usuário logado é administrador da repartição
+// atualmente conectada — só administradores veem a opção de minutar
+// relatórios com IA. Chamado ao entrar no app; guarda o resultado em
+// currentUserPapel, consultado depois pela Home
+let currentUserPapel = 'rotina';
+async function refreshCurrentUserPapel(){
+  currentUserPapel = 'rotina';
+  try {
+    if(!currentUser || !currentUser.email) return;
+    const rep = getSelectedReparticao();
+    if(!rep) return;
+    const data = await callAppsScript({ action: 'list_user_reparticoes', email: currentUser.email });
+    const match = (data.reparticoes || []).find(r => r.reparticaoId === rep.clientId);
+    if(match) currentUserPapel = match.papel === 'admin' ? 'admin' : 'rotina';
+  } catch(e){ /* falha silenciosa — mantém 'rotina' (mais restritivo) por segurança */ }
+}
+
 function enterApp(){
   showView('home');
   refreshUserUI();
@@ -6406,6 +6519,7 @@ function enterApp(){
   reflectStoredDriveStatus();
   updateCustodiaOriginalReparticaoLabel();
   refreshReparticoesFolderNomesFromCentral();
+  refreshCurrentUserPapel();
 
   // autopreenche Responsável pela coleta se estiver vazio
   const respField = $('f_responsavel');
@@ -8019,6 +8133,26 @@ function resetFormFields(){
 // principal ou minuta) — usado em vez de salvar .html cru porque o
 // Google Drive não renderiza arquivos .html na pré-visualização, só
 // mostra o código-fonte bruto; PDF abre corretamente formatado
+// gera o PDF da minuta a partir de uma cópia "limpa" do conteúdo —
+// o editor ao vivo tem estilos pensados para a edição (min-height,
+// bordas, fundo) que, capturados literalmente na conversão pra PDF,
+// empurravam o conteúdo pra baixo, deixando um vão em branco enorme
+// no topo da página. A cópia usa a mesma classe "report-paper" do
+// relatório principal (sem nenhum desses estilos de edição) e fica
+// fora da tela, só durante a geração
+async function generateMinutaPdf(baseName){
+  const temp = document.createElement('div');
+  temp.className = 'report-paper';
+  temp.style.cssText = 'position:absolute;left:-9999px;top:0;width:700px;';
+  temp.innerHTML = $('minutaEditor').innerHTML;
+  document.body.appendChild(temp);
+  try {
+    return await generatePdfFromElement(temp, baseName);
+  } finally {
+    document.body.removeChild(temp);
+  }
+}
+
 async function generatePdfFromElement(elemento, baseName){
   if(window.html2pdf){
     try {
