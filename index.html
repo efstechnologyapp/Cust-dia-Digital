@@ -1261,7 +1261,6 @@
 
       <div class="hidden-view" id="regNewReparticaoForm" style="background:#F7F9FB;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:14px;">
         <h4 style="font-family:var(--serif);font-size:14.5px;color:var(--navy-dark);margin:0 0 4px;">Cadastrar nova repartição</h4>
-        <a href="Manual_Cadastro_Reparticao.pdf" target="_blank" rel="noopener" style="font-size:12px;display:inline-block;margin-bottom:10px;">📄 Ver manual em PDF: como obter os dados da repartição no Google</a>
         <div class="field">
           <label style="font-size:12px;">Nome da repartição</label>
           <input type="text" id="regNewRepNome" placeholder="Ex.: 14ª Delegacia de Polícia">
@@ -1477,6 +1476,11 @@
       <span id="minutaAiProviderLabel" style="font-size:9px;color:var(--muted);align-self:center;margin-left:4px;"></span>
     </div>
     <div id="minutaEditor" contenteditable="true" style="border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:14px;min-height:300px;background:#fff;font-size:13.5px;line-height:1.6;"></div>
+
+    <div class="hidden-view" id="minutaEvidenceFileSelector" style="border:1px solid var(--line);border-radius:8px;margin-top:12px;padding:10px;background:#F7F9FB;">
+      <div class="hint" style="margin:0 0 6px;">Marque o(s) arquivo(s) sobre o(s) qual(is) sua próxima pergunta se refere — a IA saberá exatamente do que você está falando.</div>
+      <div id="minutaEvidenceFileList"></div>
+    </div>
 
     <div class="hidden-view" id="minutaChatPanel" style="border:1px solid var(--line);border-radius:8px;margin-top:12px;padding:10px;background:#fff;">
       <div class="hint" style="margin:0 0 8px;font-size:9px;">Chat com a IA institucional — o que você enviar aqui pode incluir qualquer informação necessária.</div>
@@ -3991,6 +3995,30 @@ async function updateMinutaAiProviderLabel(reparticaoId){
   } catch(e){ /* falha silenciosa — não é crítico */ }
 }
 
+// mostra checkboxes com os nomes reais dos arquivos evidência do
+// relatório, para o usuário indicar sobre qual(is) arquivo(s) a
+// próxima pergunta se refere — some por completo se não houver
+// nenhum arquivo evidência (ou no tipo "metadados", que não usa isso)
+function renderMinutaEvidenceFileSelector(nomesReais){
+  const container = $('minutaEvidenceFileSelector');
+  const listEl = $('minutaEvidenceFileList');
+  if(!nomesReais || nomesReais.length === 0){
+    container.classList.add('hidden-view');
+    listEl.innerHTML = '';
+    return;
+  }
+  container.classList.remove('hidden-view');
+  listEl.innerHTML = nomesReais.map((nome, idx) => `
+    <label class="init-check-row" style="font-size:12px;margin-bottom:4px;">
+      <input type="checkbox" class="minuta-evidence-check" value="${esc(nome)}">
+      ${esc(nome)}
+    </label>
+  `).join('');
+}
+function getSelectedMinutaEvidenceFiles(){
+  return Array.from(document.querySelectorAll('.minuta-evidence-check:checked')).map(c => c.value);
+}
+
 async function openMinutaEditor(r, tipo){
   minutaContext = { relatorioNum: r.relatorioNum, processoNum: r.processoNum, reparticaoId: r.reparticaoId, tipo };
   minutaChatHistory = [];
@@ -4001,6 +4029,7 @@ async function openMinutaEditor(r, tipo){
   const consentJaAceito = localStorage.getItem('minuta_ia_consent') === '1';
   $('minutaConsentBox').classList.toggle('hidden-view', consentJaAceito);
   updateMinutaAiProviderLabel(r.reparticaoId);
+  renderMinutaEvidenceFileSelector([]); // limpa/esconde por padrão — só reaparece no ramo "arqevidencia" abaixo
 
   // mesmo cabeçalho institucional do relatório principal, para a
   // minuta já nascer com a identificação do órgão/repartição
@@ -4041,6 +4070,8 @@ async function openMinutaEditor(r, tipo){
     minutaContext.evidenceFilesText = nomesReais.length
       ? `Arquivos evidência efetivamente anexados a este relatório (${nomesReais.length}):\n${nomesReais.map((n, i) => `${i + 1}. ${n}`).join('\n')}`
       : 'Nenhum arquivo evidência foi encontrado anexado a este relatório.';
+    minutaContext.evidenceFilesList = nomesReais;
+    renderMinutaEvidenceFileSelector(nomesReais);
   }
 }
 
@@ -4241,11 +4272,20 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   if(!texto) return;
   const btn = $('minutaChatSendBtn');
   if(btn.disabled) return;
-  appendMinutaChatBubble('user', texto);
+  // se o usuário marcou arquivo(s) específico(s) no seletor acima do
+  // chat, deixa isso explícito na própria pergunta — assim a IA sabe
+  // exatamente a qual arquivo aquela pergunta se refere, mensagem por
+  // mensagem (não só na primeira)
+  const arquivosSelecionados = getSelectedMinutaEvidenceFiles();
+  const prefixoArquivos = arquivosSelecionados.length
+    ? `[Pergunta referente ao(s) arquivo(s): ${arquivosSelecionados.join(', ')}]\n`
+    : '';
+  const textoComSelecao = prefixoArquivos + texto;
+  appendMinutaChatBubble('user', textoComSelecao);
   // na primeira mensagem da conversa, injeta os dados do relatório
   // como contexto — sem isso, a IA não tem como saber a que relatório
   // o usuário está se referindo quando pede para "analisar" algo
-  let textoParaEnviar = texto;
+  let textoParaEnviar = textoComSelecao;
   if(minutaChatHistory.length === 0 && minutaContext){
     let dadosRelatorio;
     if(minutaContext.metadataText){
@@ -4257,7 +4297,7 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
     }
     const instrucoesFormato = 'Instruções de formato: você está conversando com o usuário sobre este relatório — ele decide, mensagem por mensagem, o que efetivamente inserir no documento final. Quando redigir um trecho destinado ao documento, escreva pronto para ser inserido (não repita cabeçalho/título do relatório, não use tags HTML nem escreva "<html>", "<head>" ou "<body>"). Pode usar markdown simples (negrito com **, títulos com #, listas com - ou 1.) que será formatado automaticamente. Escreva em texto corrido bem estruturado em parágrafos.';
     const instrucaoAntiInvencao = 'Regra inviolável: você é uma ferramenta de redação para um relatório técnico oficial. NUNCA invente, presuma ou fabrique fatos, nomes de arquivos, conteúdos, valores, datas ou conclusões que não tenham sido fornecidos explicitamente pelo usuário ou pelos dados de contexto acima. Se faltar informação para responder ao pedido, diga isso claramente e peça os dados que faltam — nunca preencha a lacuna com suposições ou exemplos genéricos como se fossem reais.';
-    textoParaEnviar = `${dadosRelatorio}\n\n${instrucoesFormato}\n\n${instrucaoAntiInvencao}\n\n---\n\nMensagem do usuário: ${texto}`;
+    textoParaEnviar = `${dadosRelatorio}\n\n${instrucoesFormato}\n\n${instrucaoAntiInvencao}\n\n---\n\nMensagem do usuário: ${textoComSelecao}`;
   }
   minutaChatHistory.push({ role: 'user', content: textoParaEnviar });
   $('minutaChatInput').value = '';
