@@ -1,4 +1,4 @@
-const CACHE_NAME = "custodia-digital-v111";
+const CACHE_NAME = "custodia-digital-v112";
 const ASSETS = [
   "./index.html",
   "./manifest.json",

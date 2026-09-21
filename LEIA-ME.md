@@ -1,5 +1,40 @@
 # Custódia Digital — App (PWA)
 
+## Três correções importantes na Minuta IA (segunda rodada)
+
+1. **Botão "Enviar" do chat sem feedback claro**: agora desabilita e
+   muda pra "Enviando…" durante o processamento, e ao terminar rola
+   a tela até o documento (a resposta entra lá, não no chat) — status
+   também deixa isso explícito: "✓ Resposta inserida no documento
+   (role para cima para ver)".
+
+2. **Conversor de markdown reescrito** — a versão anterior exigia que
+   TODAS as linhas de um bloco fossem do mesmo tipo (só lista, só
+   parágrafo); um sub-título em negrito seguido de uma lista sem
+   linha em branco entre eles (padrão comum da IA) quebrava a
+   detecção, e tudo virava texto corrido com `*` aparecendo
+   literalmente. Reescrito para processar **linha por linha**,
+   agrupando linhas consecutivas do mesmo tipo — testado com o texto
+   real relatado pelo usuário, resultado correto (ver captura).
+
+3. **Tags `<html><head>...` aparecendo como texto no documento
+   salvo**: causa raiz identificada — o Google Drive não renderiza
+   arquivos `.html` na pré-visualização, só mostra o código-fonte
+   bruto. Corrigido pela raiz: a minuta agora é salva como **PDF**
+   (mesmo mecanismo já usado pelo relatório principal, extraído para
+   uma função compartilhada `generatePdfFromElement()`), que o Drive
+   exibe corretamente formatado. Testado com uma biblioteca de PDF
+   simulada — confirma gerar `.pdf` em vez de `.html`.
+
+**Bônus, corrigido no processo**: um bug estrutural real na inserção
+de respostas — ao mandar uma segunda pergunta à IA, sua resposta
+podia ficar **aninhada dentro do último item de lista** da resposta
+anterior, em vez de aparecer depois. A inserção agora usa manipulação
+direta do DOM, inserindo cada resposta nova como bloco irmão do
+parágrafo/item atual, nunca aninhado. Testado com duas respostas
+consecutivas — confirmado que a segunda não fica dentro da primeira.
+
+
 ## Ícone de excluir Relatório de Metadados (cards "Relatórios da Repartição")
 
 Novo botão "✕" ao lado do link "Rel Metadados" nos cards da aba

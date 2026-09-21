@@ -4018,45 +4018,67 @@ $('minutaEditor').addEventListener('mouseup', saveMinutaEditorSelection);
 // insere o texto da IA na posição salva do cursor (ou no final, se
 // nunca houve uma posição salva — ex.: editor ainda vazio)
 // converte o markdown que a IA costuma gerar (negrito, títulos, listas,
-// linhas horizontais, parágrafos) em HTML de verdade — sem isso, o
-// texto entrava todo em sequência, com os símbolos de markdown
-// (**, #, ---) aparecendo literalmente em vez de formatação real.
-// Sempre escapa o texto original antes de aplicar qualquer marcação,
-// para nunca interpretar HTML que porventura venha na resposta da IA
-// (evita, por ex., tags <html>/<body> aparecendo como texto visível)
+// linhas horizontais, parágrafos) em HTML de verdade — processado
+// linha por linha, agrupando linhas consecutivas do mesmo tipo, para
+// lidar bem com blocos mistos (ex.: um sub-título em negrito seguido
+// de uma lista, sem linha em branco entre eles). Sempre escapa o
+// texto original antes de aplicar qualquer marcação, para nunca
+// interpretar HTML que porventura venha na resposta da IA (evita,
+// por ex., tags <html>/<body> aparecendo como texto visível)
 function markdownParaHtml(texto){
-  const blocos = texto.replace(/\r\n/g, '\n').split(/\n{2,}/);
-  return blocos.map(bloco => {
-    const linhas = bloco.split('\n').map(l => l.trim()).filter(Boolean);
-    if(linhas.length === 0) return '';
+  const linhasTotais = texto.replace(/\r\n/g, '\n').split('\n');
+  const partesHtml = [];
+  let grupoAtual = null; // { tipo: 'ul'|'ol'|'p', linhas: [] }
 
-    // título (#, ##, ###...)
-    const tituloMatch = linhas.length === 1 && linhas[0].match(/^(#{1,6})\s+(.*)$/);
+  function fecharGrupo(){
+    if(!grupoAtual || grupoAtual.linhas.length === 0){ grupoAtual = null; return; }
+    if(grupoAtual.tipo === 'ul'){
+      partesHtml.push('<ul>' + grupoAtual.linhas.map(l => `<li>${aplicarNegritoItalico(esc(l))}</li>`).join('') + '</ul>');
+    } else if(grupoAtual.tipo === 'ol'){
+      partesHtml.push('<ol>' + grupoAtual.linhas.map(l => `<li>${aplicarNegritoItalico(esc(l))}</li>`).join('') + '</ol>');
+    } else {
+      partesHtml.push('<p>' + grupoAtual.linhas.map(l => aplicarNegritoItalico(esc(l))).join('<br>') + '</p>');
+    }
+    grupoAtual = null;
+  }
+
+  linhasTotais.forEach(linhaBruta => {
+    const linha = linhaBruta.trim();
+    if(!linha){ fecharGrupo(); return; } // linha vazia separa blocos/parágrafos
+
+    const tituloMatch = linha.match(/^(#{1,6})\s+(.*)$/);
     if(tituloMatch){
-      const nivel = Math.min(tituloMatch[1].length + 1, 6); // # vira h2, ## vira h3... (h1 é reservado pro título do relatório)
-      return `<h${nivel}>${aplicarNegritoItalico(esc(tituloMatch[2]))}</h${nivel}>`;
+      fecharGrupo();
+      const nivel = Math.min(tituloMatch[1].length + 1, 6); // # vira h2 (h1 é reservado pro título do relatório)
+      partesHtml.push(`<h${nivel}>${aplicarNegritoItalico(esc(tituloMatch[2]))}</h${nivel}>`);
+      return;
     }
-
-    // linha horizontal (---, ***, ___)
-    if(linhas.length === 1 && /^(-{3,}|\*{3,}|_{3,})$/.test(linhas[0])){
-      return '<hr>';
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(linha)){
+      fecharGrupo();
+      partesHtml.push('<hr>');
+      return;
     }
-
-    // lista não ordenada (linhas começando com - ou *)
-    if(linhas.every(l => /^[-*]\s+/.test(l))){
-      const itens = linhas.map(l => `<li>${aplicarNegritoItalico(esc(l.replace(/^[-*]\s+/, '')))}</li>`).join('');
-      return `<ul>${itens}</ul>`;
+    const bulletMatch = linha.match(/^[-*]\s+(.*)$/);
+    if(bulletMatch){
+      if(!grupoAtual || grupoAtual.tipo !== 'ul') fecharGrupo();
+      if(!grupoAtual) grupoAtual = { tipo: 'ul', linhas: [] };
+      grupoAtual.linhas.push(bulletMatch[1]);
+      return;
     }
-
-    // lista ordenada (linhas começando com 1. 2. ...)
-    if(linhas.every(l => /^\d+[\.\)]\s+/.test(l))){
-      const itens = linhas.map(l => `<li>${aplicarNegritoItalico(esc(l.replace(/^\d+[\.\)]\s+/, '')))}</li>`).join('');
-      return `<ol>${itens}</ol>`;
+    const numMatch = linha.match(/^\d+[\.\)]\s+(.*)$/);
+    if(numMatch){
+      if(!grupoAtual || grupoAtual.tipo !== 'ol') fecharGrupo();
+      if(!grupoAtual) grupoAtual = { tipo: 'ol', linhas: [] };
+      grupoAtual.linhas.push(numMatch[1]);
+      return;
     }
-
-    // parágrafo comum — quebras de linha simples dentro do bloco viram <br>
-    return `<p>${linhas.map(l => aplicarNegritoItalico(esc(l))).join('<br>')}</p>`;
-  }).filter(Boolean).join('');
+    // linha comum de texto — vira (ou continua) um parágrafo
+    if(!grupoAtual || grupoAtual.tipo !== 'p') fecharGrupo();
+    if(!grupoAtual) grupoAtual = { tipo: 'p', linhas: [] };
+    grupoAtual.linhas.push(linha);
+  });
+  fecharGrupo();
+  return partesHtml.join('');
 }
 function aplicarNegritoItalico(textoEscapado){
   return textoEscapado
@@ -4064,22 +4086,52 @@ function aplicarNegritoItalico(textoEscapado){
     .replace(/(^|[^*])\*(?!\*)(.+?)\*(?!\*)/g, '$1<i>$2</i>');
 }
 
+// insere o HTML da resposta como blocos IRMÃOS do parágrafo/item atual
+// (não dentro dele) — inserir via execCommand na posição bruta do
+// cursor podia aninhar um bloco novo (ex.: <ul>, <h3>) dentro de um
+// <li> ou <p> já existente, quebrando a estrutura do documento
 function insertTextIntoMinutaEditorAtCursor(texto){
   const editor = $('minutaEditor');
   editor.focus();
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  if(minutaEditorSavedRange){
-    sel.addRange(minutaEditorSavedRange);
-  } else {
-    const range = document.createRange();
+  const temp = document.createElement('div');
+  temp.innerHTML = markdownParaHtml(texto);
+  const novosNos = Array.from(temp.childNodes);
+  if(novosNos.length === 0) return;
+
+  let range = (minutaEditorSavedRange && editor.contains(minutaEditorSavedRange.commonAncestorContainer))
+    ? minutaEditorSavedRange
+    : null;
+  if(!range){
+    range = document.createRange();
     range.selectNodeContents(editor);
-    range.collapse(false); // move para o final
-    sel.addRange(range);
+    range.collapse(false);
   }
-  const html = '<br>' + markdownParaHtml(texto);
-  document.execCommand('insertHTML', false, html);
-  saveMinutaEditorSelection(); // atualiza a posição salva para o fim do texto recém-inserido
+
+  // sobe do ponto do cursor até encontrar o bloco de nível mais alto
+  // (filho direto do editor) que o contém, para inserir os novos nós
+  // logo depois dele, como irmãos — nunca aninhado
+  let blocoAtual = range.startContainer;
+  if(blocoAtual.nodeType === 3) blocoAtual = blocoAtual.parentNode;
+  while(blocoAtual && blocoAtual.parentNode !== editor && blocoAtual !== editor){
+    blocoAtual = blocoAtual.parentNode;
+  }
+
+  let ultimoNoInserido = null;
+  if(blocoAtual && blocoAtual !== editor){
+    const referencia = blocoAtual.nextSibling;
+    novosNos.forEach(no => { editor.insertBefore(no, referencia); ultimoNoInserido = no; });
+  } else {
+    novosNos.forEach(no => { editor.appendChild(no); ultimoNoInserido = no; });
+  }
+
+  // atualiza a posição salva do cursor para logo após o conteúdo
+  // recém-inserido, para a próxima resposta continuar em sequência
+  if(ultimoNoInserido){
+    const novoRange = document.createRange();
+    novoRange.setStartAfter(ultimoNoInserido);
+    novoRange.collapse(true);
+    minutaEditorSavedRange = novoRange;
+  }
 }
 
 // mostra só a pergunta no painel — um histórico curto, para consulta;
@@ -4095,6 +4147,8 @@ function appendMinutaQuestionBubble(texto){
 $('minutaChatSendBtn').addEventListener('click', async () => {
   const texto = $('minutaChatInput').value.trim();
   if(!texto) return;
+  const btn = $('minutaChatSendBtn');
+  if(btn.disabled) return;
   appendMinutaQuestionBubble(texto);
   // na primeira mensagem da conversa, injeta os dados do relatório
   // como contexto — sem isso, a IA não tem como saber a que relatório
@@ -4110,18 +4164,26 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   minutaChatHistory.push({ role: 'user', content: textoParaEnviar });
   $('minutaChatInput').value = '';
   const statusEl = $('minutaChatStatus');
-  statusEl.textContent = 'A IA está redigindo…';
+  btn.disabled = true;
+  const textoOriginalBtn = btn.textContent;
+  btn.textContent = 'Enviando…';
+  statusEl.textContent = 'A IA está redigindo — a resposta vai aparecer direto no documento acima…';
   statusEl.className = 'loc-status';
   try {
     const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory, reparticaoId: minutaContext ? minutaContext.reparticaoId : '' });
     minutaChatHistory.push({ role: 'assistant', content: data.resposta });
     insertTextIntoMinutaEditorAtCursor(data.resposta);
-    statusEl.textContent = '✓ Resposta inserida no documento.';
+    // rola a tela até o documento, pra deixar claro que algo mudou lá
+    $('minutaEditor').scrollIntoView({ behavior: 'smooth', block: 'end' });
+    statusEl.textContent = '✓ Resposta inserida no documento (role para cima para ver).';
     statusEl.className = 'loc-status ok';
     logUserAction('uso de Minuta IA', minutaContext ? minutaContext.relatorioNum : '');
   } catch(err){
     statusEl.textContent = 'Não foi possível obter resposta: ' + err.message;
     statusEl.className = 'loc-status err';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = textoOriginalBtn;
   }
 });
 
@@ -4148,8 +4210,7 @@ $('minutaSaveBtn').addEventListener('click', async () => {
   try {
     const tipoLabelHumano = minutaContext.tipo === 'metadados' ? 'Relatório de Metadados' : 'Relatório de Análise de Arquivos Evidência';
     const tipoCodigo = minutaContext.tipo === 'metadados' ? 'Rel.MDados' : 'Rel.AnArqEv';
-    const conteudoHtml = `<html><head><meta charset="utf-8"></head><body>${$('minutaEditor').innerHTML}</body></html>`;
-    const file = new File([conteudoHtml], buildStructuredFileName(tipoCodigo, minutaContext.relatorioNum) + '.html', { type: 'text/html' });
+    const file = await generatePdfFromElement($('minutaEditor'), buildStructuredFileName(tipoCodigo, minutaContext.relatorioNum));
     const result = await uploadFileToDrive(file, rep.folderId, rep.clientId, statusEl);
     if(currentUser && currentUser.email){
       await callAppsScript({
@@ -7954,9 +8015,11 @@ function resetFormFields(){
   }
 }
 
-async function generateReportFile(){
-  const reportNum = ($('f_relatorio_num').value || 'sem_numero').trim().replace(/[^\w\-]+/g, '_');
-  const baseName = buildStructuredFileName('Rel.CIA', reportNum);
+// gera um PDF a partir de qualquer elemento do documento (relatório
+// principal ou minuta) — usado em vez de salvar .html cru porque o
+// Google Drive não renderiza arquivos .html na pré-visualização, só
+// mostra o código-fonte bruto; PDF abre corretamente formatado
+async function generatePdfFromElement(elemento, baseName){
   if(window.html2pdf){
     try {
       const worker = html2pdf().set({
@@ -7965,7 +8028,7 @@ async function generateReportFile(){
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'avoid-all'] }
-      }).from($('reportPaper'));
+      }).from(elemento);
 
       const pdf = await worker.toPdf().get('pdf');
       const totalPages = pdf.internal.getNumberOfPages();
@@ -7982,8 +8045,14 @@ async function generateReportFile(){
       return new File([pdfBlob], baseName + '.pdf', { type: 'application/pdf' });
     } catch(e){ /* cai no fallback abaixo */ }
   }
-  const htmlDoc = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${baseName}</title></head><body>${$('reportPaper').innerHTML}</body></html>`;
+  const htmlDoc = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${baseName}</title></head><body>${elemento.innerHTML}</body></html>`;
   return new File([htmlDoc], baseName + '.html', { type: 'text/html' });
+}
+
+async function generateReportFile(){
+  const reportNum = ($('f_relatorio_num').value || 'sem_numero').trim().replace(/[^\w\-]+/g, '_');
+  const baseName = buildStructuredFileName('Rel.CIA', reportNum);
+  return generatePdfFromElement($('reportPaper'), baseName);
 }
 
 async function concludeTask(){
