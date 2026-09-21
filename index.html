@@ -1478,7 +1478,7 @@
     <div id="minutaEditor" contenteditable="true" style="border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:14px;min-height:300px;background:#fff;font-size:13.5px;line-height:1.6;"></div>
 
     <div class="hidden-view" id="minutaEvidenceFileSelector" style="border:1px solid var(--line);border-radius:8px;margin-top:12px;padding:10px;background:#F7F9FB;">
-      <div class="hint" style="margin:0 0 6px;">Marque o(s) arquivo(s) sobre o(s) qual(is) sua próxima pergunta se refere — a IA saberá exatamente do que você está falando.</div>
+      <div class="hint" style="margin:0 0 6px;">Marque o(s) arquivo(s) que a IA deve analisar de verdade nesta pergunta (o conteúdo real é enviado a ela — imagens e PDFs de até 8MB).</div>
       <div id="minutaEvidenceFileList"></div>
     </div>
 
@@ -3778,6 +3778,7 @@ async function renderAppInfoTab(){
         <li>Google Drive (armazenamento de arquivos)</li>
         <li>Google Cloud/OAuth (autenticação por repartição)</li>
         <li>Google AI Studio (integração com Gemini)</li>
+        <li>Google Apps Script (autenticação de e-mail do usuário)</li>
       </ul>
     </div>
   `;
@@ -3999,24 +4000,56 @@ async function updateMinutaAiProviderLabel(reparticaoId){
 // relatório, para o usuário indicar sobre qual(is) arquivo(s) a
 // próxima pergunta se refere — some por completo se não houver
 // nenhum arquivo evidência (ou no tipo "metadados", que não usa isso)
-function renderMinutaEvidenceFileSelector(nomesReais){
+function renderMinutaEvidenceFileSelector(arquivosReais){
   const container = $('minutaEvidenceFileSelector');
   const listEl = $('minutaEvidenceFileList');
-  if(!nomesReais || nomesReais.length === 0){
+  if(!arquivosReais || arquivosReais.length === 0){
     container.classList.add('hidden-view');
     listEl.innerHTML = '';
     return;
   }
   container.classList.remove('hidden-view');
-  listEl.innerHTML = nomesReais.map((nome, idx) => `
+  listEl.innerHTML = arquivosReais.map((a) => `
     <label class="init-check-row" style="font-size:12px;margin-bottom:4px;">
-      <input type="checkbox" class="minuta-evidence-check" value="${esc(nome)}">
-      ${esc(nome)}
+      <input type="checkbox" class="minuta-evidence-check" value="${esc(a.nome)}" data-drive-link="${esc(a.driveLink)}">
+      ${esc(a.nome)}
     </label>
   `).join('');
 }
 function getSelectedMinutaEvidenceFiles(){
-  return Array.from(document.querySelectorAll('.minuta-evidence-check:checked')).map(c => c.value);
+  return Array.from(document.querySelectorAll('.minuta-evidence-check:checked')).map(c => ({ nome: c.value, driveLink: c.dataset.driveLink }));
+}
+
+// baixa o arquivo real do Drive (o mesmo já enviado como evidência) e
+// converte para base64, para a IA conseguir efetivamente analisar o
+// conteúdo (imagem/PDF), não só saber que o arquivo existe pelo nome
+function extractDriveFileId(driveLink){
+  const match = (driveLink || '').match(/[-\w]{25,}/);
+  return match ? match[0] : null;
+}
+const MINUTA_ANEXO_MAX_BYTES = 8 * 1024 * 1024; // 8MB — limite prático de payload/custo por arquivo
+async function fetchDriveFileAsBase64(driveLink, clientId){
+  const fileId = extractDriveFileId(driveLink);
+  if(!fileId) throw new Error('Link do Drive inválido.');
+  const token = requireExistingDriveToken(clientId);
+  const res = await fetchWithTimeout(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    headers: { Authorization: 'Bearer ' + token }
+  }, 30000);
+  if(!res.ok){
+    if(res.status === 401) throw new Error('Conexão com o Google expirou — reconecte pelo menu ☰.');
+    throw new Error('Não foi possível baixar o arquivo (HTTP ' + res.status + ').');
+  }
+  const blob = await res.blob();
+  if(blob.size > MINUTA_ANEXO_MAX_BYTES){
+    throw new Error('Arquivo grande demais para análise direta pela IA (máx. 8MB) — descreva o conteúdo manualmente.');
+  }
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Falha ao processar o arquivo.'));
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(blob);
+  });
+  return { mimeType: blob.type || 'application/octet-stream', base64 };
 }
 
 async function openMinutaEditor(r, tipo){
@@ -4061,17 +4094,19 @@ async function openMinutaEditor(r, tipo){
     // sem isso, a IA não tinha NENHUM dado real pra trabalhar e podia
     // inventar nomes de arquivo e conteúdo de análise inexistentes
     // (aconteceu de verdade, relatado pelo usuário)
-    const nomesReais = (r.arquivosEnviados || [])
+    const arquivosReais = (r.arquivosEnviados || [])
       .filter(a => parseFileCode(a.arquivo) === 'ArqEv')
       .map(a => {
         const partes = (a.arquivo || '').split(' - ');
-        return partes.length > 3 ? partes.slice(3).join(' - ') : a.arquivo;
+        const nome = partes.length > 3 ? partes.slice(3).join(' - ') : a.arquivo;
+        return { nome, driveLink: a.driveLink || '' };
       });
+    const nomesReais = arquivosReais.map(a => a.nome);
     minutaContext.evidenceFilesText = nomesReais.length
       ? `Arquivos evidência efetivamente anexados a este relatório (${nomesReais.length}):\n${nomesReais.map((n, i) => `${i + 1}. ${n}`).join('\n')}`
       : 'Nenhum arquivo evidência foi encontrado anexado a este relatório.';
-    minutaContext.evidenceFilesList = nomesReais;
-    renderMinutaEvidenceFileSelector(nomesReais);
+    minutaContext.evidenceFilesList = arquivosReais;
+    renderMinutaEvidenceFileSelector(arquivosReais);
   }
 }
 
@@ -4278,10 +4313,41 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
   // mensagem (não só na primeira)
   const arquivosSelecionados = getSelectedMinutaEvidenceFiles();
   const prefixoArquivos = arquivosSelecionados.length
-    ? `[Pergunta referente ao(s) arquivo(s): ${arquivosSelecionados.join(', ')}]\n`
+    ? `[Pergunta referente ao(s) arquivo(s): ${arquivosSelecionados.map(a => a.nome).join(', ')}]\n`
     : '';
   const textoComSelecao = prefixoArquivos + texto;
   appendMinutaChatBubble('user', textoComSelecao);
+  $('minutaChatInput').value = '';
+  const statusEl = $('minutaChatStatus');
+  btn.disabled = true;
+  const textoOriginalBtn = btn.textContent;
+
+  // baixa de verdade o conteúdo do(s) arquivo(s) marcado(s), para a
+  // IA analisar o conteúdo real (não só saber que o arquivo existe) —
+  // arquivos que falharem (grandes demais, erro de rede) são avisados
+  // mas não travam o envio da pergunta em texto
+  let arquivosAnexados = [];
+  let avisoDownload = '';
+  if(arquivosSelecionados.length){
+    btn.textContent = 'Baixando arquivo(s)…';
+    statusEl.textContent = 'Baixando arquivo(s) do Drive para análise…';
+    statusEl.className = 'loc-status';
+    const falhas = [];
+    for(const arq of arquivosSelecionados){
+      try {
+        const { mimeType, base64 } = await fetchDriveFileAsBase64(arq.driveLink, minutaContext ? minutaContext.reparticaoId : '');
+        arquivosAnexados.push({ nome: arq.nome, mimeType, base64 });
+      } catch(err){
+        falhas.push(`${arq.nome} (${err.message})`);
+      }
+    }
+    if(falhas.length){
+      avisoDownload = `Não consegui baixar: ${falhas.join('; ')}.`;
+      statusEl.textContent = avisoDownload + ' Seguindo com o que deu certo.';
+      statusEl.className = 'loc-status err';
+    }
+  }
+
   // na primeira mensagem da conversa, injeta os dados do relatório
   // como contexto — sem isso, a IA não tem como saber a que relatório
   // o usuário está se referindo quando pede para "analisar" algo
@@ -4291,27 +4357,25 @@ $('minutaChatSendBtn').addEventListener('click', async () => {
     if(minutaContext.metadataText){
       dadosRelatorio = `Contexto — metadados do relatório (documentação do procedimento; não é o conteúdo extraído do dispositivo):\n${minutaContext.metadataText}`;
     } else if(minutaContext.evidenceFilesText){
-      dadosRelatorio = `Contexto — ${minutaContext.evidenceFilesText}\n\nIMPORTANTE: esta é a lista COMPLETA e REAL dos arquivos evidência anexados. Você não tem acesso ao conteúdo desses arquivos (mensagens, fotos, documentos) — apenas sabe que eles existem e seus nomes. NUNCA invente, presuma ou fabrique nomes de arquivos diferentes destes, descrições de conteúdo, ou conclusões de análise que não foram fornecidas pelo usuário. Se o usuário pedir uma "análise" sem ter descrito o conteúdo dos arquivos, explique que você só pode redigir com base no que ele descrever, e peça essas informações — nunca invente para preencher a lacuna.`;
+      dadosRelatorio = `Contexto — ${minutaContext.evidenceFilesText}\n\nIMPORTANTE: você só tem acesso ao conteúdo real de um arquivo evidência quando o usuário o anexa explicitamente à pergunta (arquivo(s) anexado(s) aparecem junto com esta mensagem, quando for o caso). Fora isso, você não tem acesso ao conteúdo dos arquivos listados acima — apenas sabe que eles existem e seus nomes. NUNCA invente, presuma ou fabrique nomes de arquivos diferentes destes, descrições de conteúdo, ou conclusões de análise sobre arquivos que não foram anexados nem descritos pelo usuário. Se o usuário pedir uma "análise" de um arquivo sem anexá-lo nem descrever o conteúdo, explique que você precisa que ele anexe o arquivo (marcando o checkbox correspondente) ou descreva o conteúdo — nunca invente para preencher a lacuna.`;
     } else {
       dadosRelatorio = `Contexto — relatório nº ${minutaContext.relatorioNum || 'não informado'}${minutaContext.processoNum ? ', processo ' + minutaContext.processoNum : ''}.`;
     }
     const instrucoesFormato = 'Instruções de formato: você está conversando com o usuário sobre este relatório — ele decide, mensagem por mensagem, o que efetivamente inserir no documento final. Quando redigir um trecho destinado ao documento, escreva pronto para ser inserido (não repita cabeçalho/título do relatório, não use tags HTML nem escreva "<html>", "<head>" ou "<body>"). Pode usar markdown simples (negrito com **, títulos com #, listas com - ou 1.) que será formatado automaticamente. Escreva em texto corrido bem estruturado em parágrafos.';
-    const instrucaoAntiInvencao = 'Regra inviolável: você é uma ferramenta de redação para um relatório técnico oficial. NUNCA invente, presuma ou fabrique fatos, nomes de arquivos, conteúdos, valores, datas ou conclusões que não tenham sido fornecidos explicitamente pelo usuário ou pelos dados de contexto acima. Se faltar informação para responder ao pedido, diga isso claramente e peça os dados que faltam — nunca preencha a lacuna com suposições ou exemplos genéricos como se fossem reais.';
+    const instrucaoAntiInvencao = 'Regra inviolável: você é uma ferramenta de redação para um relatório técnico oficial. NUNCA invente, presuma ou fabrique fatos, nomes de arquivos, conteúdos, valores, datas ou conclusões que não tenham sido fornecidos explicitamente pelo usuário, anexados como arquivo, ou pelos dados de contexto acima. Se faltar informação para responder ao pedido, diga isso claramente e peça os dados que faltam — nunca preencha a lacuna com suposições ou exemplos genéricos como se fossem reais.';
     textoParaEnviar = `${dadosRelatorio}\n\n${instrucoesFormato}\n\n${instrucaoAntiInvencao}\n\n---\n\nMensagem do usuário: ${textoComSelecao}`;
   }
   minutaChatHistory.push({ role: 'user', content: textoParaEnviar });
-  $('minutaChatInput').value = '';
-  const statusEl = $('minutaChatStatus');
-  btn.disabled = true;
-  const textoOriginalBtn = btn.textContent;
   btn.textContent = 'Enviando…';
-  statusEl.textContent = 'A IA está redigindo…';
+  statusEl.textContent = arquivosAnexados.length ? 'A IA está analisando o(s) arquivo(s) e redigindo…' : 'A IA está redigindo…';
   statusEl.className = 'loc-status';
   try {
-    const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory, reparticaoId: minutaContext ? minutaContext.reparticaoId : '' });
+    const data = await callAppsScript({ action: 'ai_chat', messages: minutaChatHistory, reparticaoId: minutaContext ? minutaContext.reparticaoId : '', arquivosAnexados });
     minutaChatHistory.push({ role: 'assistant', content: data.resposta });
     appendMinutaChatBubble('assistant', data.resposta);
-    statusEl.textContent = '';
+    const avisoFinal = [avisoDownload, data.avisoAnexo].filter(Boolean).join(' ');
+    statusEl.textContent = avisoFinal;
+    statusEl.className = avisoFinal ? 'loc-status err' : '';
     logUserAction('uso de Minuta IA', minutaContext ? minutaContext.relatorioNum : '');
   } catch(err){
     statusEl.textContent = 'Não foi possível obter resposta: ' + err.message;

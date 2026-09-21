@@ -1,5 +1,97 @@
 # Custódia Digital — App (PWA)
 
+## Lista de conexões com outros sistemas — adicionado Apps Script
+
+Acrescentado "Google Apps Script (autenticação de e-mail do
+usuário)" à lista de conexões (Informações Gerais → Dados do app).
+
+## IA analisando o conteúdo real dos arquivos evidência (não só o nome)
+
+Funcionalidade grande pedida pelo usuário: até agora a IA só sabia o
+**nome** dos arquivos evidência, nunca o conteúdo — mesmo marcando o
+checkbox de seleção, ela dizia "não tenho acesso ao conteúdo".
+Agora, quando o usuário marca o(s) checkbox(es) e envia a pergunta, o
+**conteúdo real do arquivo é baixado do Drive e enviado à IA**, que
+passa a efetivamente ver a imagem/PDF.
+
+**Como funciona:**
+- Cliente baixa o arquivo direto do Drive (mesmo link já salvo),
+  converte para base64, limite de **8MB por arquivo** — arquivos
+  maiores são pulados com aviso claro, sem travar o envio da
+  pergunta em texto.
+- Servidor monta o formato multimodal correto por provedor:
+  - **Anthropic e Gemini**: suporte completo a imagem e PDF.
+  - **OpenAI**: só imagem (PDF é ignorado nessa via, com aviso ao
+    usuário).
+  - **DeepSeek**: sem suporte multimodal — segue só com o texto, com
+    aviso explícito ao usuário de que o provedor não analisa
+    arquivos.
+- O anexo vale só para a **pergunta atual** (mensagem por mensagem),
+  não fica "grudado" nas próximas perguntas da conversa.
+- Instrução anti-invenção atualizada: a IA sabe que só tem acesso ao
+  conteúdo quando o arquivo é efetivamente anexado — fora isso,
+  continua sem inventar.
+
+**Testado**: lógica de montagem multimodal validada isoladamente
+para os 3 provedores com suporte (Anthropic com imagem e com PDF,
+Gemini, OpenAI ignorando PDF corretamente); fluxo completo de
+download+conversão+envio confirmado; arquivo grande demais (9MB)
+tratado com aviso sem travar; aviso de provedor sem suporte
+(DeepSeek) confirmado; e um bug real encontrado e corrigido durante
+os testes — o aviso de falha no download estava sendo apagado pelo
+status final de sucesso, agora os dois se combinam corretamente.
+
+
+## Manual em PDF removido da tela de cadastro de repartição (login)
+
+Removido o link "📄 Ver manual em PDF" do formulário "+ Cadastrar
+repartição", na tela de login/cadastro de usuário. O registro
+histórico dessa funcionalidade na v. 0.85 (Histórico de versões)
+permanece intacto, como sempre.
+
+
+## Seletor de arquivos evidência para a pergunta à IA
+
+Pedido do usuário: um jeito de indicar sobre qual arquivo evidência
+específico cada pergunta ao chat se refere, em vez de sempre falar
+genericamente de "os arquivos".
+
+- Nova área com **checkboxes**, um por arquivo evidência real
+  anexado ao relatório, entre o editor e o painel de chat (só
+  aparece no tipo "Análise de Arquivos Evidência", e só quando há
+  pelo menos um arquivo evidência real).
+- Ao enviar uma pergunta com algum arquivo marcado, ela é
+  automaticamente prefixada com "[Pergunta referente ao(s)
+  arquivo(s): {nomes marcados}]" — tanto no que é mostrado na bolha
+  do chat quanto no que é enviado à IA. Funciona mensagem por
+  mensagem (pode trocar a seleção a cada pergunta), não só na
+  primeira.
+- Testado: seleção de um arquivo específico dentre vários resulta na
+  IA recebendo só aquele nome como referência da pergunta atual, com
+  o restante do contexto anti-invenção intacto. Confirmado
+  visualmente com captura de tela.
+
+
+## Três ajustes na Home e no cadastro de repartição
+
+1. **Legenda da Home**: texto trocado para "Coleta/Extração,
+   Identificação e Documentação da Cadeia de Custódia de Arquivos
+   Digitais", em itálico e com fonte menor (12px) que o nome do app
+   (15px) — antes estava maior (26px), o oposto do pedido.
+2. **Seletor de IA no cadastro de repartição** (tela de login):
+   opção padrão trocada de "Ainda não configurar" para "Deixar a
+   cargo do administrador do sistema", selecionada por padrão. O
+   campo "Chave de API" só aparece quando um provedor de verdade é
+   selecionado — some de novo se voltar pro padrão.
+3. **Reposicionamento**: campos "Logo do órgão/repartição" e
+   "Cabeçalho institucional" movidos para logo após "Nome da
+   repartição" (antes ficavam no fim do formulário).
+
+Testado: fonte/texto da legenda, comportamento do campo de chave
+(aparece/some corretamente), e ordem final dos campos no formulário
+— todos conferidos.
+
+
 ## Minutar Relatório com IA restrito a administradores da repartição
 
 Funcionalidade pedida pelo usuário: só usuários marcados como
